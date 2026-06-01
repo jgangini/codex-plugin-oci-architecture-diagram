@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 42 42">
+<sodipodi:namedview
+     id="oci-oci-vision-namedview9"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="8.7619048"
+     inkscape:cx="21"
+     inkscape:cy="20.942935"
+     inkscape:window-width="1080"
+     inkscape:window-height="1849"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="Layer_1" />
+  
+  <defs
+     id="oci-oci-vision-defs1">
+    
+  </defs>
+  <path
+     id="oci-oci-vision-polygon1"
+     class="oci-oci-vision-cls-2"
+     style="fill:white; fill: #fff;"
+     d="M 34.17,14.05 V 13.44 L 33.63,13.16 21.68,6.99 21.23,6.76 20.78,6.98 8.39,13.15 7.83,13.43 v 0.62 14.07 0.62 l 0.57,0.28 12.39,6 0.45,0.21 0.44,-0.22 11.94,-6.01 0.55,-0.27 v -0.62 z" />
+  <path
+     id="oci-oci-vision-polygon2"
+     class="oci-oci-vision-cls-2"
+     style="fill:white; fill: #fff;"
+     d="m 30.71,0 v 1 1.43 1 h 1 6.86 v 6.86 1 h 1 1.43 1 v -1 V 1 0 h -1 -9.29 z" />
+  <path
+     id="oci-oci-vision-polygon3"
+     class="oci-oci-vision-cls-2"
+     style="fill:white; fill: #fff;"
+     d="M 3.43,10.29 V 3.43 h 6.86 1 V 2.43 1 0 h -1 H 1 0 v 1 9.29 1 h 1 1.43 1 z" />
+  <path
+     id="oci-oci-vision-polygon4"
+     class="oci-oci-vision-cls-2"
+     style="fill:white; fill: #fff;"
+     d="m 38.57,31.71 v 6.86 h -6.86 -1 v 1 1.43 1 h 1 9.29 1 v -1 -9.29 -1 h -1 -1.43 -1 z" />
+  <path
+     id="oci-oci-vision-polygon5"
+     class="oci-oci-vision-cls-2"
+     style="fill:white; fill: #fff;"
+     d="M 3.43,30.71 H 2.43 1 0 v 1 9.29 1 h 1 9.29 1 v -1 -1.43 -1 h -1 -6.86 v -6.86 z" />
+  <path
+     id="oci-oci-vision-polygon9"
+     style="fill:#2c5967; fill: #2c5967;"
+     class="oci-oci-vision-cls-1"
+     d="m 1,41 h 9.29 V 39.57 H 2.43 V 31.71 H 1 Z m 30.71,0 H 41 v -9.29 h -1.43 v 7.86 H 31.71 Z M 10.29,1 H 1 v 9.29 H 2.43 V 2.43 h 7.86 z m 29.28,1.43 v 7.86 H 41 V 1 H 31.71 V 2.43 Z M 33.17,14.05 21.23,7.87 8.84,14.04 v 14.07 l 12.4,6 11.94,-6.01 V 14.05 Z m -2.28,0.43 -9.67,4.83 -10.05,-4.83 10.04,-5 9.67,5 z m -20.62,1.14 10.25,4.93 V 32.18 L 10.27,27.22 Z M 21.95,32.16 V 20.55 l 9.8,-4.9 v 11.58 z" />
+</svg>

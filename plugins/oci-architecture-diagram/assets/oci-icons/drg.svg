@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 0.5257 0.6555">
+  <title>DRG</title>
+  <g>
+<ellipse cx="0.2648" cy="0.2586" rx="0.2524" ry="0.2524" fill="#ffffff" stroke="#312d2a" stroke-width="0.012"/>
+<path d="M 0.2648 0.0123 L 0.0185 0.2586 L 0.2648 0.0123 Z" fill="#ffffff" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.2648 0 L 0.5233 0.2586 L 0.2648 0 L 0.2648 0 Z" fill="#ffffff" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.2648 0.0123 L 0.511 0.2586 L 0.2648 0.0123 L 0.2648 0.0123 Z" fill="#2c5967" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.2648 0.4843 L 0.4905 0.2586 L 0.2648 0.4843 L 0.2648 0.4843 Z" fill="#2c5967" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.275 0.4032 L 0.275 0.1166 L 0.3062 0.1479 L 0.3208 0.1334 L 0.2648 0.0773 L 0.2087 0.1334 L 0.2233 0.1479 L 0.2545 0.1166 L 0.2545 0.4032 L 0.2233 0.3719 L 0.2087 0.3864 L 0.2648 0.4424 L 0.3208 0.3864 L 0.3062 0.3719 L 0.275 0.4032 L 0.275 0.4032 Z" fill="#2c5967" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.1976 0.2026 L 0.1831 0.2171 L 0.2144 0.2484 L 0.0826 0.2484 L 0.0826 0.2688 L 0.2144 0.2688 L 0.1831 0.3001 L 0.1976 0.3146 L 0.2535 0.2586 L 0.1976 0.2026 L 0.1976 0.2026 Z" fill="#2c5967" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.3151 0.2484 L 0.3464 0.2171 L 0.3319 0.2026 L 0.276 0.2586 L 0.3319 0.3146 L 0.3464 0.3001 L 0.3151 0.2688 L 0.4469 0.2688 L 0.4469 0.2484 L 0.3151 0.2484 L 0.3151 0.2484 Z" fill="#2c5967" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+  </g>
+</svg>

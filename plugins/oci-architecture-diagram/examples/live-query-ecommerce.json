@@ -1,0 +1,200 @@
+{
+  "title": "E-commerce Platform",
+  "layout": "left-to-right",
+  "groups": [
+    {
+      "id": "region",
+      "label": "OCI Region",
+      "type": "region"
+    },
+    {
+      "id": "vcn",
+      "label": "Commerce VCN",
+      "type": "vcn",
+      "parent": "region"
+    },
+    {
+      "id": "edge-subnet",
+      "label": "Public Edge Subnet",
+      "type": "subnet",
+      "parent": "vcn"
+    },
+    {
+      "id": "app-subnet",
+      "label": "Private Application Subnet",
+      "type": "subnet",
+      "parent": "vcn"
+    },
+    {
+      "id": "data-subnet",
+      "label": "Private Data Subnet",
+      "type": "subnet",
+      "parent": "vcn"
+    },
+    {
+      "id": "ops-subnet",
+      "label": "Operations Subnet",
+      "type": "subnet",
+      "parent": "vcn"
+    },
+    {
+      "id": "platform-services",
+      "label": "OCI Platform Services",
+      "type": "group",
+      "parent": "region"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "dns",
+      "label": "Public DNS",
+      "service": "DNS",
+      "group": "edge-subnet"
+    },
+    {
+      "id": "waf",
+      "label": "Web Application Firewall",
+      "service": "WAF",
+      "group": "edge-subnet"
+    },
+    {
+      "id": "load-balancer",
+      "label": "Public Load Balancer",
+      "service": "Load Balancer",
+      "group": "edge-subnet"
+    },
+    {
+      "id": "oke",
+      "label": "Commerce Microservices",
+      "service": "OKE",
+      "group": "app-subnet"
+    },
+    {
+      "id": "functions",
+      "label": "Order Functions",
+      "service": "Functions",
+      "group": "app-subnet"
+    },
+    {
+      "id": "queue",
+      "label": "Payment Queue",
+      "service": "OCI Queue",
+      "group": "app-subnet"
+    },
+    {
+      "id": "streaming",
+      "label": "Order Events",
+      "service": "Streaming",
+      "group": "app-subnet"
+    },
+    {
+      "id": "service-gateway",
+      "label": "Service Gateway",
+      "service": "Service Gateway",
+      "group": "app-subnet"
+    },
+    {
+      "id": "adb",
+      "label": "Transaction Database",
+      "service": "Oracle Autonomous Database",
+      "group": "data-subnet"
+    },
+    {
+      "id": "object-storage",
+      "label": "Product Images Bucket",
+      "service": "Object Storage",
+      "group": "data-subnet"
+    },
+    {
+      "id": "vault",
+      "label": "Secrets Vault",
+      "service": "Vault",
+      "group": "platform-services"
+    },
+    {
+      "id": "bastion",
+      "label": "Private Admin Access",
+      "service": "Bastion",
+      "group": "ops-subnet"
+    },
+    {
+      "id": "logging",
+      "label": "Central Logging",
+      "service": "Logging",
+      "group": "platform-services"
+    },
+    {
+      "id": "monitoring",
+      "label": "Service Monitoring",
+      "service": "Monitoring",
+      "group": "platform-services"
+    }
+  ],
+  "edges": [
+    {
+      "from": "dns",
+      "to": "waf",
+      "label": "DNS"
+    },
+    {
+      "from": "waf",
+      "to": "load-balancer",
+      "label": "HTTPS"
+    },
+    {
+      "from": "load-balancer",
+      "to": "oke",
+      "label": "HTTPS"
+    },
+    {
+      "from": "oke",
+      "to": "functions",
+      "label": "invoke"
+    },
+    {
+      "from": "functions",
+      "to": "queue",
+      "label": "async orders"
+    },
+    {
+      "from": "functions",
+      "to": "streaming",
+      "label": "events"
+    },
+    {
+      "from": "oke",
+      "to": "adb",
+      "label": "SQL"
+    },
+    {
+      "from": "oke",
+      "to": "service-gateway",
+      "label": "private OCI APIs"
+    },
+    {
+      "from": "service-gateway",
+      "to": "object-storage",
+      "label": "object API"
+    },
+    {
+      "from": "oke",
+      "to": "vault",
+      "label": "secrets"
+    },
+    {
+      "from": "bastion",
+      "to": "oke",
+      "label": "admin"
+    },
+    {
+      "from": "oke",
+      "to": "logging",
+      "label": "logs"
+    },
+    {
+      "from": "oke",
+      "to": "monitoring",
+      "label": "metrics"
+    }
+  ]
+}

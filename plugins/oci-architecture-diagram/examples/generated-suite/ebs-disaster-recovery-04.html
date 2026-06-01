@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>OCI ebs-disaster-recovery - plataforma con eventos</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #312d2a;
+      --muted: #5c6f82;
+      --line: #d7dde4;
+      --oci: #c74634;
+      --teal: #2c5967;
+      --page: #f6f7f8;
+      --card: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background: var(--page);
+    }
+    main {
+      min-width: 920px;
+      padding: 28px;
+    }
+    header {
+      margin: 0 0 18px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+    .diagram-shell {
+      position: relative;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .diagram-toolbar {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      z-index: 8;
+      display: inline-flex;
+      flex-direction: column;
+      gap: 3px;
+      align-items: center;
+      width: max-content;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+    .diagram-toolbar button,
+    .zoom-percent {
+      width: 34px;
+      height: 26px;
+      border: 1px solid #c9d1d9;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.94);
+      color: var(--ink);
+      font: 700 11px/1 Arial, Helvetica, sans-serif;
+      box-shadow: 0 2px 5px rgba(49, 45, 42, 0.10);
+    }
+    .diagram-toolbar button {
+      cursor: pointer;
+    }
+    .zoom-percent {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #405366;
+      font-size: 10px;
+      letter-spacing: 0;
+      pointer-events: none;
+    }
+    .diagram-toolbar button:hover {
+      border-color: var(--teal);
+      color: var(--teal);
+    }
+    .diagram-wrap {
+      position: relative;
+      overflow: auto;
+      background: #fff;
+      cursor: grab;
+      max-height: calc(100vh - 150px);
+    }
+    .diagram-wrap.is-panning {
+      cursor: grabbing;
+      user-select: none;
+    }
+    .diagram-stage {
+      transform-origin: 0 0;
+      width: max-content;
+      height: max-content;
+    }
+    .diagram {
+      display: block;
+      width: auto;
+      max-width: none;
+      min-width: 0;
+      height: auto;
+      transform-origin: 0 0;
+    }
+    .canvas {
+      fill: #ffffff;
+    }
+    .diagram-group rect {
+      stroke-width: 1.5;
+      stroke-dasharray: 0;
+    }
+    .diagram-group.depth-1 rect,
+    .diagram-group.depth-2 rect {
+      fill-opacity: 1;
+    }
+    .diagram-group-label rect {
+      fill: rgba(255, 255, 255, 0.94);
+      stroke: #d7dde4;
+      stroke-width: 1;
+    }
+    .diagram-group-label text {
+      font-size: 12px;
+      font-weight: 700;
+      fill: var(--ink);
+    }
+    .edge {
+      fill: none;
+      stroke: var(--muted);
+      stroke-width: 1.65;
+      stroke-linecap: round;
+      opacity: 0.9;
+    }
+    .edge-traffic { stroke: #2c5967; }
+    .edge-data { stroke: #5f7f3f; }
+    .edge-events { stroke: #9a6634; }
+    .edge-admin { stroke: #6f5aa7; }
+    .edge-security { stroke: #a24b42; }
+    .edge-observability { stroke: #4f7d90; }
+    .edge-service { stroke: #4f6678; }
+    .edge-label {
+      pointer-events: none;
+    }
+    .edge-label rect {
+      fill: rgba(255, 255, 255, 0.95);
+      stroke: #c7d0da;
+      stroke-width: 1;
+    }
+    .edge-label text {
+      fill: var(--muted);
+      font-size: 8.8px;
+      font-weight: 700;
+    }
+    .edge-label-traffic rect { stroke: #93b6bd; fill: #f1f9fa; }
+    .edge-label-data rect { stroke: #b3c99d; fill: #f6fbf1; }
+    .edge-label-events rect { stroke: #d2b18e; fill: #fff8f0; }
+    .edge-label-admin rect { stroke: #c0b7df; fill: #f7f5ff; }
+    .edge-label-security rect { stroke: #d6aaa5; fill: #fff5f3; }
+    .edge-label-observability rect { stroke: #a6c6d1; fill: #f2f9fb; }
+    .edge-label-traffic text { fill: #2c5967; }
+    .edge-label-data text { fill: #557537; }
+    .edge-label-events text { fill: #865825; }
+    .edge-label-admin text { fill: #5f4f98; }
+    .edge-label-security text { fill: #8f3f37; }
+    .edge-label-observability text { fill: #426f82; }
+    .node-card {
+      fill: var(--card);
+      stroke: #c9d1d9;
+      stroke-width: 1.2;
+      filter: drop-shadow(0 2px 5px rgba(49, 45, 42, 0.10));
+    }
+    .node-icon {
+      overflow: visible;
+    }
+    .node-icon path,
+    .node-icon polygon,
+    .node-icon rect,
+    .node-icon circle,
+    .node-icon line,
+    .node-icon polyline {
+      vector-effect: non-scaling-stroke;
+    }
+    .node-service-name {
+      fill: var(--ink);
+      font-size: 11.4px;
+      font-weight: 700;
+    }
+    .service-inventory {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+    }
+    .service-inventory h2 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+    .service-inventory-scroll {
+      max-height: 230px;
+      overflow-y: auto;
+      border-top: 1px solid #e5e9ee;
+      border-bottom: 1px solid #e5e9ee;
+      padding-right: 8px;
+      scrollbar-gutter: stable;
+    }
+    .service-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .service-item {
+      display: grid;
+      grid-template-columns: minmax(190px, 280px) minmax(0, 1fr);
+      gap: 16px;
+      padding: 10px 0;
+      border-bottom: 1px solid #e5e9ee;
+      align-items: start;
+    }
+    .service-name {
+      color: var(--ink);
+      font-size: 12.8px;
+      font-weight: 700;
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+    }
+    .service-context {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11.4px;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }
+    .service-role {
+      margin: 0;
+      color: #405366;
+      font-size: 12.2px;
+      line-height: 1.4;
+    }
+    .warnings {
+      margin-top: 14px;
+      border-left: 4px solid var(--oci);
+      background: #fff7f4;
+      padding: 10px 14px;
+      font-size: 13px;
+    }
+    .warnings ul {
+      margin: 6px 0 0;
+      padding-left: 18px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>OCI ebs-disaster-recovery - plataforma con eventos</h1>
+    </header>
+    <section class="diagram-shell">
+      <div class="diagram-wrap" tabindex="0">
+        <div class="diagram-stage">
+          
+<svg class="diagram" xmlns="http://www.w3.org/2000/svg" width="1732" height="1350" viewBox="0 0 1732 1350" role="img" aria-labelledby="diagram-title">
+  <title id="diagram-title">OCI ebs-disaster-recovery - plataforma con eventos</title>
+  <defs>
+    <marker id="arrow-traffic" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 1.5 1.5 L 8.5 5 L 1.5 8.5 z" fill="#2c5967"/>
+    </marker>
+    <marker id="arrow-data" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 1.5 1.5 L 8.5 5 L 1.5 8.5 z" fill="#5f7f3f"/>
+    </marker>
+    <marker id="arrow-events" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 1.5 1.5 L 8.5 5 L 1.5 8.5 z" fill="#9a6634"/>
+    </marker>
+    <marker id="arrow-admin" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 1.5 1.5 L 8.5 5 L 1.5 8.5 z" fill="#6f5aa7"/>
+    </marker>
+    <marker id="arrow-security" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 1.5 1.5 L 8.5 5 L 1.5 8.5 z" fill="#a24b42"/>
+    </marker>
+    <marker id="arrow-observability" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 1.5 1.5 L 8.5 5 L 1.5 8.5 z" fill="#4f7d90"/>
+    </marker>
+    <marker id="arrow-service" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 1.5 1.5 L 8.5 5 L 1.5 8.5 z" fill="#4f6678"/>
+    </marker>
+  </defs>
+  <rect class="canvas" x="0" y="0" width="1732" height="1350"/>
+  <g class="groups">
+    <g class="diagram-group depth-0" data-group-id="primary-region"><rect x="24" y="34" width="1360" height="554" rx="8" fill="#f4f5f6" stroke="#aeb7c1"/></g><g class="diagram-group depth-0" data-group-id="secondary-region"><rect x="370" y="606" width="1308" height="660" rx="8" fill="#f4f5f6" stroke="#aeb7c1"/></g><g class="diagram-group depth-2" data-group-id="ops-subnet"><rect x="106" y="154" width="1196" height="208" rx="8" fill="#e4e8eb" stroke="#657484"/></g>
+  </g>
+  <g class="edges">
+    <path class="edge edge-service" d="M 316 412 C 364.96 412, 403.04 412, 452 412" marker-end="url(#arrow-service)"/><g class="edge-label edge-label-service" transform="translate(384 412)"><rect x="-15.8" y="-11" width="31.6" height="17" rx="4"/><text text-anchor="middle" y="1">HTTP</text></g><path class="edge edge-data" d="M 636 404 C 684.96 404, 723.04 258, 772 258" marker-end="url(#arrow-data)"/><g class="edge-label edge-label-data" transform="translate(704 331)"><rect x="-15" y="-11" width="30" height="17" rx="4"/><text text-anchor="middle" y="1">SQL</text></g><path class="edge edge-service" d="M 636 420 C 684.96 420, 723.04 412, 772 412" marker-end="url(#arrow-service)"/><g class="edge-label edge-label-service" transform="translate(704 416)"><rect x="-15" y="-11" width="30" height="17" rx="4"/><text text-anchor="middle" y="1">NFS</text></g><path class="edge edge-service" d="M 956 258 C 1004.96 258, 1043.04 258, 1092 258" marker-end="url(#arrow-service)"/><g class="edge-label edge-label-service" transform="translate(1024 258)"><rect x="-15.8" y="-11" width="31.6" height="17" rx="4"/><text text-anchor="middle" y="1">redo</text></g><path class="edge edge-service" d="M 1276 258 C 1324.96 258, 1363.04 790, 1412 790" marker-end="url(#arrow-service)"/><g class="edge-label edge-label-service" transform="translate(1344 524)"><rect x="-28.05" y="-11" width="56.1" height="17" rx="4"/><text text-anchor="middle" y="1">replicate</text></g><path class="edge edge-service" d="M 316 274 C 364.96 274, 403.04 1090, 452 1090" marker-end="url(#arrow-service)"/><g class="edge-label edge-label-service" transform="translate(384 682)"><rect x="-32.95" y="-11" width="65.9" height="17" rx="4"/><text text-anchor="middle" y="1">orchestrate</text></g><path class="edge edge-service" d="M 316 258 C 408 258, 1320 774, 1412 774" marker-end="url(#arrow-service)"/><g class="edge-label edge-label-service" transform="translate(864 516)"><rect x="-25.6" y="-11" width="51.2" height="17" rx="4"/><text text-anchor="middle" y="1">failover</text></g><path class="edge edge-events" d="M 316 242 C 364.96 242, 403.04 258, 452 258" marker-end="url(#arrow-events)"/><g class="edge-label edge-label-events" transform="translate(384 250)"><rect x="-20.7" y="-11" width="41.4" height="17" rx="4"/><text text-anchor="middle" y="1">events</text></g>
+  </g>
+  <g class="group-labels">
+    <g class="diagram-group-label depth-0" data-group-id="primary-region"><rect x="36" y="43" width="148" height="22" rx="5"/><text x="47" y="58">Primary OCI Region</text></g><g class="diagram-group-label depth-0" data-group-id="secondary-region"><rect x="382" y="615" width="148" height="22" rx="5"/><text x="393" y="630">Standby OCI Region</text></g><g class="diagram-group-label depth-2" data-group-id="ops-subnet"><rect x="118" y="163" width="113" height="22" rx="5"/><text x="129" y="178">DR Operations</text></g>
+  </g>
+  <g class="nodes">
+    
+    <g class="node" id="node-primary-lb" transform="translate(132 356)">
+      <rect class="node-card" width="184" height="112" rx="8"/>
+      <svg class="node-icon" x="66" y="21" width="52" height="52" viewBox="0 0 42.38 42" preserveAspectRatio="xMidYMid meet">
+        <g>
+	<g>
+		<g>
+			<path class="oci-load-balancer-primary-st0" d="M34.2,41.5v-2.48h3.01L23.16,24.96c-0.37,4.76-1.46,8.95-3.17,12.18c-2.1,3.56-4.22,4.29-5.63,4.29
+				c-0.25,0-0.51-0.02-0.76-0.07c-4.03-0.74-6.46-6.79-7.4-12.21c-0.38-2.03-0.62-4.41-0.67-6.91H0.5v-2.48h5.03
+				c0.06-2.59,0.31-5.07,0.72-7.17C7.56,5.23,10.69,0.64,14.42,0.6c2.18,0,6.08,1.59,8.18,12.23c0.24,1.35,0.41,2.75,0.53,4.2
+				L37.17,2.98H34.2V0.5h7.3v7.3h-2.48V4.64L23.9,19.76h12.88l-2-1.91l1.71-1.8l5.17,4.92l-5.14,5.14l-1.75-1.75l2.12-2.13H23.95
+				l15.07,15.07V34.2h2.48v7.3H34.2z" style="fill:#FFFFFF;"/>
+			<path class="oci-load-balancer-primary-st0" d="M41,1v6.3h-1.48V3.44L22.79,20.17c0,0.03,0,0.06,0,0.09h15.25l-2.55-2.43l1.02-1.07l4.44,4.23l-4.43,4.43
+				l-1.05-1.05l2.62-2.62H22.79c0,0.02,0,0.03,0,0.05l16.72,16.72V34.7H41V41h-6.3v-1.48h3.72l-15.7-15.7
+				c-0.25,4.57-1.17,9.28-3.18,13.08l-0.02,0.04c-1.88,3.19-3.75,3.99-5.17,3.99c-0.24,0-0.47-0.02-0.68-0.06
+				c-3.78-0.69-6.13-6.79-6.99-11.81c-0.42-2.2-0.64-4.75-0.68-7.32H1v-1.48h5.02c0.04-2.67,0.28-5.31,0.72-7.58
+				C8,5.57,10.95,1.13,14.42,1.1c0.01,0,0.02,0,0.04,0c2,0,5.62,1.55,7.64,11.82l0,0.02c0.27,1.56,0.49,3.33,0.6,5.21L38.38,2.48
+				H34.7V1H41 M42,0h-1h-6.3h-1v1v1.48v1h1h1.26L23.53,15.92c-0.11-1.09-0.26-2.14-0.44-3.15C21.02,2.29,17.26,0.1,14.46,0.1
+				c-4.09,0.04-7.33,4.68-8.71,12.41c-0.39,1.99-0.63,4.31-0.71,6.75H1H0v1v1.48v1h1h4.04c0.08,2.34,0.31,4.58,0.67,6.51
+				c0.96,5.57,3.51,11.82,7.8,12.6c0.28,0.05,0.57,0.08,0.86,0.08c1.54,0,3.84-0.78,6.03-4.48l0-0.01l0.03-0.05
+				c1.62-3.06,2.69-6.94,3.14-11.33l12.45,12.45H34.7h-1v1V41v1h1H41h1v-1v-6.3v-1h-1h-1.48h-1v1v1.4L25.16,22.74h10.53l-0.92,0.92
+				l-0.71,0.71l0.71,0.71l1.05,1.05l0.71,0.71l0.71-0.71l4.43-4.43l0.72-0.72l-0.74-0.71l-4.44-4.23l-0.72-0.69l-0.69,0.72
+				l-1.02,1.07l-0.69,0.72l0.72,0.69l0.74,0.7H25.11L38.52,5.85V7.3v1h1H41h1v-1V1V0L42,0z" style="fill:#FFFFFF;"/>
+		</g>
+		<g>
+			<path class="oci-load-balancer-primary-st1" d="M14.46,2.95c-0.01,0-0.01,0-0.02,0c-1.97,0.02-4.66,3.18-5.88,10.06l0,0.02c-0.42,2.17-0.65,4.68-0.69,7.23
+				h8.88l-2.74-2.61l1.02-1.07l4.62,4.41l-4.43,4.42l-1.05-1.05l2.62-2.62H7.86c0.04,2.46,0.25,4.89,0.65,6.99
+				c0.96,5.57,3.27,9.9,5.51,10.31c0.11,0.02,0.23,0.03,0.34,0.03c1.43,0,2.71-1.63,3.56-3.06c3.29-6.25,3.56-15.92,2.36-22.75
+				C18.78,5.66,16.29,2.95,14.46,2.95z" style="fill:none;"/>
+			<path class="oci-load-balancer-primary-st2" d="M41,7.3V1h-6.3v1.48h3.67L22.71,18.15c-0.11-1.88-0.32-3.65-0.6-5.21l0-0.02C20.08,2.65,16.46,1.1,14.46,1.1
+				c-0.01,0-0.02,0-0.04,0C10.95,1.13,8,5.57,6.74,12.68c-0.44,2.27-0.68,4.91-0.72,7.58H1v1.48h5.01c0.04,2.58,0.26,5.12,0.68,7.32
+				c0.86,5.01,3.21,11.11,6.99,11.81c0.21,0.04,0.44,0.06,0.68,0.06c1.41,0,3.28-0.8,5.17-3.99l0.02-0.04
+				c2.01-3.8,2.93-8.51,3.18-13.08l15.7,15.7H34.7V41H41v-6.3h-1.48v3.81L22.79,21.79c0-0.02,0-0.03,0-0.05H38.1l-2.62,2.62
+				l1.05,1.05l4.43-4.43l-4.44-4.23l-1.02,1.07l2.55,2.43H22.79c0-0.03,0-0.06,0-0.09L39.52,3.44V7.3H41z M17.92,36.02
+				c-0.85,1.43-2.13,3.06-3.56,3.06c-0.11,0-0.23-0.01-0.34-0.03c-2.23-0.41-4.55-4.74-5.51-10.31c-0.4-2.11-0.61-4.54-0.65-6.99
+				h8.94l-2.62,2.62l1.05,1.05l4.43-4.42l-4.62-4.41l-1.02,1.07l2.74,2.61H7.86c0.04-2.55,0.27-5.06,0.69-7.23l0-0.02
+				c1.22-6.89,3.91-10.04,5.88-10.06c0.01,0,0.01,0,0.02,0c1.83,0,4.32,2.71,5.83,10.32C21.48,20.09,21.21,29.77,17.92,36.02z" style="fill:#2C5967;"/>
+		</g>
+	</g>
+</g>
+      </svg>
+      <text class="node-service-name" text-anchor="middle" x="92" y="89"><tspan x="92" dy="0">Load Balancer - Primary</tspan></text>
+    </g>
+
+    <g class="node" id="node-primary-app" transform="translate(452 356)">
+      <rect class="node-card" width="184" height="112" rx="8"/>
+      <svg class="node-icon" x="66" y="21" width="52" height="52" viewBox="0 0 42 42" preserveAspectRatio="xMidYMid meet">
+        <g>
+	<g>
+		<path class="oci-virtual-machine-st0" d="M2.67,41.5c-1.19,0-2.17-0.97-2.17-2.17V2.67c0-1.19,0.97-2.17,2.17-2.17h36.67c1.19,0,2.17,0.97,2.17,2.17
+			v36.67c0,1.19-0.97,2.17-2.17,2.17H2.67z" style="fill:#FFFFFF;"/>
+		<path class="oci-virtual-machine-st0" d="M39.33,1C40.25,1,41,1.75,41,2.67v36.67c0,0.92-0.75,1.67-1.67,1.67H2.67C1.75,41,1,40.25,1,39.33V2.67
+			C1,1.75,1.75,1,2.67,1H39.33 M39.33,0H2.67C1.2,0,0,1.2,0,2.67v36.67C0,40.8,1.2,42,2.67,42h36.67C40.8,42,42,40.8,42,39.33V2.67
+			C42,1.2,40.8,0,39.33,0L39.33,0z" style="fill:#FFFFFF;"/>
+	</g>
+	<g>
+		<path class="oci-virtual-machine-st1" d="M39.33,1H2.67C1.75,1,1,1.75,1,2.67v36.67C1,40.25,1.75,41,2.67,41h36.67c0.92,0,1.67-0.75,1.67-1.67V2.67
+			C41,1.75,40.25,1,39.33,1z M39.52,39.33c0,0.1-0.08,0.19-0.19,0.19H2.67c-0.1,0-0.19-0.08-0.19-0.19V2.67
+			c0-0.1,0.08-0.19,0.19-0.19h36.67c0.1,0,0.19,0.08,0.19,0.19V39.33z" style="fill:#2C5967;"/>
+		<path class="oci-virtual-machine-st1" d="M6.56,35.44h29.07v-8.89H6.56V35.44z M8.04,28.04h26.11v5.93H8.04V28.04z" style="fill:#2C5967;"/>
+		<circle class="oci-virtual-machine-st1" cx="30.81" cy="31" r="1.11" style="fill:#2C5967;"/>
+		<path class="oci-virtual-machine-st1" d="M15.44,6.56H6.56v8.89h8.89V6.56z M13.96,13.96H8.04V8.04h5.93V13.96z" style="fill:#2C5967;"/>
+		<path class="oci-virtual-machine-st1" d="M25.44,6.56h-8.89v8.89h8.89V6.56z M23.96,13.96h-5.93V8.04h5.93V13.96z" style="fill:#2C5967;"/>
+		<path class="oci-virtual-machine-st1" d="M15.44,16.56H6.56v8.89h8.89V16.56z M13.96,23.96H8.04v-5.93h5.93V23.96z" style="fill:#2C5967;"/>
+		<path class="oci-virtual-machine-st1" d="M25.44,16.56h-8.89v8.89h8.89V16.56z M23.96,23.96h-5.93v-5.93h5.93V23.96z" style="fill:#2C5967;"/>
+		<path class="oci-virtual-machine-st1" d="M35.44,6.56h-8.89v8.89h8.89V6.56z M33.96,13.96h-5.93V8.04h5.93V13.96z" style="fill:#2C5967;"/>
+		<path class="oci-virtual-machine-st1" d="M35.44,16.56h-8.89v8.89h8.89V16.56z M33.96,23.96h-5.93v-5.93h5.93V23.96z" style="fill:#2C5967;"/>
+	</g>
+</g>
+      </svg>
+      <text class="node-service-name" text-anchor="middle" x="92" y="89"><tspan x="92" dy="0">Virtual Machine</tspan></text>
+    </g>
+
+    <g class="node" id="node-primary-db" transform="translate(772 202)">
+      <rect class="node-card" width="184" height="112" rx="8"/>
+      <svg class="node-icon" x="66" y="21" width="52" height="52" viewBox="0 0 0.6203 0.6486" preserveAspectRatio="xMidYMid meet">
+        <title>Oracle Base Database</title>
+  <g>
+<path d="M 0.0424 0.2715 L 0.0437 0.2525 L 0.1106 0.1503 L 0.127 0.1288 L 0.1826 0.0593 L 0.2217 0.0518 L 0.2306 0.0518 L 0.2331 0.0518 L 0.2546 0.0429 L 0.3404 0.0051 L 0.4452 0.0707 L 0.4667 0.0871 L 0.5046 0.1023 L 0.5462 0.2614 L 0.5412 0.2702 L 0.0424 0.2702 L 0.0424 0.2715 Z" fill="#ffffff" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.3404 0.0126 L 0.4402 0.0745 L 0.4654 0.0947 L 0.502 0.1098 L 0.5412 0.2601 L 0.5387 0.2652 L 0.343 0.2652 L 0.3101 0.2652 L 0.1207 0.2652 L 0.1182 0.2652 L 0.05 0.2652 L 0.0513 0.2538 L 0.1144 0.1566 L 0.1334 0.1313 L 0.1851 0.0669 L 0.2217 0.0593 L 0.2306 0.0593 L 0.2344 0.0593 L 0.2596 0.048 L 0.3404 0.0126 Z" fill="#ffffff" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.3404 0 L 0.2495 0.0391 L 0.2331 0.0467 L 0.2306 0.0467 L 0.2205 0.0467 L 0.1788 0.0556 L 0.1207 0.1288 L 0.1081 0.1452 L 0.0374 0.2525 L 0.0361 0.2639 L 0.0361 0.2778 L 0.05 0.2778 L 0.1182 0.2778 L 0.1207 0.2778 L 0.3101 0.2778 L 0.343 0.2778 L 0.5387 0.2778 L 0.5462 0.2778 L 0.55 0.2715 L 0.5526 0.2652 L 0.5084 0.0985 L 0.468 0.0821 L 0.4515 0.0694 L 0.3404 0 L 0.3404 0 L 0.3404 0 Z" fill="#ffffff" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.5412 0.2588 L 0.5387 0.2652 L 0.3114 0.2652 L 0.2394 0.1919 L 0.2609 0.1919 L 0.3114 0.2437 L 0.526 0.2437 L 0.4907 0.1275 L 0.4616 0.1149 L 0.4212 0.0833 L 0.3417 0.0341 L 0.276 0.0631 L 0.2281 0.0808 L 0.194 0.0859 L 0.1548 0.1351 L 0.1245 0.1755 L 0.074 0.2437 L 0.1182 0.2437 L 0.1207 0.2437 L 0.2382 0.2437 L 0.2596 0.2652 L 0.1207 0.2652 L 0.1182 0.2652 L 0.05 0.2652 L 0.0513 0.2538 L 0.1144 0.1566 L 0.1334 0.1313 L 0.1851 0.0669 L 0.2293 0.0593 L 0.2584 0.048 L 0.3404 0.0126 L 0.4402 0.0745 L 0.4654 0.0947 L 0.502 0.1098 L 0.5412 0.2588 Z" fill="#2c5967" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.3017 0.4805 L 0.1522 0.4356 L 0.1522 0.1918 L 0.3017 0.1456 L 0.4512 0.1918 L 0.4512 0.4356 L 0.3017 0.4805 L 0.3017 0.4805 Z" fill="#ffffff" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.3017 0.1497 L 0.4472 0.1918 L 0.4472 0.4356 L 0.3017 0.4764 L 0.1563 0.4356 L 0.1563 0.1918 L 0.3017 0.1497 Z" fill="#ffffff" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.3017 0.1415 L 0.1481 0.1918 L 0.1481 0.4356 L 0.3017 0.4846 L 0.4553 0.4356 L 0.4553 0.1918 L 0.3017 0.1415 L 0.3017 0.1415 Z" fill="#ffffff" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.4472 0.1918 L 0.3017 0.1497 L 0.1563 0.1918 L 0.1563 0.4356 L 0.3017 0.4764 L 0.4472 0.4356 L 0.4472 0.1918 Z" fill="#2c5967" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.4308 0.3552 L 0.3967 0.3708 L 0.3017 0.3801 L 0.2064 0.3706 L 0.1726 0.355 L 0.1726 0.2951 L 0.3021 0.3158 L 0.4316 0.2951 L 0.4308 0.3552 Z" fill="#2c5967" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.4308 0.275 L 0.3967 0.2906 L 0.3017 0.2999 L 0.2064 0.2904 L 0.1726 0.2748 L 0.1726 0.2126 L 0.3021 0.2339 L 0.4316 0.2126 L 0.4308 0.275 Z" fill="#2c5967" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.2064 0.1754 L 0.3017 0.166 L 0.397 0.1758 L 0.4312 0.1918 L 0.397 0.2082 L 0.3017 0.218 L 0.2064 0.2082 L 0.1726 0.1918 L 0.2068 0.1755 Z" fill="#2c5967" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.3971 0.451 L 0.3017 0.4605 L 0.2064 0.451 L 0.1726 0.4356 L 0.1726 0.3753 L 0.3021 0.396 L 0.4316 0.3753 L 0.4316 0.4356 L 0.3975 0.4512 Z" fill="#2c5967" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+  </g>
+      </svg>
+      <text class="node-service-name" text-anchor="middle" x="92" y="89"><tspan x="92" dy="0">Oracle Base Database</tspan></text>
+    </g>
+
+    <g class="node" id="node-primary-files" transform="translate(772 356)">
+      <rect class="node-card" width="184" height="112" rx="8"/>
+      <svg class="node-icon" x="66" y="21" width="52" height="52" viewBox="0 0 42 42" preserveAspectRatio="xMidYMid meet">
+        <g>
+	<g>
+		<g>
+			<path class="oci-file-storage-st0" d="M2.67,41.5c-1.19,0-2.17-0.97-2.17-2.17V2.67c0-1.2,0.97-2.17,2.17-2.17h36.67c1.19,0,2.17,0.97,2.17,2.17
+				v36.67c0,1.2-0.97,2.17-2.17,2.17H2.67z" style="fill:#FFFFFF;"/>
+			<path class="oci-file-storage-st0" d="M39.33,1C40.25,1,41,1.75,41,2.67v36.67c0,0.92-0.75,1.67-1.67,1.67H2.67C1.75,41,1,40.25,1,39.33V2.67
+				C1,1.75,1.75,1,2.67,1H39.33 M39.33,0H2.67C1.2,0,0,1.2,0,2.67v36.67C0,40.8,1.2,42,2.67,42h36.67C40.8,42,42,40.8,42,39.33V2.67
+				C42,1.2,40.8,0,39.33,0L39.33,0z" style="fill:#FFFFFF;"/>
+		</g>
+		<g>
+			<path class="oci-file-storage-st1" d="M1,39.33C1,40.25,1.75,41,2.67,41h36.67c0.92,0,1.67-0.75,1.67-1.67V4.99H1V39.33z M2.48,6.47h37.04v32.87
+				c0,0.1-0.08,0.19-0.19,0.19H2.67c-0.1,0-0.19-0.08-0.19-0.19V6.47z" style="fill:#2C5967;"/>
+			<path class="oci-file-storage-st1" d="M39.33,1H2.67C1.75,1,1,1.75,1,2.67v1.21h40V2.67C41,1.75,40.25,1,39.33,1z" style="fill:#2C5967;"/>
+			<path class="oci-file-storage-st1" d="M36.06,15.68c0-0.82-0.68-1.48-1.52-1.48H18.06l-1.64-2.09c-0.29-0.36-0.74-0.58-1.21-0.58H7.46
+				c-0.84,0-1.52,0.66-1.52,1.48v21.3h30.12V15.68z M7.46,13.01h7.75c0.02,0,0.04,0.01,0.04,0.01l1.51,1.92l-1.5,1.9
+				c0,0-0.02,0.01-0.04,0.01h-7.8l0-3.84C7.42,13.02,7.43,13.01,7.46,13.01z M34.58,32.83H7.42l0-14.49h7.8
+				c0.47,0,0.92-0.22,1.2-0.58l1.65-2.08h16.47c0.02,0,0.03,0.01,0.04,0.01V32.83z" style="fill:#2C5967;"/>
+			<rect x="8.7" y="14.2" class="oci-file-storage-st1" width="5.76" height="1.48" style="fill:#2C5967;"/>
+		</g>
+	</g>
+</g>
+      </svg>
+      <text class="node-service-name" text-anchor="middle" x="92" y="89"><tspan x="92" dy="0">File Storage</tspan></text>
+    </g>
+
+    <g class="node" id="node-data-guard" transform="translate(1092 202)">
+      <rect class="node-card" width="184" height="112" rx="8"/>
+      <svg class="node-icon" x="66" y="21" width="52" height="52" viewBox="0 0 37.82 42" preserveAspectRatio="xMidYMid meet">
+        <path d="M18.91,41.5C17,41.5.5,41.35.5,36.07V6.48a1.21,1.21,0,0,1,0-.19,1.69,1.69,0,0,1,0-.23C.5,2,10.42.5,18.91.5S37.32,2,37.32,6.06a1.79,1.79,0,0,1,0,.23,1.23,1.23,0,0,1,0,.19V36.07C37.32,41.35,20.79,41.5,18.91,41.5Z" fill="#fff"/><path d="M18.91,1c8.62,0,17.91,1.58,17.91,5.06a2.29,2.29,0,0,1,0,.25.88.88,0,0,1,0,.17V36.07C36.82,40,25.1,41,18.91,41S1,40,1,36.07V6.48a.88.88,0,0,1,0-.17,2.29,2.29,0,0,1,0-.25C1,2.58,10.28,1,18.91,1m0-1C15.75,0,0,.29,0,6.06a1.85,1.85,0,0,0,0,.23,1.15,1.15,0,0,0,0,.19V36.07C0,41.71,15.75,42,18.91,42s18.91-.29,18.91-5.93V6.48c0-.07,0-.13,0-.19s0-.16,0-.23C37.82.29,22.07,0,18.91,0Z" fill="#fff"/><path d="M36.82,6.06C36.82,2.58,27.53,1,18.91,1S1,2.58,1,6.06a2.29,2.29,0,0,0,0,.25.88.88,0,0,0,0,.17V36.07C1,40,12.71,41,18.91,41s17.91-1,17.91-4.93V6.48a.88.88,0,0,0,0-.17A2.29,2.29,0,0,0,36.82,6.06ZM35.13,16.45c0,.26-.8,1.22-4.35,2.07l-.92.2v1.72a17.5,17.5,0,0,0,5.27-1.72v7.47c0,.26-.8,1.22-4.35,2.07l-1.33.28a13.65,13.65,0,0,1-.6,1.81,19.32,19.32,0,0,0,6.28-1.89v7.61c0,.27-.8,1.22-4.35,2.07a53.31,53.31,0,0,1-11.87,1.17A53.25,53.25,0,0,1,7,38.14c-3.56-.85-4.35-1.8-4.35-2.07V28.46a19,19,0,0,0,6.25,1.89,14.51,14.51,0,0,1-.59-1.81c-.46-.09-.9-.18-1.31-.28-3.56-.85-4.35-1.81-4.35-2.07V18.72A17.43,17.43,0,0,0,8,20.44V18.72L7,18.52c-3.56-.85-4.35-1.81-4.35-2.07V8.37c3.06,1.87,9.82,2.74,16.22,2.74s13.16-.87,16.22-2.74ZM30.77,8.22A51.86,51.86,0,0,1,18.91,9.43,52,52,0,0,1,7,8.22C3.47,7.34,2.69,6.36,2.69,6.06S3.47,4.78,7,3.9A52,52,0,0,1,18.91,2.69,51.86,51.86,0,0,1,30.77,3.9c3.58.88,4.36,1.85,4.36,2.16S34.35,7.34,30.77,8.22Z" fill="#2c5967"/><path d="M9.22,16.77v9c0,.35.08,8.59,9.4,12l.29.11.29-.11c9.29-3.43,9.4-11.61,9.4-11.95v-9l-9.69-4.15Zm17.69,9a11.67,11.67,0,0,1-7.16,9.9V33.08a7.89,7.89,0,0,1-.84.05,7.58,7.58,0,0,1-.84-.05v2.59C11,32.49,10.9,26,10.9,25.76V17.88l7.17-3.07v2.35a7.63,7.63,0,0,1,.84,0,7.87,7.87,0,0,1,.84,0V14.81l7.16,3.07Z" fill="#2c5967"/><path d="M12.17,25.12a6.74,6.74,0,1,0,6.74-6.74A6.74,6.74,0,0,0,12.17,25.12Zm11.79,0a5.06,5.06,0,1,1-5.05-5.05A5.06,5.06,0,0,1,24,25.12Z" fill="#2c5967"/><polygon points="16.77 24.53 15.57 25.72 18.07 28.21 22.24 24.03 21.05 22.84 18.07 25.83 16.77 24.53" fill="#2c5967"/>
+      </svg>
+      <text class="node-service-name" text-anchor="middle" x="92" y="89"><tspan x="92" dy="0">Data Guard</tspan></text>
+    </g>
+
+    <g class="node" id="node-fsdr" transform="translate(132 202)">
+      <rect class="node-card" width="184" height="112" rx="8"/>
+      <svg class="node-icon" x="66" y="21" width="52" height="52" viewBox="0 0 39.97 42" preserveAspectRatio="xMidYMid meet">
+        <polygon points="18.32 25.64 13.84 18.22 16.69 18.22 14.93 13.7 16.72 13.7 21.49 21.12 18.57 21.12 20.08 25.64 18.32 25.64" fill="#2c5967"/><path d="M16.45,14.2l2.58,4,1.54,2.41H17.88l1.51,4.52h-.78l-3-4.88-.93-1.54h2.7l-.21-.53-1.55-4h.79m.54-1H14.2l.53,1.36L16,17.72H13l.92,1.52.93,1.54,2.95,4.88.29.48h2.73l-.43-1.31-1.07-3.21H22.4l-1-1.54-1.54-2.41-2.58-4L17,13.2Z" fill="#fff"/><path d="M37.19,28.77h-.9V24c0-.94-.4-2.6-2.95-3.52l.1-.1-.7-.71-.89-.89h2.58l.28-.53.21-.38a8.6,8.6,0,0,0-3-11.32,8.49,8.49,0,0,0-2.72-1.11,1.51,1.51,0,0,1-1-.78A8.35,8.35,0,0,0,20.7,0a8.44,8.44,0,0,0-6.15,2.68,1.32,1.32,0,0,1-1,.42h-.14l-.65,0a7.06,7.06,0,0,0-2.8.59,7,7,0,0,0-4,5,1.42,1.42,0,0,1-.75,1A8.84,8.84,0,0,0,.45,16.91l-.06.79L.31,18.77H6.46c-.07.36-.13.73-.17,1.1l-.28,0c-3.87.43-6,1.88-6,4.1V34.27c0,1.48,1.51,2.67,4.26,3.34l.33.09v1.52A2.79,2.79,0,0,0,7.37,42h9.36a2.79,2.79,0,0,0,2.79-2.78l-.05-4.95h1a7.54,7.54,0,0,0,4.22,3.33l.33.09v1.53A2.79,2.79,0,0,0,27.83,42h9.36A2.79,2.79,0,0,0,40,39.22V31.57A2.8,2.8,0,0,0,37.19,28.77Z" fill="#fff"/><polygon points="14.72 18.72 15.65 20.26 18.61 25.14 19.39 25.14 17.88 20.62 20.57 20.62 19.03 18.21 16.45 14.2 15.66 14.2 17.21 18.19 17.42 18.72 14.72 18.72" fill="#2c5967"/><path d="M23,34.18V31.13a10,10,0,0,0,2,.63v-.19a2.89,2.89,0,0,1,.28-1.24A5.55,5.55,0,0,1,23,29.44V26a11.48,11.48,0,0,0,5.44,1.23A11.48,11.48,0,0,0,33.83,26v2.72h1.46V24c0-.82-.43-2-2.64-2.7l-1.21,1.22c1.39.27,2.39.75,2.39,1.48,0,.51-2.11,1.73-5.44,1.73S23,24.5,23,24s.95-1.11,2.5-1.45l-1.19-1.19c-1.54.47-2.77,1.29-2.77,2.64V34.27c0,1,1.51,1.88,3.46,2.36V35.12A4.88,4.88,0,0,1,23,34.18Z" fill="#2c5967"/><path d="M9.76,22.34c2,.2,3.58.73,3.58,1.65,0,.51-2.11,1.73-5.44,1.73S2.46,24.5,2.46,24s1.44-1.38,3.66-1.64V20.89C3.72,21.15,1,22,1,24V34.27c0,1,1.53,1.89,3.5,2.37V35.13a4.84,4.84,0,0,1-2-1V31.13a9.23,9.23,0,0,0,2,.63v-.19a3,3,0,0,1,.27-1.23,5.58,5.58,0,0,1-2.31-.9V26A11.6,11.6,0,0,0,7.9,27.18,11.62,11.62,0,0,0,13.34,26v2.71h1.45V24c0-1.06-.7-2.75-5-3.12,0,.11,0,.22,0,.33Z" fill="#2c5967"/><path d="M3,16.31a6.43,6.43,0,0,1,3.35-4.46,3.92,3.92,0,0,0,2-2.7A4.49,4.49,0,0,1,13.2,5.54a3.76,3.76,0,0,0,3.15-1.18A5.93,5.93,0,0,1,26,5.74a3.94,3.94,0,0,0,2.68,2.09,6.2,6.2,0,0,1,1.94.79,6.13,6.13,0,0,1,2.31,7.69H29.21a12.13,12.13,0,0,1,.54,1.46h4.08l.21-.38a7.6,7.6,0,0,0-5-11,2.45,2.45,0,0,1-1.69-1.31,7.4,7.4,0,0,0-12-1.73,2.31,2.31,0,0,1-1.95.73,5.88,5.88,0,0,0-2.95.48,6,6,0,0,0-3.45,4.3,2.4,2.4,0,0,1-1.26,1.68A7.92,7.92,0,0,0,1.44,17l-.06.78H6.62a12.13,12.13,0,0,1,.54-1.46Z" fill="#2c5967"/><path d="M32,20.37l-1-1-1.85,1.84a11,11,0,0,0-21.94,0V23H8.67V21.2a9.51,9.51,0,0,1,19,0l-1.85-1.85-1,1L28.43,24Z" fill="#2c5967"/><polygon points="35 34.91 33.48 36.4 32.85 35.77 31.82 36.8 33.48 38.45 33.48 38.45 36.02 35.95 35 34.91" fill="#2c5967"/><path d="M37.19,29.77H27.83A1.8,1.8,0,0,0,26,31.57v7.65A1.79,1.79,0,0,0,27.83,41h9.36A1.78,1.78,0,0,0,39,39.22V31.57A1.79,1.79,0,0,0,37.19,29.77Zm-9.36,9.77a.32.32,0,0,1-.33-.32V33.78H29v5.76Zm9.68-.32a.32.32,0,0,1-.32.32H30.42V33.78h7.09Zm0-6.9h-10v-.75a.35.35,0,0,1,.33-.35h9.36a.35.35,0,0,1,.32.35Z" fill="#2c5967"/><path d="M7.37,29.77a1.79,1.79,0,0,0-1.78,1.8v7.65A1.78,1.78,0,0,0,7.37,41h9.36a1.79,1.79,0,0,0,1.79-1.78V31.57a1.8,1.8,0,0,0-1.79-1.8Zm0,9.77a.32.32,0,0,1-.32-.32V33.78H8.51v5.76Zm9.69-.32a.32.32,0,0,1-.33.32H10V33.78h7.09Zm-.33-8a.35.35,0,0,1,.33.35v.75h-10v-.75a.35.35,0,0,1,.32-.35Z" fill="#2c5967"/>
+      </svg>
+      <text class="node-service-name" text-anchor="middle" x="92" y="89"><tspan x="92" dy="0">Full Stack Disaster</tspan><tspan x="92" dy="12">Recovery</tspan></text>
+    </g>
+
+    <g class="node" id="node-standby-app" transform="translate(452 1034)">
+      <rect class="node-card" width="184" height="112" rx="8"/>
+      <svg class="node-icon" x="66" y="21" width="52" height="52" viewBox="0 0 42 42" preserveAspectRatio="xMidYMid meet">
+        <g>
+	<g>
+		<path class="oci-virtual-machine-st0" d="M2.67,41.5c-1.19,0-2.17-0.97-2.17-2.17V2.67c0-1.19,0.97-2.17,2.17-2.17h36.67c1.19,0,2.17,0.97,2.17,2.17
+			v36.67c0,1.19-0.97,2.17-2.17,2.17H2.67z" style="fill:#FFFFFF;"/>
+		<path class="oci-virtual-machine-st0" d="M39.33,1C40.25,1,41,1.75,41,2.67v36.67c0,0.92-0.75,1.67-1.67,1.67H2.67C1.75,41,1,40.25,1,39.33V2.67
+			C1,1.75,1.75,1,2.67,1H39.33 M39.33,0H2.67C1.2,0,0,1.2,0,2.67v36.67C0,40.8,1.2,42,2.67,42h36.67C40.8,42,42,40.8,42,39.33V2.67
+			C42,1.2,40.8,0,39.33,0L39.33,0z" style="fill:#FFFFFF;"/>
+	</g>
+	<g>
+		<path class="oci-virtual-machine-st1" d="M39.33,1H2.67C1.75,1,1,1.75,1,2.67v36.67C1,40.25,1.75,41,2.67,41h36.67c0.92,0,1.67-0.75,1.67-1.67V2.67
+			C41,1.75,40.25,1,39.33,1z M39.52,39.33c0,0.1-0.08,0.19-0.19,0.19H2.67c-0.1,0-0.19-0.08-0.19-0.19V2.67
+			c0-0.1,0.08-0.19,0.19-0.19h36.67c0.1,0,0.19,0.08,0.19,0.19V39.33z" style="fill:#2C5967;"/>
+		<path class="oci-virtual-machine-st1" d="M6.56,35.44h29.07v-8.89H6.56V35.44z M8.04,28.04h26.11v5.93H8.04V28.04z" style="fill:#2C5967;"/>
+		<circle class="oci-virtual-machine-st1" cx="30.81" cy="31" r="1.11" style="fill:#2C5967;"/>
+		<path class="oci-virtual-machine-st1" d="M15.44,6.56H6.56v8.89h8.89V6.56z M13.96,13.96H8.04V8.04h5.93V13.96z" style="fill:#2C5967;"/>
+		<path class="oci-virtual-machine-st1" d="M25.44,6.56h-8.89v8.89h8.89V6.56z M23.96,13.96h-5.93V8.04h5.93V13.96z" style="fill:#2C5967;"/>
+		<path class="oci-virtual-machine-st1" d="M15.44,16.56H6.56v8.89h8.89V16.56z M13.96,23.96H8.04v-5.93h5.93V23.96z" style="fill:#2C5967;"/>
+		<path class="oci-virtual-machine-st1" d="M25.44,16.56h-8.89v8.89h8.89V16.56z M23.96,23.96h-5.93v-5.93h5.93V23.96z" style="fill:#2C5967;"/>
+		<path class="oci-virtual-machine-st1" d="M35.44,6.56h-8.89v8.89h8.89V6.56z M33.96,13.96h-5.93V8.04h5.93V13.96z" style="fill:#2C5967;"/>
+		<path class="oci-virtual-machine-st1" d="M35.44,16.56h-8.89v8.89h8.89V16.56z M33.96,23.96h-5.93v-5.93h5.93V23.96z" style="fill:#2C5967;"/>
+	</g>
+</g>
+      </svg>
+      <text class="node-service-name" text-anchor="middle" x="92" y="89"><tspan x="92" dy="0">Virtual Machine</tspan></text>
+    </g>
+
+    <g class="node" id="node-standby-db" transform="translate(1412 726)">
+      <rect class="node-card" width="184" height="112" rx="8"/>
+      <svg class="node-icon" x="66" y="21" width="52" height="52" viewBox="0 0 0.6203 0.6486" preserveAspectRatio="xMidYMid meet">
+        <title>Oracle Base Database</title>
+  <g>
+<path d="M 0.0424 0.2715 L 0.0437 0.2525 L 0.1106 0.1503 L 0.127 0.1288 L 0.1826 0.0593 L 0.2217 0.0518 L 0.2306 0.0518 L 0.2331 0.0518 L 0.2546 0.0429 L 0.3404 0.0051 L 0.4452 0.0707 L 0.4667 0.0871 L 0.5046 0.1023 L 0.5462 0.2614 L 0.5412 0.2702 L 0.0424 0.2702 L 0.0424 0.2715 Z" fill="#ffffff" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.3404 0.0126 L 0.4402 0.0745 L 0.4654 0.0947 L 0.502 0.1098 L 0.5412 0.2601 L 0.5387 0.2652 L 0.343 0.2652 L 0.3101 0.2652 L 0.1207 0.2652 L 0.1182 0.2652 L 0.05 0.2652 L 0.0513 0.2538 L 0.1144 0.1566 L 0.1334 0.1313 L 0.1851 0.0669 L 0.2217 0.0593 L 0.2306 0.0593 L 0.2344 0.0593 L 0.2596 0.048 L 0.3404 0.0126 Z" fill="#ffffff" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.3404 0 L 0.2495 0.0391 L 0.2331 0.0467 L 0.2306 0.0467 L 0.2205 0.0467 L 0.1788 0.0556 L 0.1207 0.1288 L 0.1081 0.1452 L 0.0374 0.2525 L 0.0361 0.2639 L 0.0361 0.2778 L 0.05 0.2778 L 0.1182 0.2778 L 0.1207 0.2778 L 0.3101 0.2778 L 0.343 0.2778 L 0.5387 0.2778 L 0.5462 0.2778 L 0.55 0.2715 L 0.5526 0.2652 L 0.5084 0.0985 L 0.468 0.0821 L 0.4515 0.0694 L 0.3404 0 L 0.3404 0 L 0.3404 0 Z" fill="#ffffff" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.5412 0.2588 L 0.5387 0.2652 L 0.3114 0.2652 L 0.2394 0.1919 L 0.2609 0.1919 L 0.3114 0.2437 L 0.526 0.2437 L 0.4907 0.1275 L 0.4616 0.1149 L 0.4212 0.0833 L 0.3417 0.0341 L 0.276 0.0631 L 0.2281 0.0808 L 0.194 0.0859 L 0.1548 0.1351 L 0.1245 0.1755 L 0.074 0.2437 L 0.1182 0.2437 L 0.1207 0.2437 L 0.2382 0.2437 L 0.2596 0.2652 L 0.1207 0.2652 L 0.1182 0.2652 L 0.05 0.2652 L 0.0513 0.2538 L 0.1144 0.1566 L 0.1334 0.1313 L 0.1851 0.0669 L 0.2293 0.0593 L 0.2584 0.048 L 0.3404 0.0126 L 0.4402 0.0745 L 0.4654 0.0947 L 0.502 0.1098 L 0.5412 0.2588 Z" fill="#2c5967" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.3017 0.4805 L 0.1522 0.4356 L 0.1522 0.1918 L 0.3017 0.1456 L 0.4512 0.1918 L 0.4512 0.4356 L 0.3017 0.4805 L 0.3017 0.4805 Z" fill="#ffffff" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.3017 0.1497 L 0.4472 0.1918 L 0.4472 0.4356 L 0.3017 0.4764 L 0.1563 0.4356 L 0.1563 0.1918 L 0.3017 0.1497 Z" fill="#ffffff" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.3017 0.1415 L 0.1481 0.1918 L 0.1481 0.4356 L 0.3017 0.4846 L 0.4553 0.4356 L 0.4553 0.1918 L 0.3017 0.1415 L 0.3017 0.1415 Z" fill="#ffffff" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.4472 0.1918 L 0.3017 0.1497 L 0.1563 0.1918 L 0.1563 0.4356 L 0.3017 0.4764 L 0.4472 0.4356 L 0.4472 0.1918 Z" fill="#2c5967" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.4308 0.3552 L 0.3967 0.3708 L 0.3017 0.3801 L 0.2064 0.3706 L 0.1726 0.355 L 0.1726 0.2951 L 0.3021 0.3158 L 0.4316 0.2951 L 0.4308 0.3552 Z" fill="#2c5967" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.4308 0.275 L 0.3967 0.2906 L 0.3017 0.2999 L 0.2064 0.2904 L 0.1726 0.2748 L 0.1726 0.2126 L 0.3021 0.2339 L 0.4316 0.2126 L 0.4308 0.275 Z" fill="#2c5967" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.2064 0.1754 L 0.3017 0.166 L 0.397 0.1758 L 0.4312 0.1918 L 0.397 0.2082 L 0.3017 0.218 L 0.2064 0.2082 L 0.1726 0.1918 L 0.2068 0.1755 Z" fill="#2c5967" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+<path d="M 0.3971 0.451 L 0.3017 0.4605 L 0.2064 0.451 L 0.1726 0.4356 L 0.1726 0.3753 L 0.3021 0.396 L 0.4316 0.3753 L 0.4316 0.4356 L 0.3975 0.4512 Z" fill="#2c5967" stroke="#312d2a" stroke-width="0.012" stroke-linejoin="round"/>
+  </g>
+      </svg>
+      <text class="node-service-name" text-anchor="middle" x="92" y="89"><tspan x="92" dy="0">Oracle Base Database</tspan></text>
+    </g>
+
+    <g class="node" id="node-events-4" transform="translate(452 202)">
+      <rect class="node-card" width="184" height="112" rx="8"/>
+      <svg class="node-icon" x="66" y="21" width="52" height="52" viewBox="0 0 42.63 42" preserveAspectRatio="xMidYMid meet">
+        <g>
+	<g>
+		<path class="oci-events-st0" d="M28.76,41.5v-3.15h-8.52v-9.07c-3.63-0.54-6.5-3.41-7.04-7.04h-2.14l1.71,3.13H0.85l6.01-10.85l2.86,5.24
+			h3.49c0.54-3.63,3.41-6.5,7.04-7.04V5.94h-5.67v3.15H5.99V0.5h8.59v2.96h8.15v9.26c3.63,0.54,6.5,3.41,7.04,7.04h1.75l2.17-3.7
+			h5.6l2.76,4.86l-2.84,4.84h-5.6l-2-3.52h-1.84c-0.54,3.63-3.4,6.5-7.04,7.04v6.59h6.04v-2.96h8.59v8.59H28.76z" style="fill:#FFFFFF;"/>
+		<path class="oci-events-st0" d="M14.08,1v2.96h8.15v9.2c3.75,0.35,6.74,3.34,7.09,7.09h2.48l2.17-3.7h5.03l2.48,4.36l-2.55,4.35H33.9l-2-3.52
+			h-2.58c-0.35,3.75-3.34,6.74-7.09,7.09v7.54h7.04v-2.96h7.59V41h-7.59v-3.15h-8.52v-9.02C17,28.48,14,25.49,13.65,21.74h-3.43
+			l1.71,3.13H1.7l5.16-9.32l2.56,4.7h4.23c0.35-3.75,3.34-6.74,7.09-7.09V5.44h-6.67v3.15H6.49V1H14.08 M15.08,0h-1H6.49h-1v1v7.59
+			v1h1h7.59h1v-1V6.44h4.67v5.86c-3.5,0.7-6.26,3.45-6.96,6.96h-2.78l-2.28-4.18l-0.87-1.6l-0.88,1.59l-5.16,9.32L0,25.87h1.7h10.24
+			h1.68l-0.81-1.48l-0.9-1.65h0.88c0.7,3.5,3.45,6.26,6.96,6.96v8.15v1h1h7.52V41v1h1h7.59h1v-1v-7.59v-1h-1h-7.59h-1v1v1.96h-5.04
+			V29.7c3.5-0.7,6.26-3.45,6.96-6.96h1.13l1.71,3.01l0.29,0.51h0.58h5.03h0.57l0.29-0.49l2.55-4.35l0.29-0.5l-0.29-0.5l-2.48-4.36
+			l-0.29-0.51h-0.58h-5.03h-0.57l-0.29,0.49l-1.88,3.21h-1.04c-0.7-3.5-3.45-6.26-6.96-6.96V3.96v-1h-1h-7.15V1V0L15.08,0z" style="fill:#FFFFFF;"/>
+	</g>
+	<g>
+		<path class="oci-events-st1" d="M29.32,21.74h2.58l2,3.52h5.03l2.55-4.35l-2.48-4.36h-5.03l-2.17,3.7h-2.48c-0.35-3.75-3.34-6.74-7.09-7.09
+			v-9.2h-8.15V1H6.49v7.59h7.59V5.44h6.67v7.72C17,13.52,14,16.51,13.65,20.26H9.42l-2.56-4.7L1.7,24.87h10.24l-1.71-3.13h3.43
+			c0.35,3.75,3.34,6.74,7.09,7.09v9.02h8.52V41h7.59v-7.59h-7.59v2.96h-7.04v-7.54C25.98,28.48,28.97,25.49,29.32,21.74z M7.97,7.11
+			V2.48h4.63v4.63H7.97z M4.21,23.39l2.63-4.76l2.59,4.76H4.21z M35.38,34.89v4.63h-4.63v-4.63H35.38z M15.1,21
+			c0-3.52,2.87-6.39,6.39-6.39s6.39,2.87,6.39,6.39s-2.87,6.39-6.39,6.39S15.1,24.52,15.1,21z M33.13,20.91l1.69-2.88h3.32
+			l1.63,2.86l-1.69,2.88h-3.31L33.13,20.91z" style="fill:#2C5967;"/>
+	</g>
+</g>
+      </svg>
+      <text class="node-service-name" text-anchor="middle" x="92" y="89"><tspan x="92" dy="0">Events</tspan></text>
+    </g>
+
+  </g>
+</svg>
+
+        </div>
+      </div>
+      <div class="diagram-toolbar" aria-label="Diagram navigation">
+        <button type="button" data-diagram-action="zoom-out" title="Zoom out">-</button>
+        <button type="button" data-diagram-action="zoom-in" title="Zoom in">+</button>
+        <output class="zoom-percent" aria-live="polite">100%</output>
+      </div>
+    </section>
+    
+    <section class="service-inventory" aria-label="Architecture services">
+      <h2>Architecture Services</h2>
+      <div class="service-inventory-scroll" tabindex="0">
+        <ul class="service-list">
+          
+        <li class="service-item">
+          <div>
+            <div class="service-name">Load Balancer - Primary</div>
+            <div class="service-context">Primary Load Balancer - Primary VCN</div>
+          </div>
+          <p class="service-role">Distribuye trafico entre la capa de aplicacion y mantiene un punto de entrada estable.</p>
+        </li>
+        <li class="service-item">
+          <div>
+            <div class="service-name">Virtual Machine</div>
+            <div class="service-context">EBS App Tier - Primary VCN</div>
+          </div>
+          <p class="service-role">Ejecuta cargas de trabajo o componentes de aplicacion sobre compute.</p>
+        </li>
+        <li class="service-item">
+          <div>
+            <div class="service-name">Oracle Base Database</div>
+            <div class="service-context">Primary Database - Primary VCN</div>
+          </div>
+          <p class="service-role">Soporta el componente Primary Database dentro del flujo definido para esta arquitectura.</p>
+        </li>
+        <li class="service-item">
+          <div>
+            <div class="service-name">File Storage</div>
+            <div class="service-context">Shared File Storage - Primary VCN</div>
+          </div>
+          <p class="service-role">Soporta el componente Shared File Storage dentro del flujo definido para esta arquitectura.</p>
+        </li>
+        <li class="service-item">
+          <div>
+            <div class="service-name">Data Guard</div>
+            <div class="service-context">Data Guard</div>
+          </div>
+          <p class="service-role">Cumple una funcion de apoyo dentro del flujo definido para esta arquitectura.</p>
+        </li>
+        <li class="service-item">
+          <div>
+            <div class="service-name">Full Stack Disaster Recovery</div>
+            <div class="service-context">Full Stack DR - DR Operations</div>
+          </div>
+          <p class="service-role">Soporta el componente Full Stack DR dentro del flujo definido para esta arquitectura.</p>
+        </li>
+        <li class="service-item">
+          <div>
+            <div class="service-name">Virtual Machine</div>
+            <div class="service-context">Standby App Tier - Standby VCN</div>
+          </div>
+          <p class="service-role">Ejecuta cargas de trabajo o componentes de aplicacion sobre compute.</p>
+        </li>
+        <li class="service-item">
+          <div>
+            <div class="service-name">Oracle Base Database</div>
+            <div class="service-context">Standby Database - Standby VCN</div>
+          </div>
+          <p class="service-role">Soporta el componente Standby Database dentro del flujo definido para esta arquitectura.</p>
+        </li>
+        <li class="service-item">
+          <div>
+            <div class="service-name">Events</div>
+            <div class="service-context">Events</div>
+          </div>
+          <p class="service-role">Cumple una funcion de apoyo dentro del flujo definido para esta arquitectura.</p>
+        </li>
+        </ul>
+      </div>
+    </section>
+    
+    <script type="application/json" id="diagram-spec">{&quot;title&quot;: &quot;OCI ebs-disaster-recovery - plataforma con eventos&quot;, &quot;layout&quot;: &quot;left-to-right&quot;, &quot;groups&quot;: [{&quot;id&quot;: &quot;primary-region&quot;, &quot;label&quot;: &quot;Primary OCI Region&quot;, &quot;type&quot;: &quot;region&quot;}, {&quot;id&quot;: &quot;primary-vcn&quot;, &quot;label&quot;: &quot;Primary VCN&quot;, &quot;type&quot;: &quot;vcn&quot;, &quot;parent&quot;: &quot;primary-region&quot;}, {&quot;id&quot;: &quot;secondary-region&quot;, &quot;label&quot;: &quot;Standby OCI Region&quot;, &quot;type&quot;: &quot;region&quot;}, {&quot;id&quot;: &quot;secondary-vcn&quot;, &quot;label&quot;: &quot;Standby VCN&quot;, &quot;type&quot;: &quot;vcn&quot;, &quot;parent&quot;: &quot;secondary-region&quot;}, {&quot;id&quot;: &quot;ops-subnet&quot;, &quot;label&quot;: &quot;DR Operations&quot;, &quot;type&quot;: &quot;subnet&quot;, &quot;parent&quot;: &quot;primary-vcn&quot;}], &quot;nodes&quot;: [{&quot;id&quot;: &quot;primary-lb&quot;, &quot;label&quot;: &quot;Primary Load Balancer&quot;, &quot;service&quot;: &quot;Load Balancer&quot;, &quot;group&quot;: &quot;primary-vcn&quot;}, {&quot;id&quot;: &quot;primary-app&quot;, &quot;label&quot;: &quot;EBS App Tier&quot;, &quot;service&quot;: &quot;Virtual Machine&quot;, &quot;group&quot;: &quot;primary-vcn&quot;}, {&quot;id&quot;: &quot;primary-db&quot;, &quot;label&quot;: &quot;Primary Database&quot;, &quot;service&quot;: &quot;Oracle Base Database&quot;, &quot;group&quot;: &quot;primary-vcn&quot;}, {&quot;id&quot;: &quot;primary-files&quot;, &quot;label&quot;: &quot;Shared File Storage&quot;, &quot;service&quot;: &quot;File Storage&quot;, &quot;group&quot;: &quot;primary-vcn&quot;}, {&quot;id&quot;: &quot;data-guard&quot;, &quot;label&quot;: &quot;Data Guard&quot;, &quot;service&quot;: &quot;Data Guard&quot;, &quot;group&quot;: &quot;ops-subnet&quot;}, {&quot;id&quot;: &quot;fsdr&quot;, &quot;label&quot;: &quot;Full Stack DR&quot;, &quot;service&quot;: &quot;Full Stack Disaster Recovery&quot;, &quot;group&quot;: &quot;ops-subnet&quot;}, {&quot;id&quot;: &quot;standby-app&quot;, &quot;label&quot;: &quot;Standby App Tier&quot;, &quot;service&quot;: &quot;Virtual Machine&quot;, &quot;group&quot;: &quot;secondary-vcn&quot;}, {&quot;id&quot;: &quot;standby-db&quot;, &quot;label&quot;: &quot;Standby Database&quot;, &quot;service&quot;: &quot;Oracle Base Database&quot;, &quot;group&quot;: &quot;secondary-vcn&quot;}, {&quot;id&quot;: &quot;events-4&quot;, &quot;label&quot;: &quot;Events&quot;, &quot;service&quot;: &quot;Events&quot;, &quot;group&quot;: &quot;ops-subnet&quot;}], &quot;edges&quot;: [{&quot;from&quot;: &quot;primary-lb&quot;, &quot;to&quot;: &quot;primary-app&quot;, &quot;label&quot;: &quot;HTTP&quot;}, {&quot;from&quot;: &quot;primary-app&quot;, &quot;to&quot;: &quot;primary-db&quot;, &quot;label&quot;: &quot;SQL&quot;}, {&quot;from&quot;: &quot;primary-app&quot;, &quot;to&quot;: &quot;primary-files&quot;, &quot;label&quot;: &quot;NFS&quot;}, {&quot;from&quot;: &quot;primary-db&quot;, &quot;to&quot;: &quot;data-guard&quot;, &quot;label&quot;: &quot;redo&quot;}, {&quot;from&quot;: &quot;data-guard&quot;, &quot;to&quot;: &quot;standby-db&quot;, &quot;label&quot;: &quot;replicate&quot;}, {&quot;from&quot;: &quot;fsdr&quot;, &quot;to&quot;: &quot;standby-app&quot;, &quot;label&quot;: &quot;orchestrate&quot;}, {&quot;from&quot;: &quot;fsdr&quot;, &quot;to&quot;: &quot;standby-db&quot;, &quot;label&quot;: &quot;failover&quot;}, {&quot;from&quot;: &quot;fsdr&quot;, &quot;to&quot;: &quot;events-4&quot;, &quot;label&quot;: &quot;events&quot;}]}</script>
+    <script>
+      (() => {
+        const wrap = document.querySelector(".diagram-wrap");
+        const stage = document.querySelector(".diagram-stage");
+        const svg = document.querySelector("svg.diagram");
+        const zoomPercent = document.querySelector(".zoom-percent");
+        if (!wrap || !stage || !svg) return;
+
+        const naturalWidth = Number(svg.getAttribute("width")) || 1200;
+        const naturalHeight = Number(svg.getAttribute("height")) || 800;
+        let scale = 1;
+
+        function applyScale(nextScale, anchor) {
+          const previous = scale;
+          scale = Math.max(0.35, Math.min(2.5, nextScale));
+          const anchorX = anchor ? anchor.x : wrap.clientWidth / 2;
+          const anchorY = anchor ? anchor.y : wrap.clientHeight / 2;
+          const ratioX = (wrap.scrollLeft + anchorX) / (naturalWidth * previous);
+          const ratioY = (wrap.scrollTop + anchorY) / (naturalHeight * previous);
+          stage.style.width = `${naturalWidth * scale}px`;
+          stage.style.height = `${naturalHeight * scale}px`;
+          svg.style.transform = `scale(${scale})`;
+          if (zoomPercent) zoomPercent.textContent = `${Math.round(scale * 100)}%`;
+          wrap.scrollLeft = ratioX * naturalWidth * scale - anchorX;
+          wrap.scrollTop = ratioY * naturalHeight * scale - anchorY;
+        }
+
+        function fitDiagram() {
+          const available = Math.max(320, wrap.clientWidth - 24);
+          applyScale(Math.min(1, available / naturalWidth));
+        }
+
+        const toolbar = document.querySelector(".diagram-toolbar");
+        if (toolbar) {
+          toolbar.addEventListener("pointerdown", (event) => {
+            event.stopPropagation();
+          });
+        }
+
+        document.querySelectorAll("[data-diagram-action]").forEach((button) => {
+          button.addEventListener("pointerdown", (event) => {
+            event.stopPropagation();
+          });
+          button.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            const action = button.getAttribute("data-diagram-action");
+            if (action === "zoom-in") applyScale(scale * 1.15);
+            if (action === "zoom-out") applyScale(scale / 1.15);
+          });
+        });
+
+        let dragging = false;
+        let startX = 0;
+        let startY = 0;
+        let startLeft = 0;
+        let startTop = 0;
+
+        wrap.addEventListener("pointerdown", (event) => {
+          if (event.button !== 0) return;
+          const target = event.target;
+          if (target instanceof Element && target.closest(".diagram-toolbar")) return;
+          dragging = true;
+          startX = event.clientX;
+          startY = event.clientY;
+          startLeft = wrap.scrollLeft;
+          startTop = wrap.scrollTop;
+          wrap.classList.add("is-panning");
+          wrap.setPointerCapture(event.pointerId);
+        });
+
+        wrap.addEventListener("pointermove", (event) => {
+          if (!dragging) return;
+          wrap.scrollLeft = startLeft - (event.clientX - startX);
+          wrap.scrollTop = startTop - (event.clientY - startY);
+        });
+
+        function stopDragging(event) {
+          dragging = false;
+          wrap.classList.remove("is-panning");
+          if (event && wrap.hasPointerCapture(event.pointerId)) {
+            wrap.releasePointerCapture(event.pointerId);
+          }
+        }
+
+        wrap.addEventListener("pointerup", stopDragging);
+        wrap.addEventListener("pointercancel", stopDragging);
+        wrap.addEventListener("wheel", (event) => {
+          if (!event.ctrlKey) return;
+          event.preventDefault();
+          const rect = wrap.getBoundingClientRect();
+          applyScale(scale * (event.deltaY < 0 ? 1.12 : 0.88), {
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top
+          });
+        }, { passive: false });
+
+        applyScale(1);
+        requestAnimationFrame(fitDiagram);
+      })();
+    </script>
+  </main>
+</body>
+</html>

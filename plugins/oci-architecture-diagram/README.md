@@ -1,0 +1,83 @@
+# OCI Architecture Diagram Plugin
+
+Repo-local Codex plugin for generating static Oracle Cloud Infrastructure
+architecture diagrams as portable HTML/SVG.
+
+## Quick Start
+
+From `plugins/oci-architecture-diagram`:
+
+```powershell
+python scripts/extract_oci_icons.py --source ../../oci --out assets/oci-icons
+python scripts/import_oci_svg_icons.py --source "D:\Desktop\Oracle\4.tools\_OCI icons" --out assets/oci-icons
+python scripts/generate_oci_diagram.py --spec examples/web-architecture.json --out examples/web-architecture.html
+python scripts/serve_architecture_site.py --port 8765 --diagram web-architecture
+```
+
+If `python` is not on PATH, use the Python executable bundled with your Codex
+workspace runtime.
+
+Then open the local gallery with the Codex in-app Browser:
+
+```text
+http://127.0.0.1:8765/src/index.html?diagram=web-architecture
+```
+
+## Skills
+
+The plugin is split into focused local skills instead of one large prompt:
+
+- `oci-architecture-diagram`: orchestrates the full workflow.
+- `oci-spec-normalizer`: converts natural language to JSON v1.
+- `oci-architecture-validator`: checks schema, service placement, and coherence.
+- `oci-icon-catalog`: extracts/imports/sanitizes OCI icons.
+- `oci-diagram-renderer`: runs the HTML renderer and gallery generator.
+- `oci-diagram-visual-qa`: uses Browser checks for icons, labels, spacing, and navigation.
+
+## What It Produces
+
+- `assets/oci-icons/*.svg`: best-effort SVG icons converted from OCI `.vssx`
+  stencils, optionally replaced by cleaner SVG artwork from Oracle's OCI icon
+  library through `scripts/import_oci_svg_icons.py`.
+- `assets/oci-icons/catalog.json`: service names, aliases, categories, and
+  conversion warnings.
+- A single HTML file with inline CSS and embedded SVG, suitable for sharing or
+  opening directly in a browser.
+- `src/index.html`: a local HTTP gallery for navigating generated diagrams.
+
+## Spec
+
+The renderer accepts a small JSON model:
+
+- `title`: diagram title.
+- `layout`: currently `left-to-right`.
+- `groups[]`: visual containers such as region, VCN, and subnet.
+- `nodes[]`: OCI resources with `id`, `label`, `service`, and `group`.
+- `edges[]`: connections with `from`, `to`, and optional `label`.
+
+## Local Browser Flow
+
+Use this flow when testing the plugin inside Codex:
+
+1. Render or regenerate diagram HTML under `examples/`.
+2. Add the diagram to `src/architectures.js` when it should appear in the
+   gallery.
+3. Serve the plugin root:
+
+```powershell
+python scripts/serve_architecture_site.py --port 8765 --diagram arquitectura-web-oke-adb
+```
+
+4. Use `@Browser` to open a local HTTP URL such as:
+
+```text
+http://127.0.0.1:8765/src/index.html?diagram=arquitectura-web-oke-adb
+```
+
+Avoid standalone Playwright package imports for visual QA. The Browser plugin
+is the intended surface for loading, inspecting, and refreshing local pages in
+Codex.
+
+Final responses for generated diagrams should lead with the localhost gallery
+URL that was opened in the Codex Browser, followed by any HTML/JSON artifact
+paths and renderer warnings.

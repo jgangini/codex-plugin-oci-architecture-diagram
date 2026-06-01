@@ -1,0 +1,37 @@
+{
+  "name": "oci-architecture-diagram",
+  "version": "0.1.0+codex.20260601225303",
+  "description": "Generate portable HTML/SVG architecture diagrams for Oracle Cloud Infrastructure from natural-language prompts.",
+  "author": {
+    "name": "Joel Gangini"
+  },
+  "homepage": "https://www.oracle.com/cloud/",
+  "license": "MIT",
+  "keywords": [
+    "oci",
+    "oracle-cloud",
+    "architecture",
+    "diagram",
+    "html"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "OCI Architecture Diagram",
+    "shortDescription": "Create OCI diagrams and open them in Codex Browser via localhost.",
+    "longDescription": "Turns natural-language Oracle Cloud architecture descriptions into normalized diagram specs, renders self-contained HTML/SVG output, serves the local gallery over localhost, and uses the Codex Browser as the final visual delivery surface.",
+    "developerName": "Joel Gangini",
+    "category": "OCI",
+    "capabilities": [
+      "Write",
+      "Local files"
+    ],
+    "defaultPrompt": [
+      "Dibuja una arquitectura web en OCI con OKE y Autonomous Database.",
+      "Create an OCI architecture diagram for a public web app.",
+      "Generate an HTML OCI diagram from this architecture description."
+    ],
+    "brandColor": "#C74634",
+    "composerIcon": "./assets/icon.svg",
+    "logo": "./assets/logo.png"
+  }
+}

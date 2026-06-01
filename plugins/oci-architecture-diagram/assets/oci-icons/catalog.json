@@ -1,0 +1,3566 @@
+{
+  "generatedBy": "extract_oci_icons.py",
+  "source": "D:\\dev\\codex-plugin-oci-architecture\\oci",
+  "serviceCount": 241,
+  "services": {
+    "analytics": {
+      "name": "Analytics",
+      "category": "Analytics AI",
+      "file": "analytics.svg",
+      "sourceFile": "OCI_Analytics_AI.vssx",
+      "masterId": "2",
+      "keywords": [
+        "AI"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Analytics.svg",
+      "matchedLocalIconSlug": "analytics"
+    },
+    "big-data": {
+      "name": "Big Data",
+      "category": "Analytics AI",
+      "file": "big-data.svg",
+      "sourceFile": "OCI_Analytics_AI.vssx",
+      "masterId": "6",
+      "keywords": [
+        "Analytics",
+        "AI"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Big Data.svg",
+      "matchedLocalIconSlug": "big-data"
+    },
+    "data-catalog": {
+      "name": "Data Catalog",
+      "category": "Analytics AI",
+      "file": "data-catalog.svg",
+      "sourceFile": "OCI_Analytics_AI.vssx",
+      "masterId": "8",
+      "keywords": [
+        "Analytics",
+        "AI"
+      ],
+      "warnings": []
+    },
+    "data-integration": {
+      "name": "Data Integration",
+      "category": "Analytics AI",
+      "file": "data-integration.svg",
+      "sourceFile": "OCI_Analytics_AI.vssx",
+      "masterId": "10",
+      "keywords": [
+        "Analytics",
+        "AI"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Data Integration.svg",
+      "matchedLocalIconSlug": "data-integration"
+    },
+    "data-flow": {
+      "name": "Data Flow",
+      "category": "Analytics AI",
+      "file": "data-flow.svg",
+      "sourceFile": "OCI_Analytics_AI.vssx",
+      "masterId": "12",
+      "keywords": [
+        "Analytics",
+        "AI"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Data Flow.svg",
+      "matchedLocalIconSlug": "data-flow"
+    },
+    "streaming": {
+      "name": "Streaming",
+      "category": "Analytics AI",
+      "file": "streaming.svg",
+      "sourceFile": "OCI_Analytics_AI.vssx",
+      "masterId": "14",
+      "keywords": [
+        "Analytics",
+        "AI"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Streaming.svg",
+      "matchedLocalIconSlug": "streaming"
+    },
+    "service-connector-hub": {
+      "name": "Service Connector Hub",
+      "category": "Analytics AI",
+      "file": "service-connector-hub.svg",
+      "sourceFile": "OCI_Analytics_AI.vssx",
+      "masterId": "16",
+      "keywords": [
+        "Analytics",
+        "AI"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Service Connector Hub.svg",
+      "matchedLocalIconSlug": "service-connector-hub"
+    },
+    "data-science": {
+      "name": "Data Science",
+      "category": "Analytics AI",
+      "file": "data-science.svg",
+      "sourceFile": "OCI_Analytics_AI.vssx",
+      "masterId": "20",
+      "keywords": [
+        "Analytics",
+        "AI"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Data Science.svg",
+      "matchedLocalIconSlug": "data-science"
+    },
+    "machine-learning": {
+      "name": "Machine Learning",
+      "category": "Analytics AI",
+      "file": "machine-learning.svg",
+      "sourceFile": "OCI_Analytics_AI.vssx",
+      "masterId": "18",
+      "keywords": [
+        "Analytics",
+        "AI"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Machine Learning.svg",
+      "matchedLocalIconSlug": "machine-learning"
+    },
+    "artificial-intelligence": {
+      "name": "Artificial Intelligence",
+      "category": "Analytics AI",
+      "file": "artificial-intelligence.svg",
+      "sourceFile": "OCI_Analytics_AI.vssx",
+      "masterId": "22",
+      "keywords": [
+        "AI",
+        "Analytics"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Artificial Intelligence.svg",
+      "matchedLocalIconSlug": "artificial-intelligence"
+    },
+    "digital-assistant": {
+      "name": "Digital Assistant",
+      "category": "Analytics AI",
+      "file": "digital-assistant.svg",
+      "sourceFile": "OCI_Analytics_AI.vssx",
+      "masterId": "24",
+      "keywords": [
+        "Analytics",
+        "AI"
+      ],
+      "warnings": []
+    },
+    "document-understanding": {
+      "name": "Document Understanding",
+      "category": "Analytics AI",
+      "file": "document-understanding.svg",
+      "sourceFile": "OCI_Analytics_AI.vssx",
+      "masterId": "46",
+      "keywords": [],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Analytics & AI/Document Understanding.svg",
+      "matchedLocalIconSlug": "document-understanding"
+    },
+    "essbase": {
+      "name": "Essbase",
+      "category": "Analytics AI",
+      "file": "essbase.svg",
+      "sourceFile": "OCI_Analytics_AI.vssx",
+      "masterId": "33",
+      "keywords": [
+        "Analytics",
+        "AI"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Essbase.svg",
+      "matchedLocalIconSlug": "essbase"
+    },
+    "message-listener": {
+      "name": "Message Listener",
+      "category": "Analytics AI",
+      "file": "message-listener.svg",
+      "sourceFile": "OCI_Analytics_AI.vssx",
+      "masterId": "39",
+      "keywords": [
+        "Analytics",
+        "AI"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Message Listener.svg",
+      "matchedLocalIconSlug": "message-listener"
+    },
+    "message-producer": {
+      "name": "Message Producer",
+      "category": "Analytics AI",
+      "file": "message-producer.svg",
+      "sourceFile": "OCI_Analytics_AI.vssx",
+      "masterId": "40",
+      "keywords": [
+        "Analytics",
+        "AI"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Message Producer.svg",
+      "matchedLocalIconSlug": "message-producer"
+    },
+    "forecasting": {
+      "name": "Forecasting",
+      "category": "Analytics AI",
+      "file": "forecasting.svg",
+      "sourceFile": "OCI_Analytics_AI.vssx",
+      "masterId": "43",
+      "keywords": [
+        "Forecasting"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Analytics & AI/Forecasting.svg",
+      "matchedLocalIconSlug": "forecasting"
+    },
+    "oci-generative-ai": {
+      "name": "OCI Generative AI",
+      "category": "Analytics AI",
+      "file": "oci-generative-ai.svg",
+      "sourceFile": "OCI_Analytics_AI.vssx",
+      "masterId": "50",
+      "keywords": [],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Generative AI.svg",
+      "matchedLocalIconSlug": "generative-ai"
+    },
+    "oci-language": {
+      "name": "OCI Language",
+      "category": "Analytics AI",
+      "file": "oci-language.svg",
+      "sourceFile": "OCI_Analytics_AI.vssx",
+      "masterId": "51",
+      "keywords": [],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Analytics & AI/OCI Language.svg",
+      "matchedLocalIconSlug": "oci-language"
+    },
+    "oci-speech": {
+      "name": "OCI Speech",
+      "category": "Analytics AI",
+      "file": "oci-speech.svg",
+      "sourceFile": "OCI_Analytics_AI.vssx",
+      "masterId": "52",
+      "keywords": [],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Analytics & AI/OCI-Speech.svg",
+      "matchedLocalIconSlug": "oci-speech"
+    },
+    "oci-vision": {
+      "name": "OCI Vision",
+      "category": "Analytics AI",
+      "file": "oci-vision.svg",
+      "sourceFile": "OCI_Analytics_AI.vssx",
+      "masterId": "53",
+      "keywords": [],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Analytics & AI/OCI Vision.svg",
+      "matchedLocalIconSlug": "oci-vision"
+    },
+    "hcm": {
+      "name": "HCM",
+      "category": "Applications",
+      "file": "hcm.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "47",
+      "keywords": [
+        "Applications"
+      ],
+      "warnings": []
+    },
+    "oracle-soa-suite": {
+      "name": "Oracle SOA Suite",
+      "category": "Applications",
+      "file": "oracle-soa-suite.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "100",
+      "keywords": [],
+      "warnings": []
+    },
+    "erp": {
+      "name": "ERP",
+      "category": "Applications",
+      "file": "erp.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "48",
+      "keywords": [
+        "Applications"
+      ],
+      "warnings": []
+    },
+    "e-business-suite": {
+      "name": "E-Business Suite",
+      "category": "Applications",
+      "file": "e-business-suite.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "68",
+      "keywords": [
+        "Applications"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "E-Business Suite.svg",
+      "matchedLocalIconSlug": "e-business-suite"
+    },
+    "supply-chain-planning": {
+      "name": "Supply Chain Planning",
+      "category": "Applications",
+      "file": "supply-chain-planning.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "74",
+      "keywords": [
+        "Applications"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Supply Chain Planning.svg",
+      "matchedLocalIconSlug": "supply-chain-planning"
+    },
+    "innovation-management": {
+      "name": "Innovation Management",
+      "category": "Applications",
+      "file": "innovation-management.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "75",
+      "keywords": [
+        "Applications"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Innovation Management.svg",
+      "matchedLocalIconSlug": "innovation-management"
+    },
+    "project-financial-management": {
+      "name": "Project Financial Management",
+      "category": "Applications",
+      "file": "project-financial-management.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "76",
+      "keywords": [
+        "Applications"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Project Financial Management.svg",
+      "matchedLocalIconSlug": "project-financial-management"
+    },
+    "inventory-management": {
+      "name": "Inventory Management",
+      "category": "Applications",
+      "file": "inventory-management.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "72",
+      "keywords": [
+        "Applications"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Inventory Management.svg",
+      "matchedLocalIconSlug": "inventory-management"
+    },
+    "product-master-data-management": {
+      "name": "Product Master Data Management",
+      "category": "Applications",
+      "file": "product-master-data-management.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "73",
+      "keywords": [
+        "Applications"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Product Master Data Management.svg",
+      "matchedLocalIconSlug": "product-master-data-management"
+    },
+    "bi-cloud-connector": {
+      "name": "BI Cloud Connector",
+      "category": "Applications",
+      "file": "bi-cloud-connector.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "77",
+      "keywords": [
+        "Applications"
+      ],
+      "warnings": []
+    },
+    "cloud-operations": {
+      "name": "Cloud Operations",
+      "category": "Applications",
+      "file": "cloud-operations.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "91",
+      "keywords": [
+        "Applications"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Applications/Cloud Operations.svg",
+      "matchedLocalIconSlug": "cloud-operations"
+    },
+    "engagement": {
+      "name": "Engagement",
+      "category": "Applications",
+      "file": "engagement.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "79",
+      "keywords": [
+        "Applications"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Engagement.svg",
+      "matchedLocalIconSlug": "engagement"
+    },
+    "order-management": {
+      "name": "Order Management",
+      "category": "Applications",
+      "file": "order-management.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "80",
+      "keywords": [
+        "Applications"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Order Management.svg",
+      "matchedLocalIconSlug": "order-management"
+    },
+    "procurement": {
+      "name": "Procurement",
+      "category": "Applications",
+      "file": "procurement.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "81",
+      "keywords": [
+        "Applications"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Procurement.svg",
+      "matchedLocalIconSlug": "procurement"
+    },
+    "cpq": {
+      "name": "CPQ",
+      "category": "Applications",
+      "file": "cpq.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "82",
+      "keywords": [
+        "Applications"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "CPQ.svg",
+      "matchedLocalIconSlug": "cpq"
+    },
+    "manufacturing": {
+      "name": "Manufacturing",
+      "category": "Applications",
+      "file": "manufacturing.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "83",
+      "keywords": [
+        "Applications"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Manufacturing.svg",
+      "matchedLocalIconSlug": "manufacturing"
+    },
+    "project-management": {
+      "name": "Project Management",
+      "category": "Applications",
+      "file": "project-management.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "84",
+      "keywords": [
+        "Applications"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Project Management.svg",
+      "matchedLocalIconSlug": "project-management"
+    },
+    "financials": {
+      "name": "Financials",
+      "category": "Applications",
+      "file": "financials.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "85",
+      "keywords": [
+        "Applications"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Financials.svg",
+      "matchedLocalIconSlug": "financials"
+    },
+    "healthcare": {
+      "name": "Healthcare",
+      "category": "Applications",
+      "file": "healthcare.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "105",
+      "keywords": [],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Healthcare.svg",
+      "matchedLocalIconSlug": "healthcare"
+    },
+    "epm": {
+      "name": "EPM",
+      "category": "Applications",
+      "file": "epm.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "87",
+      "keywords": [
+        "Applications"
+      ],
+      "warnings": []
+    },
+    "fusion": {
+      "name": "Fusion",
+      "category": "Applications",
+      "file": "fusion.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "66",
+      "keywords": [
+        "Applications"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Fusion.svg",
+      "matchedLocalIconSlug": "fusion"
+    },
+    "crm": {
+      "name": "CRM",
+      "category": "Applications",
+      "file": "crm.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "95",
+      "keywords": [
+        "Applications"
+      ],
+      "warnings": []
+    },
+    "media-flow": {
+      "name": "Media Flow",
+      "category": "Applications",
+      "file": "media-flow.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "96",
+      "keywords": [
+        "Applications"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Media Flow.svg",
+      "matchedLocalIconSlug": "media-flow"
+    },
+    "digital-media": {
+      "name": "Digital Media ",
+      "category": "Applications",
+      "file": "digital-media.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "97",
+      "keywords": [
+        "Other"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Digital Media.svg",
+      "matchedLocalIconSlug": "digital-media"
+    },
+    "media-streams": {
+      "name": "Media Streams",
+      "category": "Applications",
+      "file": "media-streams.svg",
+      "sourceFile": "OCI_Applications.vssx",
+      "masterId": "98",
+      "keywords": [
+        "Applications"
+      ],
+      "warnings": []
+    },
+    "oci-compute": {
+      "name": "OCI Compute",
+      "category": "Compute",
+      "file": "oci-compute.svg",
+      "sourceFile": "OCI_Compute.vssx",
+      "masterId": "27",
+      "keywords": [],
+      "warnings": []
+    },
+    "instance-pools": {
+      "name": "Instance Pools",
+      "category": "Compute",
+      "file": "instance-pools.svg",
+      "sourceFile": "OCI_Compute.vssx",
+      "masterId": "6",
+      "keywords": [
+        "VM",
+        "Compute"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Instance Pools.svg",
+      "matchedLocalIconSlug": "instance-pools"
+    },
+    "functions": {
+      "name": "Functions",
+      "category": "Compute",
+      "file": "functions.svg",
+      "sourceFile": "OCI_Compute.vssx",
+      "masterId": "8",
+      "keywords": [
+        "Compute"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Functions.svg",
+      "matchedLocalIconSlug": "functions"
+    },
+    "virtual-machine": {
+      "name": "Virtual Machine",
+      "category": "Compute",
+      "file": "virtual-machine.svg",
+      "sourceFile": "OCI_Compute.vssx",
+      "masterId": "10",
+      "keywords": [
+        "VM",
+        "Compute",
+        "Instance"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Virtual Machine.svg",
+      "matchedLocalIconSlug": "virtual-machine"
+    },
+    "autoscaling": {
+      "name": "Autoscaling",
+      "category": "Compute",
+      "file": "autoscaling.svg",
+      "sourceFile": "OCI_Compute.vssx",
+      "masterId": "12",
+      "keywords": [
+        "Compute",
+        "Instance",
+        "VM"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Autoscaling.svg",
+      "matchedLocalIconSlug": "autoscaling"
+    },
+    "flex-vm": {
+      "name": "Flex VM",
+      "category": "Compute",
+      "file": "flex-vm.svg",
+      "sourceFile": "OCI_Compute.vssx",
+      "masterId": "14",
+      "keywords": [
+        "Virtual",
+        "Machine",
+        "Instance",
+        "Flexible"
+      ],
+      "warnings": []
+    },
+    "burstable-vm": {
+      "name": "Burstable VM",
+      "category": "Compute",
+      "file": "burstable-vm.svg",
+      "sourceFile": "OCI_Compute.vssx",
+      "masterId": "16",
+      "keywords": [
+        "Virtual",
+        "Machine"
+      ],
+      "warnings": []
+    },
+    "virtual-machine-gpu": {
+      "name": "Virtual Machine GPU",
+      "category": "Compute",
+      "file": "virtual-machine-gpu.svg",
+      "sourceFile": "OCI_Compute.vssx",
+      "masterId": "17",
+      "keywords": [
+        "Virtual",
+        "Machine"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Compute/Virtual Machine GPU.svg",
+      "matchedLocalIconSlug": "virtual-machine-gpu"
+    },
+    "virtual-machine-application": {
+      "name": "Virtual Machine Application",
+      "category": "Compute",
+      "file": "virtual-machine-application.svg",
+      "sourceFile": "OCI_Compute.vssx",
+      "masterId": "21",
+      "keywords": [
+        "Virtual",
+        "Machine",
+        "Instance",
+        "Application"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Compute/Virtual Machine Application.svg",
+      "matchedLocalIconSlug": "virtual-machine-application"
+    },
+    "virtual-machine-generic": {
+      "name": "Virtual Machine (generic)",
+      "category": "Compute",
+      "file": "virtual-machine-generic.svg",
+      "sourceFile": "OCI_Compute.vssx",
+      "masterId": "25",
+      "keywords": [
+        "Virtual",
+        "Machine",
+        "Generic"
+      ],
+      "warnings": []
+    },
+    "text-label": {
+      "name": "Text Label",
+      "category": "Connectors",
+      "file": "text-label.svg",
+      "sourceFile": "OCI_Connectors.vssx",
+      "masterId": "58",
+      "keywords": [],
+      "warnings": [
+        "Text Label: no convertible vector geometry found"
+      ]
+    },
+    "labeled-action": {
+      "name": "Labeled Action",
+      "category": "Connectors",
+      "file": "labeled-action.svg",
+      "sourceFile": "OCI_Connectors.vssx",
+      "masterId": "59",
+      "keywords": [],
+      "warnings": [
+        "Labeled Action: no convertible vector geometry found"
+      ]
+    },
+    "ordered-action": {
+      "name": "Ordered Action",
+      "category": "Connectors",
+      "file": "ordered-action.svg",
+      "sourceFile": "OCI_Connectors.vssx",
+      "masterId": "60",
+      "keywords": [],
+      "warnings": [
+        "Ordered Action: no convertible vector geometry found"
+      ]
+    },
+    "site-to-site-vpn": {
+      "name": "Site-to-Site VPN",
+      "category": "Networking",
+      "file": "site-to-site-vpn.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "39",
+      "keywords": [
+        "Networking"
+      ],
+      "warnings": []
+    },
+    "fastconnect": {
+      "name": "FastConnect",
+      "category": "Networking",
+      "file": "fastconnect.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "37",
+      "keywords": [
+        "Networking"
+      ],
+      "warnings": []
+    },
+    "vpn-or-fastconnect": {
+      "name": "VPN or FastConnect",
+      "category": "Connectors",
+      "file": "vpn-or-fastconnect.svg",
+      "sourceFile": "OCI_Connectors.vssx",
+      "masterId": "51",
+      "keywords": [],
+      "warnings": [
+        "VPN or FastConnect: no convertible vector geometry found"
+      ]
+    },
+    "local-peering": {
+      "name": "Local Peering",
+      "category": "Connectors",
+      "file": "local-peering.svg",
+      "sourceFile": "OCI_Connectors.vssx",
+      "masterId": "47",
+      "keywords": [],
+      "warnings": [
+        "Local Peering: no convertible vector geometry found"
+      ]
+    },
+    "remote-peering": {
+      "name": "Remote Peering",
+      "category": "Connectors",
+      "file": "remote-peering.svg",
+      "sourceFile": "OCI_Connectors.vssx",
+      "masterId": "64",
+      "keywords": [],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Remote peering.svg",
+      "matchedLocalIconSlug": "remote-peering"
+    },
+    "oracle-base-database": {
+      "name": "Oracle Base Database",
+      "category": "Database",
+      "file": "oracle-base-database.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "95",
+      "keywords": [],
+      "warnings": []
+    },
+    "database": {
+      "name": "Database",
+      "category": "Database",
+      "file": "database.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "99",
+      "keywords": [],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Database.svg",
+      "matchedLocalIconSlug": "database"
+    },
+    "oracle-autonomous-database": {
+      "name": "Oracle Autonomous Database",
+      "category": "Database",
+      "file": "oracle-autonomous-database.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "101",
+      "keywords": [],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Autonomous Database.svg",
+      "matchedLocalIconSlug": "autonomous-database"
+    },
+    "oci-migrate-autonomous-database": {
+      "name": "OCI Migrate Autonomous Database",
+      "category": "Database",
+      "file": "oci-migrate-autonomous-database.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "102",
+      "keywords": [],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Database/Migrate Autonomous Database.svg",
+      "matchedLocalIconSlug": "migrate-autonomous-database"
+    },
+    "oracle-autonomous-data-warehouse": {
+      "name": "Oracle Autonomous Data Warehouse",
+      "category": "Database",
+      "file": "oracle-autonomous-data-warehouse.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "103",
+      "keywords": [],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Autonomous Data Warehouse.svg",
+      "matchedLocalIconSlug": "autonomous-data-warehouse"
+    },
+    "adw-d": {
+      "name": "ADW-D",
+      "category": "Database",
+      "file": "adw-d.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "53",
+      "keywords": [
+        "Dedicated",
+        "Data",
+        "Warehouse"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "ADW-D.svg",
+      "matchedLocalIconSlug": "adw-d"
+    },
+    "oracle-autonomous-transaction-processing-atp": {
+      "name": "Oracle Autonomous Transaction Processing ATP",
+      "category": "Database",
+      "file": "oracle-autonomous-transaction-processing-atp.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "104",
+      "keywords": [],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Autonomous Transaction Processing ATP.svg",
+      "matchedLocalIconSlug": "autonomous-transaction-processing-atp"
+    },
+    "atp-d": {
+      "name": "ATP-D",
+      "category": "Database",
+      "file": "atp-d.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "55",
+      "keywords": [
+        "Database",
+        "Dedicated"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "ATP-D.svg",
+      "matchedLocalIconSlug": "atp-d"
+    },
+    "oracle-exadata-database-service": {
+      "name": "Oracle Exadata Database Service",
+      "category": "Database",
+      "file": "oracle-exadata-database-service.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "105",
+      "keywords": [],
+      "warnings": []
+    },
+    "oracle-compute-cloud-customer": {
+      "name": "Oracle Compute Cloud@Customer",
+      "category": "Database",
+      "file": "oracle-compute-cloud-customer.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "106",
+      "keywords": [],
+      "warnings": []
+    },
+    "exadata-cloud-customer": {
+      "name": "Exadata Cloud@Customer",
+      "category": "Database",
+      "file": "exadata-cloud-customer.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "107",
+      "keywords": [],
+      "warnings": []
+    },
+    "exadata-fleet-update": {
+      "name": "Exadata Fleet Update",
+      "category": "Database",
+      "file": "exadata-fleet-update.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "108",
+      "keywords": [],
+      "warnings": []
+    },
+    "adb-d": {
+      "name": "ADB-D",
+      "category": "Database",
+      "file": "adb-d.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "51",
+      "keywords": [
+        "Autonomous",
+        "Database",
+        "dedicated"
+      ],
+      "warnings": []
+    },
+    "adb-exadata-cloud-customer": {
+      "name": "ADB Exadata Cloud@Customer",
+      "category": "Database",
+      "file": "adb-exadata-cloud-customer.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "109",
+      "keywords": [],
+      "warnings": []
+    },
+    "data-safe": {
+      "name": "Data Safe",
+      "category": "Database",
+      "file": "data-safe.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "58",
+      "keywords": [],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Data Safe.svg",
+      "matchedLocalIconSlug": "data-safe"
+    },
+    "nosql-database": {
+      "name": "NoSQL Database",
+      "category": "Database",
+      "file": "nosql-database.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "15",
+      "keywords": [],
+      "warnings": []
+    },
+    "mysql-database-system": {
+      "name": "MySQL Database System",
+      "category": "Database",
+      "file": "mysql-database-system.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "17",
+      "keywords": [],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Database/MySQL Database System.svg",
+      "matchedLocalIconSlug": "mysql-database-system"
+    },
+    "rac": {
+      "name": "RAC",
+      "category": "Database",
+      "file": "rac.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "60",
+      "keywords": [
+        "Database"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "RAC.svg",
+      "matchedLocalIconSlug": "rac"
+    },
+    "opensearch": {
+      "name": "OpenSearch",
+      "category": "Database",
+      "file": "opensearch.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "62",
+      "keywords": [
+        "Database"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OpenSearch.svg",
+      "matchedLocalIconSlug": "opensearch"
+    },
+    "database-management": {
+      "name": "Database Management",
+      "category": "Database",
+      "file": "database-management.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "85",
+      "keywords": [
+        "Database Management"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Database Management.svg",
+      "matchedLocalIconSlug": "database-management"
+    },
+    "data-guard": {
+      "name": "Data Guard",
+      "category": "Database",
+      "file": "data-guard.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "86",
+      "keywords": [
+        "Data",
+        "Guard"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Database/Data Guard.svg",
+      "matchedLocalIconSlug": "data-guard"
+    },
+    "data-guard-recovery": {
+      "name": "Data Guard Recovery",
+      "category": "Database",
+      "file": "data-guard-recovery.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "87",
+      "keywords": [
+        "Data",
+        "Guard",
+        "Recovery"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Database/Data Guard Recovery.svg",
+      "matchedLocalIconSlug": "data-guard-recovery"
+    },
+    "my-sql-heatwave": {
+      "name": "My SQL HeatWave",
+      "category": "Database",
+      "file": "my-sql-heatwave.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "90",
+      "keywords": [
+        "My",
+        "SQL",
+        "HeatWave"
+      ],
+      "warnings": []
+    },
+    "data-lakehouse": {
+      "name": "Data Lakehouse",
+      "category": "Database",
+      "file": "data-lakehouse.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "120",
+      "keywords": [],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Database/Data Lakehouse.svg",
+      "matchedLocalIconSlug": "data-lakehouse"
+    },
+    "data-lake": {
+      "name": "Data Lake",
+      "category": "Database",
+      "file": "data-lake.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "92",
+      "keywords": [
+        "Data Lake"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Database/Data Lake.svg",
+      "matchedLocalIconSlug": "data-lake"
+    },
+    "oracle-rest-data-services": {
+      "name": "Oracle REST Data Services",
+      "category": "Database",
+      "file": "oracle-rest-data-services.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "94",
+      "keywords": [
+        "Oracle",
+        "REST",
+        "Data",
+        "Services"
+      ],
+      "warnings": []
+    },
+    "database-flashback": {
+      "name": "Database Flashback",
+      "category": "Database",
+      "file": "database-flashback.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "111",
+      "keywords": [],
+      "warnings": []
+    },
+    "migration-workbench": {
+      "name": "Migration Workbench",
+      "category": "Database",
+      "file": "migration-workbench.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "112",
+      "keywords": [],
+      "warnings": []
+    },
+    "estate-explorer": {
+      "name": "Estate Explorer",
+      "category": "Database",
+      "file": "estate-explorer.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "113",
+      "keywords": [],
+      "warnings": []
+    },
+    "oracle-database-migration-service": {
+      "name": "Oracle Database Migration Service",
+      "category": "Database",
+      "file": "oracle-database-migration-service.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "115",
+      "keywords": [],
+      "warnings": []
+    },
+    "oci-database-with-postgresql": {
+      "name": "OCI Database with PostgreSQL",
+      "category": "Database",
+      "file": "oci-database-with-postgresql.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "116",
+      "keywords": [],
+      "warnings": []
+    },
+    "goldengate-on-premises": {
+      "name": "GoldenGate On-premises",
+      "category": "Database",
+      "file": "goldengate-on-premises.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "64",
+      "keywords": [],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "GoldenGate On-Premises.svg",
+      "matchedLocalIconSlug": "goldengate-on-premises"
+    },
+    "goldengate": {
+      "name": "GoldenGate",
+      "category": "Database",
+      "file": "goldengate.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "27",
+      "keywords": [
+        "Database"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "GoldenGate.svg",
+      "matchedLocalIconSlug": "goldengate"
+    },
+    "goldengate-director": {
+      "name": "GoldenGate Director",
+      "category": "Database",
+      "file": "goldengate-director.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "66",
+      "keywords": [
+        "Database",
+        "GoldenGate",
+        "Director"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "GoldenGate Director.svg",
+      "matchedLocalIconSlug": "goldengate-director"
+    },
+    "goldengate-studio": {
+      "name": "GoldenGate Studio",
+      "category": "Database",
+      "file": "goldengate-studio.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "68",
+      "keywords": [
+        "Database",
+        "GoldenGate",
+        "Studio"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "GoldenGate Studio.svg",
+      "matchedLocalIconSlug": "goldengate-studio"
+    },
+    "goldengate-application-adapter": {
+      "name": "GoldenGate Application Adapter",
+      "category": "Database",
+      "file": "goldengate-application-adapter.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "69",
+      "keywords": [
+        "Database"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Database/GoldenGate Application Adapter.svg",
+      "matchedLocalIconSlug": "goldengate-application-adapter"
+    },
+    "goldengate-plug-in": {
+      "name": "GoldenGate Plug-In",
+      "category": "Database",
+      "file": "goldengate-plug-in.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "70",
+      "keywords": [
+        "Database"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "GoldenGate Plug-in.svg",
+      "matchedLocalIconSlug": "goldengate-plug-in"
+    },
+    "goldengate-stream-analytics": {
+      "name": "GoldenGate Stream Analytics",
+      "category": "Database",
+      "file": "goldengate-stream-analytics.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "72",
+      "keywords": [
+        "Database"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "GoldenGate Stream Analytics.svg",
+      "matchedLocalIconSlug": "goldengate-stream-analytics"
+    },
+    "goldengate-veridata": {
+      "name": "GoldenGate Veridata",
+      "category": "Database",
+      "file": "goldengate-veridata.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "74",
+      "keywords": [
+        "Database"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "GoldenGate Veridata.svg",
+      "matchedLocalIconSlug": "goldengate-veridata"
+    },
+    "goldengate-monitor": {
+      "name": "GoldenGate Monitor",
+      "category": "Database",
+      "file": "goldengate-monitor.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "75",
+      "keywords": [
+        "Database"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "GoldenGate Monitor.svg",
+      "matchedLocalIconSlug": "goldengate-monitor"
+    },
+    "goldengate-hp-non-stop-guardian": {
+      "name": "GoldenGate HP Non-Stop Guardian",
+      "category": "Database",
+      "file": "goldengate-hp-non-stop-guardian.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "76",
+      "keywords": [
+        "Database"
+      ],
+      "warnings": []
+    },
+    "goldengate-free": {
+      "name": "GoldenGate Free",
+      "category": "Database",
+      "file": "goldengate-free.svg",
+      "sourceFile": "OCI_Database.vssx",
+      "masterId": "110",
+      "keywords": [],
+      "warnings": []
+    },
+    "container-engine-for-kubernetes": {
+      "name": "Container Engine for Kubernetes",
+      "category": "Developer Services",
+      "file": "container-engine-for-kubernetes.svg",
+      "sourceFile": "OCI_Developer_Services.vssx",
+      "masterId": "2",
+      "keywords": [
+        "Developer",
+        "Services"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Container Engine For Kubernetes.svg",
+      "matchedLocalIconSlug": "container-engine-for-kubernetes"
+    },
+    "oci-container-registry": {
+      "name": "OCI Container Registry",
+      "category": "Developer Services",
+      "file": "oci-container-registry.svg",
+      "sourceFile": "OCI_Developer_Services.vssx",
+      "masterId": "51",
+      "keywords": [],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Container Registry.svg",
+      "matchedLocalIconSlug": "container-registry"
+    },
+    "container": {
+      "name": "Container",
+      "category": "Developer Services",
+      "file": "container.svg",
+      "sourceFile": "OCI_Developer_Services.vssx",
+      "masterId": "38",
+      "keywords": [
+        "Container",
+        "Developer. Services"
+      ],
+      "warnings": []
+    },
+    "multiple-containers": {
+      "name": "Multiple Containers",
+      "category": "Developer Services",
+      "file": "multiple-containers.svg",
+      "sourceFile": "OCI_Developer_Services.vssx",
+      "masterId": "41",
+      "keywords": [
+        "Multiple",
+        "Containers"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Developer services/Multiple Containers.svg",
+      "matchedLocalIconSlug": "multiple-containers"
+    },
+    "container-instances": {
+      "name": "Container Instances",
+      "category": "Developer Services",
+      "file": "container-instances.svg",
+      "sourceFile": "OCI_Developer_Services.vssx",
+      "masterId": "53",
+      "keywords": [],
+      "warnings": []
+    },
+    "service-mesh": {
+      "name": "Service Mesh",
+      "category": "Developer Services",
+      "file": "service-mesh.svg",
+      "sourceFile": "OCI_Developer_Services.vssx",
+      "masterId": "37",
+      "keywords": [
+        "Developer",
+        "Services."
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Service Mesh.svg",
+      "matchedLocalIconSlug": "service-mesh"
+    },
+    "apex": {
+      "name": "APEX",
+      "category": "Developer Services",
+      "file": "apex.svg",
+      "sourceFile": "OCI_Developer_Services.vssx",
+      "masterId": "9",
+      "keywords": [
+        "Developer",
+        "Service"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "APEX.svg",
+      "matchedLocalIconSlug": "apex"
+    },
+    "private-endpoint-ip": {
+      "name": "Private Endpoint IP",
+      "category": "Developer Services",
+      "file": "private-endpoint-ip.svg",
+      "sourceFile": "OCI_Developer_Services.vssx",
+      "masterId": "35",
+      "keywords": [
+        "Developer",
+        "Services"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Private Endpoint IP.svg",
+      "matchedLocalIconSlug": "private-endpoint-ip"
+    },
+    "api-gateway": {
+      "name": "API Gateway",
+      "category": "Developer Services",
+      "file": "api-gateway.svg",
+      "sourceFile": "OCI_Developer_Services.vssx",
+      "masterId": "12",
+      "keywords": [
+        "Developer",
+        "Services"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "API Gateway.svg",
+      "matchedLocalIconSlug": "api-gateway"
+    },
+    "api-service": {
+      "name": "API Service",
+      "category": "Developer Services",
+      "file": "api-service.svg",
+      "sourceFile": "OCI_Developer_Services.vssx",
+      "masterId": "14",
+      "keywords": [
+        "Developer",
+        "Services"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "API Service.svg",
+      "matchedLocalIconSlug": "api-service"
+    },
+    "integration": {
+      "name": "Integration",
+      "category": "Developer Services",
+      "file": "integration.svg",
+      "sourceFile": "OCI_Developer_Services.vssx",
+      "masterId": "54",
+      "keywords": [],
+      "warnings": []
+    },
+    "notifications": {
+      "name": "Notifications",
+      "category": "Developer Services",
+      "file": "notifications.svg",
+      "sourceFile": "OCI_Developer_Services.vssx",
+      "masterId": "18",
+      "keywords": [
+        "Developer",
+        "Services"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Notifications.svg",
+      "matchedLocalIconSlug": "notifications"
+    },
+    "visual-builder": {
+      "name": "Visual Builder",
+      "category": "Developer Services",
+      "file": "visual-builder.svg",
+      "sourceFile": "OCI_Developer_Services.vssx",
+      "masterId": "22",
+      "keywords": [
+        "Developer",
+        "Services"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Visual Builder.svg",
+      "matchedLocalIconSlug": "visual-builder"
+    },
+    "devops": {
+      "name": "DevOps",
+      "category": "Developer Services",
+      "file": "devops.svg",
+      "sourceFile": "OCI_Developer_Services.vssx",
+      "masterId": "24",
+      "keywords": [
+        "Developer",
+        "Services"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "DevOps.svg",
+      "matchedLocalIconSlug": "devops"
+    },
+    "content-management": {
+      "name": "Content Management",
+      "category": "Developer Services",
+      "file": "content-management.svg",
+      "sourceFile": "OCI_Developer_Services.vssx",
+      "masterId": "28",
+      "keywords": [
+        "Developer",
+        "Services"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Content Management.svg",
+      "matchedLocalIconSlug": "content-management"
+    },
+    "resource-manager": {
+      "name": "Resource Manager",
+      "category": "Developer Services",
+      "file": "resource-manager.svg",
+      "sourceFile": "OCI_Developer_Services.vssx",
+      "masterId": "26",
+      "keywords": [
+        "Developer",
+        "Services"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Resource Manager.svg",
+      "matchedLocalIconSlug": "resource-manager"
+    },
+    "email-delivery": {
+      "name": "Email Delivery",
+      "category": "Developer Services",
+      "file": "email-delivery.svg",
+      "sourceFile": "OCI_Developer_Services.vssx",
+      "masterId": "20",
+      "keywords": [
+        "Developer",
+        "Services"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Email Delivery.svg",
+      "matchedLocalIconSlug": "email-delivery"
+    },
+    "jet": {
+      "name": "Jet",
+      "category": "Developer Services",
+      "file": "jet.svg",
+      "sourceFile": "OCI_Developer_Services.vssx",
+      "masterId": "33",
+      "keywords": [
+        "Developer",
+        "Services"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Jet.svg",
+      "matchedLocalIconSlug": "jet"
+    },
+    "logic-flow": {
+      "name": "Logic Flow",
+      "category": "Developer Services",
+      "file": "logic-flow.svg",
+      "sourceFile": "OCI_Developer_Services.vssx",
+      "masterId": "43",
+      "keywords": [
+        "Developer",
+        "Services"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Developer services/Logic Flow.svg",
+      "matchedLocalIconSlug": "logic-flow"
+    },
+    "application-dependency-management": {
+      "name": "Application Dependency Management",
+      "category": "Developer Services",
+      "file": "application-dependency-management.svg",
+      "sourceFile": "OCI_Developer_Services.vssx",
+      "masterId": "56",
+      "keywords": [],
+      "warnings": []
+    },
+    "oke-virtual-node": {
+      "name": "OKE Virtual Node",
+      "category": "Developer Services",
+      "file": "oke-virtual-node.svg",
+      "sourceFile": "OCI_Developer_Services.vssx",
+      "masterId": "47",
+      "keywords": [
+        "Developer",
+        "Services"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Developer services/OKE Virtual Node.svg",
+      "matchedLocalIconSlug": "oke-virtual-node"
+    },
+    "oci-process-automation": {
+      "name": "OCI Process Automation",
+      "category": "Developer Services",
+      "file": "oci-process-automation.svg",
+      "sourceFile": "OCI_Developer_Services.vssx",
+      "masterId": "48",
+      "keywords": [
+        "Developer Services"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Applications/Process Automation.svg",
+      "matchedLocalIconSlug": "process-automation"
+    },
+    "cloud-advisor": {
+      "name": "Cloud Advisor",
+      "category": "Governance",
+      "file": "cloud-advisor.svg",
+      "sourceFile": "OCI_Governance.vssx",
+      "masterId": "45",
+      "keywords": [
+        "Governance",
+        "Administration"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Cloud Advisor.svg",
+      "matchedLocalIconSlug": "cloud-advisor"
+    },
+    "organization": {
+      "name": "Organization",
+      "category": "Governance",
+      "file": "organization.svg",
+      "sourceFile": "OCI_Governance.vssx",
+      "masterId": "49",
+      "keywords": [
+        "Governance",
+        "Administration"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Organization.svg",
+      "matchedLocalIconSlug": "organization"
+    },
+    "license-manager": {
+      "name": "License Manager",
+      "category": "Governance",
+      "file": "license-manager.svg",
+      "sourceFile": "OCI_Governance.vssx",
+      "masterId": "50",
+      "keywords": [
+        "Governance",
+        "Administration"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "License Manager.svg",
+      "matchedLocalIconSlug": "license-manager"
+    },
+    "oracle-cloud-identifier": {
+      "name": "Oracle Cloud Identifier",
+      "category": "Governance",
+      "file": "oracle-cloud-identifier.svg",
+      "sourceFile": "OCI_Governance.vssx",
+      "masterId": "41",
+      "keywords": [
+        "Governance",
+        "Administration"
+      ],
+      "warnings": []
+    },
+    "tagging": {
+      "name": "Tagging",
+      "category": "Governance",
+      "file": "tagging.svg",
+      "sourceFile": "OCI_Governance.vssx",
+      "masterId": "43",
+      "keywords": [
+        "Governance",
+        "Administration"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Tagging.svg",
+      "matchedLocalIconSlug": "tagging"
+    },
+    "cloud-migrations": {
+      "name": "Cloud Migrations",
+      "category": "Governance",
+      "file": "cloud-migrations.svg",
+      "sourceFile": "OCI_Governance.vssx",
+      "masterId": "51",
+      "keywords": [
+        "Governance",
+        "Administration"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Governance/Cloud Migrations.svg",
+      "matchedLocalIconSlug": "cloud-migrations"
+    },
+    "roving-edge-service": {
+      "name": "Roving Edge Service",
+      "category": "Hybrid",
+      "file": "roving-edge-service.svg",
+      "sourceFile": "OCI_Hybrid.vssx",
+      "masterId": "38",
+      "keywords": [
+        "Hybrid"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Hybrid/Roving Edge Service.svg",
+      "matchedLocalIconSlug": "roving-edge-service"
+    },
+    "roving-edge-device": {
+      "name": "Roving Edge Device",
+      "category": "Hybrid",
+      "file": "roving-edge-device.svg",
+      "sourceFile": "OCI_Hybrid.vssx",
+      "masterId": "42",
+      "keywords": [
+        "Hybrid"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Hybrid/Roving Edge Device.svg",
+      "matchedLocalIconSlug": "roving-edge-device"
+    },
+    "roving-edge-ultra": {
+      "name": "Roving Edge Ultra",
+      "category": "Hybrid",
+      "file": "roving-edge-ultra.svg",
+      "sourceFile": "OCI_Hybrid.vssx",
+      "masterId": "39",
+      "keywords": [
+        "Hybrid"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Hybrid/Roving Edge Ultra.svg",
+      "matchedLocalIconSlug": "roving-edge-ultra"
+    },
+    "roving-edge-infrastructure": {
+      "name": "Roving Edge Infrastructure",
+      "category": "Hybrid",
+      "file": "roving-edge-infrastructure.svg",
+      "sourceFile": "OCI_Hybrid.vssx",
+      "masterId": "41",
+      "keywords": [
+        "Hybrid"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Roving Edge Infrastructure.svg",
+      "matchedLocalIconSlug": "roving-edge-infrastructure"
+    },
+    "dedicated-region": {
+      "name": "Dedicated Region",
+      "category": "Hybrid",
+      "file": "dedicated-region.svg",
+      "sourceFile": "OCI_Hybrid.vssx",
+      "masterId": "32",
+      "keywords": [
+        "Hybrid"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Dedicated Region.svg",
+      "matchedLocalIconSlug": "dedicated-region"
+    },
+    "oracle-identity-cloud-service": {
+      "name": "Oracle Identity Cloud Service",
+      "category": "Identity Security",
+      "file": "oracle-identity-cloud-service.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "65",
+      "keywords": [],
+      "warnings": []
+    },
+    "iam": {
+      "name": "IAM",
+      "category": "Identity Security",
+      "file": "iam.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "32",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "IAM.svg",
+      "matchedLocalIconSlug": "iam"
+    },
+    "user": {
+      "name": "User",
+      "category": "Identity Security",
+      "file": "user.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "48",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "User.svg",
+      "matchedLocalIconSlug": "user"
+    },
+    "user2": {
+      "name": "User2",
+      "category": "Identity Security",
+      "file": "user2.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "2",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": []
+    },
+    "user-3": {
+      "name": "User 3",
+      "category": "Identity Security",
+      "file": "user-3.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "51",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": []
+    },
+    "user-group": {
+      "name": "User Group",
+      "category": "Identity Security",
+      "file": "user-group.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "8",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": []
+    },
+    "user-group-2": {
+      "name": "User Group 2",
+      "category": "Identity Security",
+      "file": "user-group-2.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "54",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": []
+    },
+    "user-group-3": {
+      "name": "User Group 3",
+      "category": "Identity Security",
+      "file": "user-group-3.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "55",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": []
+    },
+    "policies": {
+      "name": "Policies",
+      "category": "Identity Security",
+      "file": "policies.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "12",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Policies.svg",
+      "matchedLocalIconSlug": "policies"
+    },
+    "compartments": {
+      "name": "Compartments",
+      "category": "Identity Security",
+      "file": "compartments.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "14",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Compartments.svg",
+      "matchedLocalIconSlug": "compartments"
+    },
+    "cloud-guard": {
+      "name": "Cloud Guard",
+      "category": "Identity Security",
+      "file": "cloud-guard.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "16",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Cloud Guard.svg",
+      "matchedLocalIconSlug": "cloud-guard"
+    },
+    "maximum-security-zone": {
+      "name": "Maximum Security Zone",
+      "category": "Identity Security",
+      "file": "maximum-security-zone.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "18",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Maximum Security Zone.svg",
+      "matchedLocalIconSlug": "maximum-security-zone"
+    },
+    "threat-intelligence": {
+      "name": "Threat Intelligence",
+      "category": "Identity Security",
+      "file": "threat-intelligence.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "56",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Threat Intelligence.svg",
+      "matchedLocalIconSlug": "threat-intelligence"
+    },
+    "firewall": {
+      "name": "Firewall",
+      "category": "Identity Security",
+      "file": "firewall.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "23",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Firewall.svg",
+      "matchedLocalIconSlug": "firewall"
+    },
+    "waf": {
+      "name": "WAF",
+      "category": "Identity Security",
+      "file": "waf.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "25",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Web Application Firewall WAF.svg",
+      "matchedLocalIconSlug": "web-application-firewall-waf"
+    },
+    "certifcates": {
+      "name": "Certifcates",
+      "category": "Identity Security",
+      "file": "certifcates.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "57",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": []
+    },
+    "vulnerability-scanning": {
+      "name": "Vulnerability Scanning",
+      "category": "Identity Security",
+      "file": "vulnerability-scanning.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "61",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Vulnerability Scanning.svg",
+      "matchedLocalIconSlug": "vulnerability-scanning"
+    },
+    "vault": {
+      "name": "Vault",
+      "category": "Identity Security",
+      "file": "vault.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "62",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Vault.svg",
+      "matchedLocalIconSlug": "vault"
+    },
+    "bastion": {
+      "name": "Bastion",
+      "category": "Identity Security",
+      "file": "bastion.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "60",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Bastion.svg",
+      "matchedLocalIconSlug": "bastion"
+    },
+    "security-lists": {
+      "name": "Security Lists",
+      "category": "Identity Security",
+      "file": "security-lists.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "34",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Identity & Security/Security Lists.svg",
+      "matchedLocalIconSlug": "security-lists"
+    },
+    "ddos-protection": {
+      "name": "DDOS Protection",
+      "category": "Identity Security",
+      "file": "ddos-protection.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "36",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": []
+    },
+    "key-vault": {
+      "name": "Key Vault",
+      "category": "Identity Security",
+      "file": "key-vault.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "38",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Key Vault.svg",
+      "matchedLocalIconSlug": "key-vault"
+    },
+    "key-management": {
+      "name": "Key Management",
+      "category": "Identity Security",
+      "file": "key-management.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "40",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Key Management.svg",
+      "matchedLocalIconSlug": "key-management"
+    },
+    "encryption": {
+      "name": "Encryption",
+      "category": "Identity Security",
+      "file": "encryption.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "42",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Encryption.svg",
+      "matchedLocalIconSlug": "encryption"
+    },
+    "threat-defense": {
+      "name": "Threat Defense",
+      "category": "Identity Security",
+      "file": "threat-defense.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "59",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Threat Defense.svg",
+      "matchedLocalIconSlug": "threat-defense"
+    },
+    "nsg": {
+      "name": "NSG",
+      "category": "Identity Security",
+      "file": "nsg.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "45",
+      "keywords": [
+        "Identity",
+        "Security",
+        "Network",
+        "Security",
+        "Group"
+      ],
+      "warnings": []
+    },
+    "active-directory": {
+      "name": "Active Directory",
+      "category": "Identity Security",
+      "file": "active-directory.svg",
+      "sourceFile": "OCI_Identity_Security.vssx",
+      "masterId": "58",
+      "keywords": [
+        "Identity",
+        "Security"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Active Directory.svg",
+      "matchedLocalIconSlug": "active-directory"
+    },
+    "marketplace": {
+      "name": "Marketplace",
+      "category": "Marketplace",
+      "file": "marketplace.svg",
+      "sourceFile": "OCI_Marketplace.vssx",
+      "masterId": "45",
+      "keywords": [
+        "Marketplace"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Marketplace.svg",
+      "matchedLocalIconSlug": "marketplace"
+    },
+    "data-transfer": {
+      "name": "Data Transfer",
+      "category": "Migration",
+      "file": "data-transfer.svg",
+      "sourceFile": "OCI_Migration.vssx",
+      "masterId": "34",
+      "keywords": [
+        "Migration"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Data Transfer.svg",
+      "matchedLocalIconSlug": "data-transfer"
+    },
+    "database-migration": {
+      "name": "Database Migration",
+      "category": "Migration",
+      "file": "database-migration.svg",
+      "sourceFile": "OCI_Migration.vssx",
+      "masterId": "36",
+      "keywords": [
+        "Migration"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Database Migration.svg",
+      "matchedLocalIconSlug": "database-migration"
+    },
+    "oracle-cloud-migration-advisor": {
+      "name": "Oracle Cloud Migration Advisor",
+      "category": "Migration",
+      "file": "oracle-cloud-migration-advisor.svg",
+      "sourceFile": "OCI_Migration.vssx",
+      "masterId": "37",
+      "keywords": [],
+      "warnings": []
+    },
+    "load-balancer-primary": {
+      "name": "Load Balancer - Primary",
+      "category": "Networking",
+      "file": "load-balancer-primary.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "6",
+      "keywords": [
+        "Networking"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Load Balancer LB.svg",
+      "matchedLocalIconSlug": "load-balancer-lb"
+    },
+    "flexible-load-balancer": {
+      "name": "Flexible Load Balancer",
+      "category": "Networking",
+      "file": "flexible-load-balancer.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "49",
+      "keywords": [
+        "Networking"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Flexible Load Balancer.svg",
+      "matchedLocalIconSlug": "flexible-load-balancer"
+    },
+    "dns": {
+      "name": "DNS",
+      "category": "Networking",
+      "file": "dns.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "11",
+      "keywords": [
+        "Networking",
+        "Domain",
+        "Name"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Domain Name System DNS.svg",
+      "matchedLocalIconSlug": "domain-name-system-dns"
+    },
+    "customer-premises-equipment": {
+      "name": "Customer Premises Equipment",
+      "category": "Networking",
+      "file": "customer-premises-equipment.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "10",
+      "keywords": [
+        "CPE",
+        "Networking"
+      ],
+      "warnings": []
+    },
+    "byoip": {
+      "name": "BYOIP",
+      "category": "Networking",
+      "file": "byoip.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "48",
+      "keywords": [
+        "Networking"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "BYOIP.svg",
+      "matchedLocalIconSlug": "byoip"
+    },
+    "ip-pools": {
+      "name": "IP Pools",
+      "category": "Networking",
+      "file": "ip-pools.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "47",
+      "keywords": [
+        "Networking"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "IP Pools.svg",
+      "matchedLocalIconSlug": "ip-pools"
+    },
+    "vtap": {
+      "name": "VTAP",
+      "category": "Networking",
+      "file": "vtap.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "15",
+      "keywords": [
+        "Networking",
+        "Virtual",
+        "Test",
+        "Access",
+        "Points"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "VTAP.svg",
+      "matchedLocalIconSlug": "vtap"
+    },
+    "cdn": {
+      "name": "CDN",
+      "category": "Networking",
+      "file": "cdn.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "17",
+      "keywords": [
+        "Content",
+        "Delivery",
+        "Network",
+        "Networking"
+      ],
+      "warnings": []
+    },
+    "on-premises-data-center": {
+      "name": "On-premises Data Center ",
+      "category": "Networking",
+      "file": "on-premises-data-center.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "19",
+      "keywords": [
+        "Networking"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Networking/On-Premises Data Center.svg",
+      "matchedLocalIconSlug": "on-premises-data-center"
+    },
+    "backbone": {
+      "name": "Backbone",
+      "category": "Networking",
+      "file": "backbone.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "20",
+      "keywords": [
+        "Networking"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Backbone.svg",
+      "matchedLocalIconSlug": "backbone"
+    },
+    "network-switch": {
+      "name": "Network Switch",
+      "category": "Networking",
+      "file": "network-switch.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "22",
+      "keywords": [
+        "Networking"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Network Switch.svg",
+      "matchedLocalIconSlug": "network-switch"
+    },
+    "virtual-cloud-network": {
+      "name": "Virtual Cloud Network",
+      "category": "Networking",
+      "file": "virtual-cloud-network.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "2",
+      "keywords": [
+        "VCN",
+        "Networking"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Virtual Cloud Network VCN_red.svg",
+      "matchedLocalIconSlug": "virtual-cloud-network-vcn-red"
+    },
+    "load-balancer-failover": {
+      "name": "Load Balancer - Failover",
+      "category": "Networking",
+      "file": "load-balancer-failover.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "8",
+      "keywords": [
+        "Networking"
+      ],
+      "warnings": []
+    },
+    "vnic": {
+      "name": "VNIC",
+      "category": "Networking",
+      "file": "vnic.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "64",
+      "keywords": [],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Networking/VNIC.svg",
+      "matchedLocalIconSlug": "vnic"
+    },
+    "vcn-region-identifier": {
+      "name": "VCN (Region Identifier)",
+      "category": "Networking",
+      "file": "vcn-region-identifier.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "34",
+      "keywords": [
+        "Networking",
+        "label"
+      ],
+      "warnings": []
+    },
+    "route-table": {
+      "name": "Route Table",
+      "category": "Networking",
+      "file": "route-table.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "26",
+      "keywords": [
+        "Networking"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Route Table.svg",
+      "matchedLocalIconSlug": "route-table"
+    },
+    "drg": {
+      "name": "DRG",
+      "category": "Networking",
+      "file": "drg.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "55",
+      "keywords": [
+        "Dynamic",
+        "Routing",
+        "Gateway",
+        "DRG"
+      ],
+      "warnings": []
+    },
+    "service-gateway": {
+      "name": "Service Gateway",
+      "category": "Networking",
+      "file": "service-gateway.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "29",
+      "keywords": [
+        "Networking",
+        "OSN"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Service Gateway.svg",
+      "matchedLocalIconSlug": "service-gateway"
+    },
+    "internet-gateway": {
+      "name": "Internet Gateway",
+      "category": "Networking",
+      "file": "internet-gateway.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "31",
+      "keywords": [
+        "Networking"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Internet Gateway.svg",
+      "matchedLocalIconSlug": "internet-gateway"
+    },
+    "nat-gateway": {
+      "name": "NAT Gateway",
+      "category": "Networking",
+      "file": "nat-gateway.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "33",
+      "keywords": [
+        "Networking"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "NAT Gateway.svg",
+      "matchedLocalIconSlug": "nat-gateway"
+    },
+    "local-peering-gateway": {
+      "name": "Local Peering Gateway",
+      "category": "Networking",
+      "file": "local-peering-gateway.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "58",
+      "keywords": [
+        "Local",
+        "Peering",
+        "Gateway",
+        "LPG"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Networking/Local Peering Gateway.svg",
+      "matchedLocalIconSlug": "local-peering-gateway"
+    },
+    "oracle-services-network": {
+      "name": "Oracle Services Network",
+      "category": "Networking",
+      "file": "oracle-services-network.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "57",
+      "keywords": [
+        "Oracle",
+        "Services",
+        "Network",
+        "OSN"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Networking/Services Network.svg",
+      "matchedLocalIconSlug": "services-network"
+    },
+    "network-performance-inspector": {
+      "name": "Network Performance Inspector",
+      "category": "Networking",
+      "file": "network-performance-inspector.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "59",
+      "keywords": [
+        "Network",
+        "Performance",
+        "Inspector"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Networking/Network Performance Inspector.svg",
+      "matchedLocalIconSlug": "network-performance-inspector"
+    },
+    "network-visualizer": {
+      "name": "Network Visualizer",
+      "category": "Networking",
+      "file": "network-visualizer.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "60",
+      "keywords": [
+        "Network Visualizer"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Database/Network Visualizer.svg",
+      "matchedLocalIconSlug": "network-visualizer"
+    },
+    "inter-region-latency": {
+      "name": "Inter Region Latency",
+      "category": "Networking",
+      "file": "inter-region-latency.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "61",
+      "keywords": [
+        "Inter Region Latency"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Database/Inter Region Latency.svg",
+      "matchedLocalIconSlug": "inter-region-latency"
+    },
+    "lb-listener": {
+      "name": "LB Listener",
+      "category": "Networking",
+      "file": "lb-listener.svg",
+      "sourceFile": "OCI_Networking.vssx",
+      "masterId": "41",
+      "keywords": [
+        "Networking",
+        "Load",
+        "Balancer",
+        "Listener"
+      ],
+      "warnings": []
+    },
+    "application-performance-monitoring": {
+      "name": "Application Performance Monitoring",
+      "category": "Observability Management",
+      "file": "application-performance-monitoring.svg",
+      "sourceFile": "OCI_Observability_Management.vssx",
+      "masterId": "2",
+      "keywords": [
+        "Observability",
+        "Management",
+        "APM"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Application Performance Monitoring.svg",
+      "matchedLocalIconSlug": "application-performance-monitoring"
+    },
+    "logging": {
+      "name": "Logging",
+      "category": "Observability Management",
+      "file": "logging.svg",
+      "sourceFile": "OCI_Observability_Management.vssx",
+      "masterId": "6",
+      "keywords": [
+        "Observability",
+        "Management"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Logging.svg",
+      "matchedLocalIconSlug": "logging"
+    },
+    "search": {
+      "name": "Search",
+      "category": "Observability Management",
+      "file": "search.svg",
+      "sourceFile": "OCI_Observability_Management.vssx",
+      "masterId": "8",
+      "keywords": [
+        "Observability",
+        "Management"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Search.svg",
+      "matchedLocalIconSlug": "search"
+    },
+    "auditing": {
+      "name": "Auditing",
+      "category": "Observability Management",
+      "file": "auditing.svg",
+      "sourceFile": "OCI_Observability_Management.vssx",
+      "masterId": "10",
+      "keywords": [
+        "Observability",
+        "Management"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Auditing.svg",
+      "matchedLocalIconSlug": "auditing"
+    },
+    "monitoring": {
+      "name": "Monitoring",
+      "category": "Observability Management",
+      "file": "monitoring.svg",
+      "sourceFile": "OCI_Observability_Management.vssx",
+      "masterId": "12",
+      "keywords": [
+        "Observability",
+        "Management"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Monitoring.svg",
+      "matchedLocalIconSlug": "monitoring"
+    },
+    "alarms": {
+      "name": "Alarms",
+      "category": "Observability Management",
+      "file": "alarms.svg",
+      "sourceFile": "OCI_Observability_Management.vssx",
+      "masterId": "14",
+      "keywords": [
+        "Observability",
+        "Management"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Alarms.svg",
+      "matchedLocalIconSlug": "alarms"
+    },
+    "health-checks": {
+      "name": "Health Checks",
+      "category": "Observability Management",
+      "file": "health-checks.svg",
+      "sourceFile": "OCI_Observability_Management.vssx",
+      "masterId": "30",
+      "keywords": [
+        "Observability",
+        "Management"
+      ],
+      "warnings": []
+    },
+    "logging-analytics": {
+      "name": "Logging Analytics",
+      "category": "Observability Management",
+      "file": "logging-analytics.svg",
+      "sourceFile": "OCI_Observability_Management.vssx",
+      "masterId": "18",
+      "keywords": [
+        "Observability",
+        "Management"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Logging Analytics.svg",
+      "matchedLocalIconSlug": "logging-analytics"
+    },
+    "events": {
+      "name": "Events",
+      "category": "Observability Management",
+      "file": "events.svg",
+      "sourceFile": "OCI_Observability_Management.vssx",
+      "masterId": "20",
+      "keywords": [
+        "Observability",
+        "Management"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Events.svg",
+      "matchedLocalIconSlug": "events"
+    },
+    "operations-insights": {
+      "name": "Operations Insights",
+      "category": "Observability Management",
+      "file": "operations-insights.svg",
+      "sourceFile": "OCI_Observability_Management.vssx",
+      "masterId": "22",
+      "keywords": [
+        "Observability",
+        "Management"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Operations Insights.svg",
+      "matchedLocalIconSlug": "operations-insights"
+    },
+    "vcn-flow-logs": {
+      "name": "VCN Flow Logs",
+      "category": "Observability Management",
+      "file": "vcn-flow-logs.svg",
+      "sourceFile": "OCI_Observability_Management.vssx",
+      "masterId": "24",
+      "keywords": [
+        "Observability",
+        "Management"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "VCN Flow Logs.svg",
+      "matchedLocalIconSlug": "vcn-flow-logs"
+    },
+    "oci-queue": {
+      "name": "OCI Queue",
+      "category": "Observability Management",
+      "file": "oci-queue.svg",
+      "sourceFile": "OCI_Observability_Management.vssx",
+      "masterId": "37",
+      "keywords": [],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Queuing.svg",
+      "matchedLocalIconSlug": "queuing"
+    },
+    "workflow": {
+      "name": "Workflow",
+      "category": "Observability Management",
+      "file": "workflow.svg",
+      "sourceFile": "OCI_Observability_Management.vssx",
+      "masterId": "28",
+      "keywords": [
+        "Observability",
+        "Management"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Workflow.svg",
+      "matchedLocalIconSlug": "workflow"
+    },
+    "full-stack-disaster-recovery": {
+      "name": "Full Stack Disaster Recovery",
+      "category": "Observability Management",
+      "file": "full-stack-disaster-recovery.svg",
+      "sourceFile": "OCI_Observability_Management.vssx",
+      "masterId": "34",
+      "keywords": [
+        "Obervability",
+        "Management"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Observability and management/Full Stack Disaster Recovery.svg",
+      "matchedLocalIconSlug": "full-stack-disaster-recovery"
+    },
+    "oci-console": {
+      "name": "OCI Console",
+      "category": "Observability Management",
+      "file": "oci-console.svg",
+      "sourceFile": "OCI_Observability_Management.vssx",
+      "masterId": "33",
+      "keywords": [
+        "Observability",
+        "Management"
+      ],
+      "warnings": []
+    },
+    "cloud-native-environment": {
+      "name": "Cloud Native Environment",
+      "category": "Other",
+      "file": "cloud-native-environment.svg",
+      "sourceFile": "OCI_Other.vssx",
+      "masterId": "98",
+      "keywords": [],
+      "warnings": []
+    },
+    "private-cloud": {
+      "name": "Private Cloud",
+      "category": "Other",
+      "file": "private-cloud.svg",
+      "sourceFile": "OCI_Other.vssx",
+      "masterId": "81",
+      "keywords": [
+        "Other"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Private Cloud.svg",
+      "matchedLocalIconSlug": "private-cloud"
+    },
+    "transaction-manager": {
+      "name": "Transaction Manager",
+      "category": "Other",
+      "file": "transaction-manager.svg",
+      "sourceFile": "OCI_Other.vssx",
+      "masterId": "89",
+      "keywords": [
+        "Other"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Other/Transaction Manager.svg",
+      "matchedLocalIconSlug": "transaction-manager"
+    },
+    "data-integrator": {
+      "name": "Data Integrator",
+      "category": "Other",
+      "file": "data-integrator.svg",
+      "sourceFile": "OCI_Other.vssx",
+      "masterId": "92",
+      "keywords": [
+        "Other"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Other/Data Integrator.svg",
+      "matchedLocalIconSlug": "data-integrator"
+    },
+    "blockchain": {
+      "name": "Blockchain",
+      "category": "Other",
+      "file": "blockchain.svg",
+      "sourceFile": "OCI_Other.vssx",
+      "masterId": "76",
+      "keywords": [
+        "Other"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Other/Blockchain.svg",
+      "matchedLocalIconSlug": "blockchain"
+    },
+    "remote-agent": {
+      "name": "Remote Agent",
+      "category": "Other",
+      "file": "remote-agent.svg",
+      "sourceFile": "OCI_Other.vssx",
+      "masterId": "93",
+      "keywords": [
+        "Other"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Other/Remote Agent.svg",
+      "matchedLocalIconSlug": "remote-agent"
+    },
+    "iot": {
+      "name": "IoT",
+      "category": "Other",
+      "file": "iot.svg",
+      "sourceFile": "OCI_Other.vssx",
+      "masterId": "104",
+      "keywords": [],
+      "warnings": []
+    },
+    "oci-multicloud": {
+      "name": "OCI Multicloud",
+      "category": "Other",
+      "file": "oci-multicloud.svg",
+      "sourceFile": "OCI_Other.vssx",
+      "masterId": "95",
+      "keywords": [
+        "Other"
+      ],
+      "warnings": []
+    },
+    "other-cloud-service": {
+      "name": "Other Cloud Service",
+      "category": "Other",
+      "file": "other-cloud-service.svg",
+      "sourceFile": "OCI_Other.vssx",
+      "masterId": "67",
+      "keywords": [
+        "Other"
+      ],
+      "warnings": []
+    },
+    "internet": {
+      "name": "Internet",
+      "category": "Other",
+      "file": "internet.svg",
+      "sourceFile": "OCI_Other.vssx",
+      "masterId": "96",
+      "keywords": [
+        "Other"
+      ],
+      "warnings": []
+    },
+    "content-delivery-network-service": {
+      "name": "Content Delivery Network Service",
+      "category": "Other",
+      "file": "content-delivery-network-service.svg",
+      "sourceFile": "OCI_Other.vssx",
+      "masterId": "101",
+      "keywords": [],
+      "warnings": []
+    },
+    "zero-data-loss-recovery-appliance": {
+      "name": "Zero Data Loss Recovery Appliance",
+      "category": "Other",
+      "file": "zero-data-loss-recovery-appliance.svg",
+      "sourceFile": "OCI_Other.vssx",
+      "masterId": "102",
+      "keywords": [],
+      "warnings": []
+    },
+    "cross-domain": {
+      "name": "Cross Domain",
+      "category": "Other",
+      "file": "cross-domain.svg",
+      "sourceFile": "OCI_Other.vssx",
+      "masterId": "103",
+      "keywords": [],
+      "warnings": []
+    },
+    "empty-physical-diagram": {
+      "name": "Empty Physical diagram",
+      "category": "Redwood elements",
+      "file": "empty-physical-diagram.svg",
+      "sourceFile": "OCI_Redwood_elements.vssx",
+      "masterId": "309",
+      "keywords": [],
+      "warnings": []
+    },
+    "block-storage": {
+      "name": "Block Storage",
+      "category": "Storage",
+      "file": "block-storage.svg",
+      "sourceFile": "OCI_Storage.vssx",
+      "masterId": "2",
+      "keywords": [
+        "Storage"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Block Storage.svg",
+      "matchedLocalIconSlug": "block-storage"
+    },
+    "block-storage-multiple": {
+      "name": "Block Storage Multiple",
+      "category": "Storage",
+      "file": "block-storage-multiple.svg",
+      "sourceFile": "OCI_Storage.vssx",
+      "masterId": "23",
+      "keywords": [
+        "Block",
+        "Storage",
+        "Multiple"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Storage/Block Storage Multiple.svg",
+      "matchedLocalIconSlug": "block-storage-multiple"
+    },
+    "back-up-restore": {
+      "name": "Back Up/Restore",
+      "category": "Storage",
+      "file": "back-up-restore.svg",
+      "sourceFile": "OCI_Storage.vssx",
+      "masterId": "6",
+      "keywords": [
+        "Storage"
+      ],
+      "warnings": []
+    },
+    "block-storage-cloning": {
+      "name": "Block Storage Cloning",
+      "category": "Storage",
+      "file": "block-storage-cloning.svg",
+      "sourceFile": "OCI_Storage.vssx",
+      "masterId": "8",
+      "keywords": [
+        "Storage"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Block Storage Cloning.svg",
+      "matchedLocalIconSlug": "block-storage-cloning"
+    },
+    "file-storage": {
+      "name": "File Storage",
+      "category": "Storage",
+      "file": "file-storage.svg",
+      "sourceFile": "OCI_Storage.vssx",
+      "masterId": "10",
+      "keywords": [
+        "Storage"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "File Storage.svg",
+      "matchedLocalIconSlug": "file-storage"
+    },
+    "file-storage-cloning-process": {
+      "name": "File Storage Cloning Process",
+      "category": "Storage",
+      "file": "file-storage-cloning-process.svg",
+      "sourceFile": "OCI_Storage.vssx",
+      "masterId": "29",
+      "keywords": [
+        "File",
+        "Storage",
+        "Cloning",
+        "Process"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Storage/File Storage Cloning Process.svg",
+      "matchedLocalIconSlug": "file-storage-cloning-process"
+    },
+    "file-storage-clone": {
+      "name": "File Storage Clone",
+      "category": "Storage",
+      "file": "file-storage-clone.svg",
+      "sourceFile": "OCI_Storage.vssx",
+      "masterId": "37",
+      "keywords": [],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Storage/File Storage Clone.svg",
+      "matchedLocalIconSlug": "file-storage-clone"
+    },
+    "file-storage-replica": {
+      "name": "File Storage Replica",
+      "category": "Storage",
+      "file": "file-storage-replica.svg",
+      "sourceFile": "OCI_Storage.vssx",
+      "masterId": "39",
+      "keywords": [],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Storage/File Storage Replica.svg",
+      "matchedLocalIconSlug": "file-storage-replica"
+    },
+    "file-storage-replication-process": {
+      "name": "File Storage Replication Process",
+      "category": "Storage",
+      "file": "file-storage-replication-process.svg",
+      "sourceFile": "OCI_Storage.vssx",
+      "masterId": "40",
+      "keywords": [],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Storage/File Storage Replication Process.svg",
+      "matchedLocalIconSlug": "file-storage-replication-process"
+    },
+    "file-storage-snapshots": {
+      "name": "File Storage Snapshots",
+      "category": "Storage",
+      "file": "file-storage-snapshots.svg",
+      "sourceFile": "OCI_Storage.vssx",
+      "masterId": "33",
+      "keywords": [
+        "File",
+        "Storage",
+        "Snapshots"
+      ],
+      "warnings": []
+    },
+    "file-storage-mount-target": {
+      "name": "File Storage Mount Target",
+      "category": "Storage",
+      "file": "file-storage-mount-target.svg",
+      "sourceFile": "OCI_Storage.vssx",
+      "masterId": "41",
+      "keywords": [],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "OCI_Icons_PNG_SVG (1)/OCI_Uploaded to OMM/Storage/File Storage Mount Target.svg",
+      "matchedLocalIconSlug": "file-storage-mount-target"
+    },
+    "object-storage": {
+      "name": "Object Storage",
+      "category": "Storage",
+      "file": "object-storage.svg",
+      "sourceFile": "OCI_Storage.vssx",
+      "masterId": "12",
+      "keywords": [
+        "Storage"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Object Storage.svg",
+      "matchedLocalIconSlug": "object-storage"
+    },
+    "buckets": {
+      "name": "Buckets",
+      "category": "Storage",
+      "file": "buckets.svg",
+      "sourceFile": "OCI_Storage.vssx",
+      "masterId": "14",
+      "keywords": [
+        "Storage"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Buckets.svg",
+      "matchedLocalIconSlug": "buckets"
+    },
+    "storage-gateway": {
+      "name": "Storage Gateway",
+      "category": "Storage",
+      "file": "storage-gateway.svg",
+      "sourceFile": "OCI_Storage.vssx",
+      "masterId": "16",
+      "keywords": [
+        "Storage"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Storage Gateway.svg",
+      "matchedLocalIconSlug": "storage-gateway"
+    },
+    "elastic-performance": {
+      "name": "Elastic Performance",
+      "category": "Storage",
+      "file": "elastic-performance.svg",
+      "sourceFile": "OCI_Storage.vssx",
+      "masterId": "18",
+      "keywords": [
+        "Storage"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Elastic Performance.svg",
+      "matchedLocalIconSlug": "elastic-performance"
+    },
+    "local-storage": {
+      "name": "Local Storage",
+      "category": "Storage",
+      "file": "local-storage.svg",
+      "sourceFile": "OCI_Storage.vssx",
+      "masterId": "20",
+      "keywords": [
+        "Storage"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Local Storage.svg",
+      "matchedLocalIconSlug": "local-storage"
+    },
+    "persistent-volume": {
+      "name": "Persistent Volume",
+      "category": "Storage",
+      "file": "persistent-volume.svg",
+      "sourceFile": "OCI_Storage.vssx",
+      "masterId": "22",
+      "keywords": [
+        "Storage"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "Persistent Volume.svg",
+      "matchedLocalIconSlug": "persistent-volume"
+    }
+  },
+  "aliases": {
+    "access": "vtap",
+    "active-directory": "active-directory",
+    "adb": "oracle-autonomous-database",
+    "adb-d": "adb-d",
+    "adb-exadata-cloud-customer": "adb-exadata-cloud-customer",
+    "administration": "cloud-advisor",
+    "adw-d": "adw-d",
+    "ai": "analytics",
+    "alarms": "alarms",
+    "analytics": "analytics",
+    "apex": "apex",
+    "api-gateway": "api-gateway",
+    "api-service": "api-service",
+    "apm": "application-performance-monitoring",
+    "application": "virtual-machine-application",
+    "application-dependency-management": "application-dependency-management",
+    "application-performance-monitoring": "application-performance-monitoring",
+    "applications": "hcm",
+    "artificial-intelligence": "artificial-intelligence",
+    "atp-d": "atp-d",
+    "auditing": "auditing",
+    "autonomous": "adb-d",
+    "autonomous-data-warehouse": "oracle-autonomous-data-warehouse",
+    "autonomous-database": "oracle-autonomous-database",
+    "autonomous-db": "oracle-autonomous-database",
+    "autonomous-transaction-processing-atp": "oracle-autonomous-transaction-processing-atp",
+    "autoscaling": "autoscaling",
+    "back-up-restore": "back-up-restore",
+    "backbone": "backbone",
+    "balancer": "lb-listener",
+    "bastion": "bastion",
+    "bi-cloud-connector": "bi-cloud-connector",
+    "big-data": "big-data",
+    "block": "block-storage-multiple",
+    "block-storage": "block-storage",
+    "block-storage-cloning": "block-storage-cloning",
+    "block-storage-multiple": "block-storage-multiple",
+    "blockchain": "blockchain",
+    "bucket": "buckets",
+    "buckets": "buckets",
+    "burstable-vm": "burstable-vm",
+    "byoip": "byoip",
+    "cdn": "cdn",
+    "certifcates": "certifcates",
+    "cloning": "file-storage-cloning-process",
+    "cloud-advisor": "cloud-advisor",
+    "cloud-guard": "cloud-guard",
+    "cloud-migrations": "cloud-migrations",
+    "cloud-native-environment": "cloud-native-environment",
+    "cloud-operations": "cloud-operations",
+    "compartments": "compartments",
+    "compute": "virtual-machine",
+    "compute-instance": "virtual-machine",
+    "container": "container",
+    "container-engine-for-kubernetes": "container-engine-for-kubernetes",
+    "container-instances": "container-instances",
+    "container-registry": "oci-container-registry",
+    "containers": "multiple-containers",
+    "content": "cdn",
+    "content-delivery-network-service": "content-delivery-network-service",
+    "content-management": "content-management",
+    "cpe": "customer-premises-equipment",
+    "cpq": "cpq",
+    "crm": "crm",
+    "cross-domain": "cross-domain",
+    "customer-premises-equipment": "customer-premises-equipment",
+    "data": "adw-d",
+    "data-catalog": "data-catalog",
+    "data-flow": "data-flow",
+    "data-guard": "data-guard",
+    "data-guard-recovery": "data-guard-recovery",
+    "data-integration": "data-integration",
+    "data-integrator": "data-integrator",
+    "data-lake": "data-lake",
+    "data-lakehouse": "data-lakehouse",
+    "data-safe": "data-safe",
+    "data-science": "data-science",
+    "data-transfer": "data-transfer",
+    "database": "database",
+    "database-flashback": "database-flashback",
+    "database-management": "database-management",
+    "database-migration": "database-migration",
+    "ddos-protection": "ddos-protection",
+    "dedicated": "adw-d",
+    "dedicated-region": "dedicated-region",
+    "delivery": "cdn",
+    "developer": "container-engine-for-kubernetes",
+    "developer-services": "container",
+    "devops": "devops",
+    "digital-assistant": "digital-assistant",
+    "digital-media": "digital-media",
+    "director": "goldengate-director",
+    "dns": "dns",
+    "document-understanding": "document-understanding",
+    "domain": "dns",
+    "domain-name-system-dns": "dns",
+    "drg": "drg",
+    "dynamic": "drg",
+    "e-business-suite": "e-business-suite",
+    "elastic-performance": "elastic-performance",
+    "email-delivery": "email-delivery",
+    "empty-physical-diagram": "empty-physical-diagram",
+    "encryption": "encryption",
+    "engagement": "engagement",
+    "epm": "epm",
+    "erp": "erp",
+    "essbase": "essbase",
+    "estate-explorer": "estate-explorer",
+    "events": "events",
+    "exadata-cloud-customer": "exadata-cloud-customer",
+    "exadata-fleet-update": "exadata-fleet-update",
+    "fastconnect": "fastconnect",
+    "file": "file-storage-cloning-process",
+    "file-storage": "file-storage",
+    "file-storage-clone": "file-storage-clone",
+    "file-storage-cloning-process": "file-storage-cloning-process",
+    "file-storage-mount-target": "file-storage-mount-target",
+    "file-storage-replica": "file-storage-replica",
+    "file-storage-replication-process": "file-storage-replication-process",
+    "file-storage-snapshots": "file-storage-snapshots",
+    "financials": "financials",
+    "firewall": "firewall",
+    "flex-vm": "flex-vm",
+    "flexible": "flex-vm",
+    "flexible-load-balancer": "flexible-load-balancer",
+    "forecasting": "forecasting",
+    "full-stack-disaster-recovery": "full-stack-disaster-recovery",
+    "function": "functions",
+    "functions": "functions",
+    "fusion": "fusion",
+    "gateway": "drg",
+    "generative-ai": "oci-generative-ai",
+    "generic": "generic",
+    "goldengate": "goldengate",
+    "goldengate-application-adapter": "goldengate-application-adapter",
+    "goldengate-director": "goldengate-director",
+    "goldengate-free": "goldengate-free",
+    "goldengate-hp-non-stop-guardian": "goldengate-hp-non-stop-guardian",
+    "goldengate-monitor": "goldengate-monitor",
+    "goldengate-on-premises": "goldengate-on-premises",
+    "goldengate-plug-in": "goldengate-plug-in",
+    "goldengate-stream-analytics": "goldengate-stream-analytics",
+    "goldengate-studio": "goldengate-studio",
+    "goldengate-veridata": "goldengate-veridata",
+    "governance": "cloud-advisor",
+    "group": "nsg",
+    "guard": "data-guard",
+    "hcm": "hcm",
+    "health-checks": "health-checks",
+    "healthcare": "healthcare",
+    "heatwave": "my-sql-heatwave",
+    "hybrid": "roving-edge-service",
+    "iam": "iam",
+    "identity": "iam",
+    "igw": "internet-gateway",
+    "innovation-management": "innovation-management",
+    "inspector": "network-performance-inspector",
+    "instance": "virtual-machine",
+    "instance-pools": "instance-pools",
+    "integration": "integration",
+    "inter-region-latency": "inter-region-latency",
+    "internet": "internet",
+    "internet-gateway": "internet-gateway",
+    "inventory-management": "inventory-management",
+    "iot": "iot",
+    "ip-pools": "ip-pools",
+    "jet": "jet",
+    "k8s": "container-engine-for-kubernetes",
+    "key-management": "key-management",
+    "key-vault": "key-vault",
+    "kubernetes": "container-engine-for-kubernetes",
+    "label": "vcn-region-identifier",
+    "labeled-action": "labeled-action",
+    "lb": "load-balancer-primary",
+    "lb-listener": "lb-listener",
+    "license-manager": "license-manager",
+    "listener": "lb-listener",
+    "load": "lb-listener",
+    "load-balancer": "load-balancer-primary",
+    "load-balancer-failover": "load-balancer-failover",
+    "load-balancer-lb": "load-balancer-primary",
+    "load-balancer-primary": "load-balancer-primary",
+    "local": "local-peering-gateway",
+    "local-peering": "local-peering",
+    "local-peering-gateway": "local-peering-gateway",
+    "local-storage": "local-storage",
+    "logging": "logging",
+    "logging-analytics": "logging-analytics",
+    "logic-flow": "logic-flow",
+    "lpg": "local-peering-gateway",
+    "machine": "flex-vm",
+    "machine-learning": "machine-learning",
+    "management": "application-performance-monitoring",
+    "manufacturing": "manufacturing",
+    "marketplace": "marketplace",
+    "maximum-security-zone": "maximum-security-zone",
+    "media-flow": "media-flow",
+    "media-streams": "media-streams",
+    "message-listener": "message-listener",
+    "message-producer": "message-producer",
+    "migrate-autonomous-database": "oci-migrate-autonomous-database",
+    "migration": "data-transfer",
+    "migration-workbench": "migration-workbench",
+    "monitoring": "monitoring",
+    "multiple": "multiple-containers",
+    "multiple-containers": "multiple-containers",
+    "my": "my-sql-heatwave",
+    "my-sql-heatwave": "my-sql-heatwave",
+    "mysql-database-system": "mysql-database-system",
+    "name": "dns",
+    "nat": "nat-gateway",
+    "nat-gateway": "nat-gateway",
+    "network": "nsg",
+    "network-performance-inspector": "network-performance-inspector",
+    "network-switch": "network-switch",
+    "network-visualizer": "network-visualizer",
+    "networking": "load-balancer-primary",
+    "nosql-database": "nosql-database",
+    "notifications": "notifications",
+    "nsg": "nsg",
+    "obervability": "full-stack-disaster-recovery",
+    "object-storage": "object-storage",
+    "observability": "application-performance-monitoring",
+    "oci-compute": "oci-compute",
+    "oci-console": "oci-console",
+    "oci-container-registry": "oci-container-registry",
+    "oci-database-with-postgresql": "oci-database-with-postgresql",
+    "oci-generative-ai": "oci-generative-ai",
+    "oci-language": "oci-language",
+    "oci-migrate-autonomous-database": "oci-migrate-autonomous-database",
+    "oci-multicloud": "oci-multicloud",
+    "oci-process-automation": "oci-process-automation",
+    "oci-queue": "oci-queue",
+    "oci-speech": "oci-speech",
+    "oci-vision": "oci-vision",
+    "oke": "container-engine-for-kubernetes",
+    "oke-virtual-node": "oke-virtual-node",
+    "on-premises-data-center": "on-premises-data-center",
+    "opensearch": "opensearch",
+    "operations-insights": "operations-insights",
+    "oracle": "oracle-rest-data-services",
+    "oracle-autonomous-data-warehouse": "oracle-autonomous-data-warehouse",
+    "oracle-autonomous-database": "oracle-autonomous-database",
+    "oracle-autonomous-transaction-processing-atp": "oracle-autonomous-transaction-processing-atp",
+    "oracle-base-database": "oracle-base-database",
+    "oracle-cloud-identifier": "oracle-cloud-identifier",
+    "oracle-cloud-migration-advisor": "oracle-cloud-migration-advisor",
+    "oracle-compute-cloud-customer": "oracle-compute-cloud-customer",
+    "oracle-database-migration-service": "oracle-database-migration-service",
+    "oracle-exadata-database-service": "oracle-exadata-database-service",
+    "oracle-identity-cloud-service": "oracle-identity-cloud-service",
+    "oracle-rest-data-services": "oracle-rest-data-services",
+    "oracle-services-network": "oracle-services-network",
+    "oracle-soa-suite": "oracle-soa-suite",
+    "order-management": "order-management",
+    "ordered-action": "ordered-action",
+    "organization": "organization",
+    "osn": "service-gateway",
+    "other": "digital-media",
+    "other-cloud-service": "other-cloud-service",
+    "peering": "local-peering-gateway",
+    "performance": "network-performance-inspector",
+    "persistent-volume": "persistent-volume",
+    "points": "vtap",
+    "policies": "policies",
+    "private-cloud": "private-cloud",
+    "private-endpoint-ip": "private-endpoint-ip",
+    "process": "file-storage-cloning-process",
+    "process-automation": "oci-process-automation",
+    "procurement": "procurement",
+    "product-master-data-management": "product-master-data-management",
+    "project-financial-management": "project-financial-management",
+    "project-management": "project-management",
+    "queuing": "oci-queue",
+    "rac": "rac",
+    "recovery": "data-guard-recovery",
+    "remote-agent": "remote-agent",
+    "remote-peering": "remote-peering",
+    "resource-manager": "resource-manager",
+    "rest": "oracle-rest-data-services",
+    "route-table": "route-table",
+    "routing": "drg",
+    "roving-edge-device": "roving-edge-device",
+    "roving-edge-infrastructure": "roving-edge-infrastructure",
+    "roving-edge-service": "roving-edge-service",
+    "roving-edge-ultra": "roving-edge-ultra",
+    "search": "search",
+    "security": "iam",
+    "security-lists": "security-lists",
+    "service": "apex",
+    "service-connector-hub": "service-connector-hub",
+    "service-gateway": "service-gateway",
+    "service-mesh": "service-mesh",
+    "services": "oracle-rest-data-services",
+    "services-network": "oracle-services-network",
+    "site-to-site-vpn": "site-to-site-vpn",
+    "snapshots": "file-storage-snapshots",
+    "sql": "my-sql-heatwave",
+    "storage": "object-storage",
+    "storage-gateway": "storage-gateway",
+    "streaming": "streaming",
+    "studio": "goldengate-studio",
+    "supply-chain-planning": "supply-chain-planning",
+    "tagging": "tagging",
+    "test": "vtap",
+    "text-label": "text-label",
+    "threat-defense": "threat-defense",
+    "threat-intelligence": "threat-intelligence",
+    "transaction-manager": "transaction-manager",
+    "user": "user",
+    "user-3": "user-3",
+    "user-group": "user-group",
+    "user-group-2": "user-group-2",
+    "user-group-3": "user-group-3",
+    "user2": "user2",
+    "vault": "vault",
+    "vcn": "virtual-cloud-network",
+    "vcn-flow-logs": "vcn-flow-logs",
+    "vcn-region-identifier": "vcn-region-identifier",
+    "virtual": "flex-vm",
+    "virtual-cloud-network": "virtual-cloud-network",
+    "virtual-cloud-network-vcn-red": "virtual-cloud-network",
+    "virtual-machine": "virtual-machine",
+    "virtual-machine-application": "virtual-machine-application",
+    "virtual-machine-generic": "virtual-machine-generic",
+    "virtual-machine-gpu": "virtual-machine-gpu",
+    "visual-builder": "visual-builder",
+    "vm": "virtual-machine",
+    "vnic": "vnic",
+    "vpn-or-fastconnect": "vpn-or-fastconnect",
+    "vtap": "vtap",
+    "vulnerability-scanning": "vulnerability-scanning",
+    "waf": "waf",
+    "warehouse": "adw-d",
+    "web-application-firewall-waf": "waf",
+    "workflow": "workflow",
+    "zero-data-loss-recovery-appliance": "zero-data-loss-recovery-appliance"
+  },
+  "warnings": [
+    "Text Label: no convertible vector geometry found",
+    "Labeled Action: no convertible vector geometry found",
+    "Ordered Action: no convertible vector geometry found",
+    "VPN or FastConnect: no convertible vector geometry found",
+    "Local Peering: no convertible vector geometry found"
+  ],
+  "localSvgIconSource": "D:\\Desktop\\Oracle\\4.tools\\_OCI icons",
+  "localSvgAvailableCount": 245,
+  "localSvgImportedCount": 170,
+  "localSvgUnmatchedCatalogCount": 71
+}

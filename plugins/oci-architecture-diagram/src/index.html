@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>OCI Architecture Diagram</title>
+  <link rel="stylesheet" href="./styles.css"/>
+  <script defer src="./architectures.js"></script>
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <main class="app-shell">
+    <aside id="architecture-menu" class="sidebar" aria-label="Architecture menu">
+      <header class="brand">
+        <img src="../assets/icon.svg" alt="" class="brand-icon"/>
+        <div>
+          <h1>OCI Architecture Diagram</h1>
+          <p>Architectures</p>
+        </div>
+      </header>
+
+      <input id="architecture-search" class="search-input" type="search" autocomplete="off" aria-label="Search architectures" placeholder="Search architectures"/>
+
+      <nav id="architecture-list" class="architecture-list" aria-label="Available diagrams"></nav>
+    </aside>
+    <button id="menu-backdrop" class="menu-backdrop" type="button" tabindex="-1" aria-label="Close architecture menu"></button>
+
+    <section class="viewer" aria-label="Architecture viewer">
+      <header class="viewer-header">
+        <div class="viewer-title">
+          <img src="../assets/icon.svg" alt="" class="viewer-logo"/>
+          <div class="viewer-copy">
+            <h2 id="architecture-title">Architecture</h2>
+            <p id="architecture-summary" class="summary"></p>
+          </div>
+        </div>
+        <button id="menu-toggle" class="menu-toggle" type="button" aria-label="Open architecture menu" aria-expanded="false" aria-controls="architecture-menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </header>
+
+      <iframe id="diagram-frame" class="diagram-frame" title="OCI diagram" src="../examples/arquitectura-web-oke-adb.html?embed=1" scrolling="no"></iframe>
+    </section>
+  </main>
+</body>
+</html>
