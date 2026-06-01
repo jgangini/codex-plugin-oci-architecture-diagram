@@ -5,7 +5,7 @@ plugin. The plugin helps Codex normalize Oracle Cloud Infrastructure
 architecture prompts, validate the diagram model, render portable HTML/SVG
 diagrams, and open the local gallery in the Codex Browser.
 
-![OCI Architecture Diagram example](plugins/oci-architecture-diagram/examples/arquitectura-web-oke-adb-generative-ai.png)
+![OCI Architecture Diagram Codex workflow](plugins/oci-architecture-diagram/assets/screenshots/codex-workflow.png)
 
 ## Install From GitHub
 
