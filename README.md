@@ -7,20 +7,19 @@ diagrams, and open the local gallery in the Codex Browser.
 
 ## Install From GitHub
 
-After this repository is pushed to GitHub, users can add the marketplace with
-any of these forms:
+Users can add the marketplace with any of these forms:
 
 ```powershell
-codex plugin marketplace add OWNER/codex-plugin-oci-architecture
-codex plugin marketplace add OWNER/codex-plugin-oci-architecture@v0.1.0
-codex plugin marketplace add https://github.com/OWNER/codex-plugin-oci-architecture.git
+codex plugin marketplace add jgangini/codex-plugin-oci-architecture-diagram
+codex plugin marketplace add jgangini/codex-plugin-oci-architecture-diagram@v0.1.0
+codex plugin marketplace add https://github.com/jgangini/codex-plugin-oci-architecture-diagram.git
 ```
 
 For local testing before publishing:
 
 ```powershell
-git clone https://github.com/OWNER/codex-plugin-oci-architecture.git
-cd codex-plugin-oci-architecture
+git clone https://github.com/jgangini/codex-plugin-oci-architecture-diagram.git
+cd codex-plugin-oci-architecture-diagram
 codex plugin marketplace add .
 ```
 

@@ -3,9 +3,11 @@
   "version": "0.1.0+codex.20260601225303",
   "description": "Generate portable HTML/SVG architecture diagrams for Oracle Cloud Infrastructure from natural-language prompts.",
   "author": {
-    "name": "Joel Gangini"
+    "name": "Joel Gangini",
+    "url": "https://github.com/jgangini"
   },
-  "homepage": "https://www.oracle.com/cloud/",
+  "homepage": "https://github.com/jgangini/codex-plugin-oci-architecture-diagram",
+  "repository": "https://github.com/jgangini/codex-plugin-oci-architecture-diagram.git",
   "license": "MIT",
   "keywords": [
     "oci",
