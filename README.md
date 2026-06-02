@@ -84,3 +84,36 @@ python -m unittest discover -s plugins/oci-architecture-diagram/tests -v
 Some icon extraction tests expect Oracle OCI stencil sources under a sibling
 `oci/` directory. Renderer and packaging tests do not require those external
 source files.
+
+## Skills
+
+- `oci-architecture-diagram`: orchestrate the full diagram workflow from prompt
+  normalization through validation, rendering, and visual QA.
+- `oci-spec-normalizer`: convert Spanish or English architecture prompts into
+  normalized OCI diagram JSON specs.
+- `oci-architecture-validator`: validate diagram specs for schema correctness,
+  coherent service placement, missing connections, duplicated ids, and
+  render-risk.
+- `oci-diagram-renderer`: render validated specs into portable static HTML/SVG
+  diagrams and report renderer warnings and output paths.
+- `oci-diagram-visual-qa`: visually verify generated diagrams for icon
+  rendering, text overlap, edge labels, arrow readability, spacing, zoom, and
+  gallery navigation.
+- `oci-icon-catalog`: maintain the OCI icon catalog, aliases, SVG sanitization,
+  and service icon mappings.
+
+## Notes
+
+The internal plugin name remains `oci-architecture-diagram` for compatibility
+with the existing Codex plugin package. The marketplace name is
+`oci-architecture`.
+
+## License
+
+This project is licensed under the MIT License.
+
+OCI Architecture Diagram is an independent project and is not an official
+Oracle product. It is not affiliated with, endorsed by, or sponsored by Oracle
+Corporation. Oracle, OCI, and related marks are trademarks or registered
+trademarks of Oracle and/or its affiliates. Third-party trademarks, logos,
+service names, and assets remain the property of their respective owners.
