@@ -47,8 +47,9 @@ node and visually de-emphasize the other nodes. Order the cards by the final
 diagram coordinates: left to right, then top to bottom within each column, so
 keyboard and pointer reading order match the architecture.
 
-In the BoM tab, place a `Descargar JSON` button to the right of the monthly
-total. The portable deck must embed and download the exact bytes of the supplied
+In the BoM tab, show the annual estimate (monthly total multiplied by 12) directly
+to the left of the monthly total; this is a presentation total, not a discounted
+price. Place a `Descargar JSON` button to the right of those totals. The portable deck must embed and download the exact bytes of the supplied
 Oracle Cost Estimator JSON. Alongside the button, explain that the user should
 open Oracle Cloud Cost Estimator, choose the three-dot menu, select `Import`, and
 upload the JSON; include the official Cost Estimator link.

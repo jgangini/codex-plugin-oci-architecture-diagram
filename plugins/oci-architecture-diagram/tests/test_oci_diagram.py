@@ -274,6 +274,10 @@ class RendererTests(unittest.TestCase):
         self.assertNotIn("Servicios, componentes y rol", output)
         self.assertIn("Container Engine for Kubernetes", output)
         self.assertIn("USD 75.00", output)
+        self.assertIn('<div class="bom-metrics">', output)
+        self.assertIn("Costo anual estimado</span><strong>USD 900.00</strong>", output)
+        self.assertIn("Total mensual estimado</span><strong>USD 75.00</strong>", output)
+        self.assertIn(".bom-metrics { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; }", output)
         self.assertIn("Bill of Materials (BoM)", output)
         self.assertIn('aria-label="Descargar JSON"', output)
         self.assertIn('aria-label="Abrir Oracle Cloud Cost Estimator"', output)
@@ -770,7 +774,7 @@ class SkillPackagingTests(unittest.TestCase):
         plugin_entry = marketplace["plugins"][0]
 
         self.assertEqual("oci-architecture-diagram", manifest["name"])
-        self.assertEqual("0.4.2", manifest["version"])
+        self.assertEqual("0.4.3", manifest["version"])
         self.assertEqual("Joel Gangini", manifest["author"]["name"])
         self.assertEqual("Joel Gangini", manifest["interface"]["developerName"])
         self.assertEqual("oci-architecture", marketplace["name"])
