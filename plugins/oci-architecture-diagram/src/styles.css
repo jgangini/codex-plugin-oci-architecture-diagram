@@ -198,8 +198,12 @@ body::-webkit-scrollbar-thumb:hover,
 }
 
 .architecture-button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   width: 100%;
-  min-height: 52px;
+  min-width: 0;
+  min-height: 42px;
   border: 0;
   padding: 8px 9px;
   color: var(--ink);
@@ -253,15 +257,18 @@ body::-webkit-scrollbar-thumb:hover,
 
 .architecture-name {
   display: block;
+  min-width: 0;
+  flex: 1 1 auto;
   font-size: 12.4px;
   font-weight: 700;
   line-height: 1.25;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.architecture-meta {
-  display: block;
-  margin-top: 3px;
+.architecture-version {
+  flex: 0 0 auto;
   color: var(--muted);
   font-size: 11px;
   line-height: 1.2;
@@ -438,14 +445,6 @@ body::-webkit-scrollbar-thumb:hover,
   font-size: 20px;
   line-height: 1.2;
   letter-spacing: 0;
-  overflow-wrap: anywhere;
-}
-
-.summary {
-  margin: 6px 0 0;
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.35;
   overflow-wrap: anywhere;
 }
 

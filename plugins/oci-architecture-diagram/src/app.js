@@ -7,7 +7,6 @@
   const search = document.querySelector("#architecture-search");
   const frame = document.querySelector("#diagram-frame");
   const title = document.querySelector("#architecture-title");
-  const summary = document.querySelector("#architecture-summary");
   const copySlideButton = document.querySelector("#copy-slide");
   const menuToggle = document.querySelector("#menu-toggle");
   const menuBackdrop = document.querySelector("#menu-backdrop");
@@ -51,6 +50,11 @@
 
   function projectVersion(project) {
     return Number.isInteger(project.version) && project.version > 0 ? project.version : 1;
+  }
+
+  function projectListTitle(project) {
+    const version = projectVersion(project);
+    return project.title.replace(new RegExp("\\s+[\\u2014-]\\s+v" + version + "$", "i"), "");
   }
 
   function normalizeDatabase(value) {
@@ -170,7 +174,6 @@
     const selected = currentProject();
     if (!selected) return;
     title.textContent = selected.title;
-    summary.textContent = selected.description;
     document.querySelectorAll(".architecture-button").forEach((button) => {
       const isActive = button.dataset.architectureId === selected.id;
       button.classList.toggle("is-active", isActive);
@@ -226,12 +229,14 @@
       button.type = "button";
       button.className = "architecture-button";
       button.dataset.architectureId = project.id;
+      button.title = project.title;
       const name = document.createElement("span");
       name.className = "architecture-name";
-      name.textContent = project.title;
+      name.textContent = projectListTitle(project);
       const meta = document.createElement("span");
-      meta.className = "architecture-meta";
+      meta.className = "architecture-version";
       meta.textContent = project.category + " · v" + projectVersion(project);
+      meta.textContent = "v" + projectVersion(project);
       button.append(name, meta);
       button.addEventListener("click", () => {
         selectProject(project.id);
@@ -361,6 +366,7 @@
     }
     const nextProject = projects.find((item) => item.id !== project.id);
     projects = projects.filter((item) => item.id !== project.id);
+    database.projects = projects;
     selectedForExport.delete(project.id);
     if (selectedId === project.id) selectedId = nextProject.id;
     await persistDatabase("Proyecto eliminado.");
@@ -543,7 +549,6 @@
   });
   exportButton.addEventListener("click", requestExport);
   title.addEventListener("dblclick", () => beginInlineEdit(title, "title"));
-  summary.addEventListener("dblclick", () => beginInlineEdit(summary, "description"));
   window.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && !document.querySelector("[contenteditable=true]")) setMenuOpen(false);
   });
