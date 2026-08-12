@@ -2,7 +2,7 @@
   const DATABASE_URL = "./projects.json";
   const SAVE_URL = "/api/projects";
   const STORAGE_KEY = "oci-architecture-projects:" + window.location.pathname;
-const PORTFOLIO_VERSION = "portfolio-v17";
+const PORTFOLIO_VERSION = "portfolio-v20";
   const list = document.querySelector("#architecture-list");
   const search = document.querySelector("#architecture-search");
   const frame = document.querySelector("#diagram-frame");
@@ -143,9 +143,16 @@ const PORTFOLIO_VERSION = "portfolio-v17";
 
   function resizeFrameToContent() {
     if (frame.classList.contains("is-deck")) {
-      frame.style.height = "";
+      const viewer = frame.closest(".viewer");
+      const headerHeight = viewer?.querySelector(".viewer-header")?.getBoundingClientRect().height || 0;
+      const maxFrameHeight = Math.max(1, window.innerHeight - headerHeight);
+      const maxFrameWidth = viewer?.clientWidth || window.innerWidth;
+      const frameHeight = Math.min(maxFrameHeight, maxFrameWidth * 9 / 16);
+      frame.style.width = Math.round(frameHeight * 16 / 9) + "px";
+      frame.style.height = Math.round(frameHeight) + "px";
       return;
     }
+    frame.style.width = "";
     try {
       const doc = frame.contentDocument;
       if (!doc) return;
@@ -188,6 +195,8 @@ const PORTFOLIO_VERSION = "portfolio-v17";
     refreshProjectMetadata();
     const isDeck = selected.format === "deck" || selected.path.endsWith("-case-deck.html");
     frame.classList.toggle("is-deck", isDeck);
+    document.body.classList.toggle("showing-deck", isDeck);
+    resizeFrameToContent();
     copySlideButton.hidden = true;
     copySlideButton.disabled = true;
     frame.src = embeddedPath(selected.path);

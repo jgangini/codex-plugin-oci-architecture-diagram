@@ -515,14 +515,33 @@ body::-webkit-scrollbar-thumb:hover,
 .diagram-frame.is-deck {
   min-height: 0;
   aspect-ratio: 16 / 9;
-  height: auto;
+  max-width: 100%;
+  justify-self: center;
+  align-self: start;
   border: 1px solid #b8c5cf;
   box-shadow: 0 2px 8px rgba(49, 45, 42, 0.12);
+}
+
+body.showing-deck {
+  height: 100vh;
+  overflow: hidden;
+}
+
+body.showing-deck .app-shell,
+body.showing-deck .viewer {
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
 }
 
 @media (max-width: 860px) {
   .viewer {
     min-height: 680px;
+  }
+
+  body.showing-deck .viewer {
+    height: 100vh;
+    min-height: 0;
   }
 
   .viewer-header {

@@ -40,7 +40,8 @@ lower-right corner and show a toast after copying; do not use a separate text
 copy button. Persist an uploaded image, its editable prompt and direct text
 edits locally in the portable deck; clicking the uploaded image must open
 download and delete actions, while the prompt text icon remains in the image
-corner.
+corner. Accept PNG, JPEG and WebP uploads up to 3 MB; show a visible error
+toast when the selected file is rejected or cannot be read.
 Make the page subtitle, case description and architecture service labels editable
 on click through an explicit Save action. Use a portable, accessible visual
 illustration on the left and the case-specific objective on the right. Embed the
@@ -71,6 +72,14 @@ Every tab must expose a camera-icon button in the upper-right header. It copies
 the active 16:9 page to the clipboard as a 1920×1080 PNG so it can be pasted into
 PowerPoint. Exclude the capture control itself from the copied image and announce
 success or failure through an accessible live region.
+
+Use a compact, minimal scrollbar treatment consistently for scrollable deck
+controls. Keep success and error toasts compact in the upper-right corner of
+the active deck, with green success and OCI-red error states.
+
+The portfolio viewer must keep the 16:9 deck fully visible within the available
+viewport, with no page-level vertical scrollbar. Scale the iframe from both the
+available width and the height below the portfolio header.
 
 ## Portable project portfolio
 
