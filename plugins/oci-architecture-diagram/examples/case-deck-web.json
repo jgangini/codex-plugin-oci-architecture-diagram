@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "case": {
+    "summary": "Aplicación web OCI con entrada pública, runtime privado y datos administrados.",
+    "objective": "Publicar una aplicación resiliente con una arquitectura y un BoM trazables.",
+    "description": "El caso presenta una aplicación web resiliente cuyo ingreso público, ejecución privada y persistencia administrada se despliegan en OCI con trazabilidad hacia su BoM.",
+    "scope": [
+      "Entrada HTTP/S, aplicación privada y datos administrados.",
+      "Escenario base mensual en USD."
+    ],
+    "assumptions": [
+      "Una instancia de aplicación cubre el escenario de ejemplo.",
+      "La arquitectura muestra únicamente componentes con costo mensual estimado."
+    ],
+    "openDecisions": [
+      "Confirmar región OCI, disponibilidad y crecimiento."
+    ]
+  },
+  "bom": {
+    "scenario": "base",
+    "validation": "locally_validated",
+    "priceFreshness": "unverified"
+  },
+  "components": [
+    {
+      "id": "load-balancer",
+      "nodeId": "lb",
+      "service": "Load Balancer",
+      "component": "Balanceador público",
+      "role": "Distribuye solicitudes hacia la aplicación.",
+      "sizing": "Depende de conexiones, ancho de banda y reglas.",
+      "pricingRefs": [
+        {
+          "configuration": "Example Load Balancer",
+          "service": "Flexible Load Balancer"
+        }
+      ]
+    },
+    {
+      "id": "oke",
+      "nodeId": "oke",
+      "service": "Container Engine for Kubernetes",
+      "component": "Pods de aplicación",
+      "role": "Ejecuta el runtime privado de la aplicación.",
+      "sizing": "1 VM de ejemplo; confirmar CPU, memoria y réplicas.",
+      "pricingRefs": [
+        {
+          "configuration": "Example OKE",
+          "service": "Compute - Virtual Machine"
+        }
+      ]
+    },
+    {
+      "id": "adb",
+      "nodeId": "adb",
+      "service": "Oracle Autonomous Database",
+      "component": "Base de datos",
+      "role": "Persiste los datos de la aplicación.",
+      "sizing": "Depende de almacenamiento, consultas y disponibilidad.",
+      "pricingRefs": [
+        {
+          "configuration": "Example ADB",
+          "service": "Database - Autonomous AI Database"
+        }
+      ]
+    },
+    {
+      "id": "object-storage",
+      "nodeId": "object-storage",
+      "service": "Object Storage",
+      "component": "Activos estáticos",
+      "role": "Almacena archivos y objetos de la aplicación.",
+      "sizing": "Depende de bytes, operaciones y retención.",
+      "pricingRefs": [
+        {
+          "configuration": "Example Object Storage",
+          "service": "Storage - Object Storage"
+        }
+      ]
+    }
+  ]
+}

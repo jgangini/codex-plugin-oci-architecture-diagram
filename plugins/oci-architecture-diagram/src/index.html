@@ -1,48 +1,68 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>OCI Architecture Diagram</title>
-  <link rel="stylesheet" href="./styles.css"/>
-  <script defer src="./architectures.js"></script>
-  <script defer src="./app.js"></script>
+  <link rel="stylesheet" href="./styles.css?v=portfolio-v12"/>
+  <script defer src="./app.js?v=portfolio-v12"></script>
 </head>
 <body>
   <main class="app-shell">
-    <aside id="architecture-menu" class="sidebar" aria-label="Architecture menu">
+    <aside id="architecture-menu" class="sidebar" aria-label="Menú de proyectos">
       <header class="brand">
         <img src="../assets/icon.svg" alt="" class="brand-icon"/>
         <div>
-          <h1>OCI Architecture Diagram</h1>
-          <p>Architectures</p>
+          <h1>OCI Architecture Projects</h1>
+          <p>Casos, arquitecturas y BoM</p>
         </div>
       </header>
 
-      <input id="architecture-search" class="search-input" type="search" autocomplete="off" aria-label="Search architectures" placeholder="Search architectures"/>
+      <input id="architecture-search" class="search-input" type="search" autocomplete="off" aria-label="Buscar proyectos" placeholder="Buscar proyectos"/>
 
-      <nav id="architecture-list" class="architecture-list" aria-label="Available diagrams"></nav>
+      <nav id="architecture-list" class="architecture-list" aria-label="Proyectos disponibles"></nav>
+      <footer class="project-footer">
+        <button id="export-projects" type="button" class="primary-action" disabled aria-label="Exportar proyectos seleccionados como ZIP">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 15v4h14v-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+          <span>Exportar ZIP</span>
+        </button>
+        <p id="project-status" class="project-status" aria-live="polite"></p>
+      </footer>
     </aside>
     <button id="menu-backdrop" class="menu-backdrop" type="button" tabindex="-1" aria-label="Close architecture menu"></button>
 
     <section class="viewer" aria-label="Architecture viewer">
       <header class="viewer-header">
-        <div class="viewer-title">
+        <div class="viewer-title" title="Doble clic para editar nombre y descripción">
           <img src="../assets/icon.svg" alt="" class="viewer-logo"/>
           <div class="viewer-copy">
-            <h2 id="architecture-title">Architecture</h2>
-            <p id="architecture-summary" class="summary"></p>
+            <h2 id="architecture-title" data-edit-field="title">Architecture</h2>
+            <p id="architecture-summary" class="summary" data-edit-field="description"></p>
           </div>
         </div>
-        <button id="menu-toggle" class="menu-toggle" type="button" aria-label="Open architecture menu" aria-expanded="false" aria-controls="architecture-menu">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
+        <div class="viewer-actions">
+          <button id="copy-slide" class="copy-slide" type="button" hidden aria-label="Copiar página 16:9" title="Copiar página 16:9"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5 9.3 3h5.4L16 5.5h3A2.5 2.5 0 0 1 21.5 8v10A2.5 2.5 0 0 1 19 20.5H5A2.5 2.5 0 0 1 2.5 18V8A2.5 2.5 0 0 1 5 5.5h3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></button>
+          <button id="menu-toggle" class="menu-toggle" type="button" aria-label="Abrir menú de proyectos" aria-expanded="false" aria-controls="architecture-menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
       </header>
 
       <iframe id="diagram-frame" class="diagram-frame" title="OCI diagram" src="../examples/arquitectura-web-oke-adb.html?embed=1" scrolling="no"></iframe>
     </section>
   </main>
+  <dialog id="action-confirmation" class="action-confirmation" aria-labelledby="confirmation-title" aria-describedby="confirmation-message">
+    <form method="dialog" class="confirmation-card">
+      <h2 id="confirmation-title">Confirmar acción</h2>
+      <p id="confirmation-message"></p>
+      <div class="confirmation-actions">
+        <button type="submit" value="cancel">Cancelar</button>
+        <button id="confirm-action" type="submit" value="confirm" class="confirm-primary">Continuar</button>
+      </div>
+    </form>
+  </dialog>
+  <script id="project-database" type="application/json">{"version":1,"updatedAt":"","projects":[]}</script>
 </body>
 </html>

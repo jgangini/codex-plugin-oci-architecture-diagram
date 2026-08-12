@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import base64
 import importlib.util
 import json
 import re
 import sys
 import tempfile
 import unittest
+import zipfile
+from io import BytesIO
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
@@ -224,6 +227,117 @@ class RendererTests(unittest.TestCase):
         self.assertNotIn('class="legend-item"', output)
         self.assertNotIn("static architecture diagram", output)
         self.assertNotIn("Unknown OCI service", output)
+
+    def test_case_deck_renders_three_16_by_9_tabs_from_validated_bom(self) -> None:
+        architecture = renderer.read_json(PLUGIN_ROOT / "examples" / "case-deck-web-architecture.json")
+        deck = renderer.read_json(PLUGIN_ROOT / "examples" / "case-deck-web.json")
+        bom_path = PLUGIN_ROOT / "examples" / "case-deck-web-bom.json"
+        bom_detail = renderer.read_bom_detail(bom_path)
+
+        output = renderer.render_case_deck_html(architecture, deck, bom_detail, self.catalog, CATALOG, bom_path)
+
+        self.assertIn('width:1920px', output)
+        self.assertIn('height:1080px', output)
+        self.assertIn('role="tab" id="tab-case"', output)
+        self.assertIn('role="tab" id="tab-architecture"', output)
+        self.assertIn('role="tab" id="tab-bom"', output)
+        self.assertIn("<h1>Use Case</h1>", output)
+        self.assertIn("Resumen del propósito y del contexto funcional del caso de uso analizado.", output)
+        self.assertIn("Vista de los servicios OCI, sus relaciones y el flujo de interacción de la solución.", output)
+        self.assertIn('class="case-content"', output)
+        self.assertIn('class="case-layout"', output)
+        self.assertIn('class="case-image"', output)
+        self.assertIn('role="img"', output)
+        self.assertIn("grid-template-columns:minmax(0, 1fr) minmax(0, 1fr)", output)
+        self.assertIn(str(deck["case"]["description"]), output)
+        self.assertNotIn('class="capture-slide"', output)
+        self.assertIn('data-capture-enabled', output)
+        self.assertIn("window.ociCopyActiveSlide = copySlide", output)
+        self.assertIn('type === "oci-copy-active-slide"', output)
+        self.assertIn('canvas.width = 1920', output)
+        self.assertIn('canvas.height = 1080', output)
+        self.assertIn('new ClipboardItem({ "image/png":png })', output)
+        self.assertIn("async function paintSlideElement", output)
+        self.assertIn("document.createRange()", output)
+        self.assertIn("await paintSlideElement(context, deck", output)
+        self.assertNotIn("<foreignObject", output)
+        self.assertNotIn("border-left:5px solid var(--oci)", output)
+        self.assertNotIn("background:#fff7f5; } .case-content", output)
+        self.assertIn("white-space:nowrap", output)
+        self.assertNotIn('class="case-single"', output)
+        self.assertNotIn("Servicios, componentes y rol", output)
+        self.assertIn("Container Engine for Kubernetes", output)
+        self.assertIn("USD 75.00", output)
+        self.assertIn("Bill of Materials (BoM)", output)
+        self.assertIn('aria-label="Descargar JSON"', output)
+        self.assertIn('aria-label="Abrir Oracle Cloud Cost Estimator"', output)
+        self.assertIn('<span>JSON</span>', output)
+        self.assertIn('<span>Cost Estimator</span>', output)
+        self.assertIn('class="action-icon"', output)
+        self.assertNotIn(">Abrir Cost Estimator<", output)
+        self.assertIn('class="deck-brand"', output)
+        self.assertIn('alt="Oracle"', output)
+        self.assertIn('data:image/svg+xml;base64,', output)
+        self.assertIn('right:56px; bottom:0;', output)
+        self.assertIn('padding:0; border:0; border-radius:0; background:transparent; box-shadow:none;', output)
+        self.assertIn('context.drawImage(element, box.x, box.y, box.width, box.height)', output)
+        self.assertIn("https://www.oracle.com/cloud/costestimator.html", output)
+        self.assertIn("menú de tres puntos", output)
+        embedded_bom = re.search(r'<script type="application/octet-stream" id="bom-download-data">([^<]+)</script>', output)
+        self.assertIsNotNone(embedded_bom)
+        self.assertEqual(base64.b64decode(embedded_bom.group(1)), bom_path.read_bytes())
+        self.assertIn('class="diagram-toolbar"', output)
+        self.assertIn(".architecture-canvas .edge-label rect", output)
+        self.assertIn(".architecture-canvas .edge-label text", output)
+        self.assertIn(".architecture-canvas .edge-label-traffic text", output)
+        self.assertIn("font-size:10px", output)
+        self.assertIn("grid-template-columns:1fr", output)
+        self.assertIn("background:linear-gradient(105deg, #ffffff 0%, #edf4fb 52%, #f8d8d2 100%)", output)
+        self.assertIn("height:146px; padding:34px 56px 0; border-bottom:1px solid var(--line);", output)
+        self.assertIn(".service-card strong { color:var(--teal); font-size:14px; }", output)
+        self.assertIn(".service-card p { margin:5px 0 0; color:var(--muted); font-size:13px; line-height:1.34; }", output)
+        self.assertIn(".diagram-stage { width:max-content; min-width:100%; min-height:100%; padding:0; }", output)
+        self.assertIn("viewport.clientWidth / baseWidth", output)
+        self.assertIn("zoom = Math.max(0.35, Math.min(2, nextZoom));", output)
+        self.assertIn("initialized = true;\n        fitDiagram();", output)
+        self.assertIn('data-node-id="oke"', output)
+        self.assertIn('tabindex="0"', output)
+        self.assertIn("is-highlighted", output)
+        self.assertNotIn("<span>Pods de aplicación</span>", output)
+        self.assertNotIn("Validación local; importación pendiente", output)
+        self.assertNotIn("Frescura de precio no verificada", output)
+        self.assertNotIn("No valorizado", output)
+
+    def test_case_deck_cards_follow_diagram_visual_reading_order(self) -> None:
+        architecture = renderer.read_json(PLUGIN_ROOT / "examples" / "case-deck-web-architecture.json")
+        deck = renderer.read_json(PLUGIN_ROOT / "examples" / "case-deck-web.json")
+
+        ordered = renderer.order_deck_components_by_architecture(list(reversed(deck["components"])), architecture)
+
+        self.assertEqual([component["nodeId"] for component in ordered], ["lb", "oke", "adb", "object-storage"])
+
+    def test_case_deck_rejects_unknown_architecture_node(self) -> None:
+        architecture = renderer.read_json(PLUGIN_ROOT / "examples" / "case-deck-web-architecture.json")
+        deck = renderer.read_json(PLUGIN_ROOT / "examples" / "case-deck-web.json")
+        deck["components"][0]["nodeId"] = "missing"
+        bom_detail = renderer.read_bom_detail(PLUGIN_ROOT / "examples" / "case-deck-web-bom.json")
+
+        with self.assertRaisesRegex(renderer.DiagramError, "must reference an architecture node"):
+            renderer.validate_deck_spec(deck, architecture, bom_detail)
+
+    def test_case_deck_requires_priced_components_to_match_architecture(self) -> None:
+        architecture = renderer.read_json(PLUGIN_ROOT / "examples" / "case-deck-web-architecture.json")
+        deck = renderer.read_json(PLUGIN_ROOT / "examples" / "case-deck-web.json")
+        bom_detail = renderer.read_bom_detail(PLUGIN_ROOT / "examples" / "case-deck-web-bom.json")
+
+        deck["components"][0]["pricingRefs"] = []
+        with self.assertRaisesRegex(renderer.DiagramError, "at least one estimated Oracle BoM line"):
+            renderer.validate_deck_spec(deck, architecture, bom_detail)
+
+        deck = renderer.read_json(PLUGIN_ROOT / "examples" / "case-deck-web.json")
+        architecture["nodes"].append({"id": "extra", "label": "Extra", "service": "Logging", "group": ""})
+        with self.assertRaisesRegex(renderer.DiagramError, "must match one-to-one"):
+            renderer.validate_deck_spec(deck, architecture, bom_detail)
 
     def test_duplicate_node_ids_are_rejected(self) -> None:
         spec = {
@@ -471,41 +585,80 @@ class PromptSuiteTests(unittest.TestCase):
 
 
 class LocalArchitectureSiteTests(unittest.TestCase):
-    def test_src_gallery_lists_generated_oke_adb_architecture(self) -> None:
+    def test_src_gallery_uses_portable_json_project_database(self) -> None:
         src = PLUGIN_ROOT / "src"
         index = (src / "index.html").read_text(encoding="utf-8")
-        architectures = (src / "architectures.js").read_text(encoding="utf-8")
+        projects = json.loads((src / "projects.json").read_text(encoding="utf-8"))
         app = (src / "app.js").read_text(encoding="utf-8")
         styles = (src / "styles.css").read_text(encoding="utf-8")
 
-        self.assertIn("./architectures.js", index)
+        self.assertNotIn("./architectures.js", index)
         self.assertIn("./app.js", index)
         self.assertIn("diagram-frame", index)
         self.assertIn("viewer-logo", index)
         self.assertIn("menu-toggle", index)
+        self.assertIn("copy-slide", index)
+        self.assertIn("export-projects", index)
+        self.assertIn("project-footer", index)
+        self.assertIn('id="action-confirmation"', index)
+        self.assertIn('id="confirm-action"', index)
+        self.assertIn('aria-label="Exportar proyectos seleccionados como ZIP"', index)
+        self.assertIn("<svg", index)
+        self.assertNotIn('id="duplicate-project"', index)
+        self.assertNotIn("Seleccione proyectos para compartir", index)
+        self.assertIn("project-database", index)
+        self.assertIn('data-edit-field="title"', index)
+        self.assertIn('data-edit-field="description"', index)
         self.assertIn('scrolling="no"', index)
-        self.assertIn("Search architectures", index)
-        self.assertIn("Architectures", index)
+        self.assertIn("Buscar proyectos", index)
+        self.assertIn("Casos, arquitecturas y BoM", index)
         self.assertNotIn("architecture-category", index)
         self.assertNotIn('class="eyebrow"', index)
-        self.assertNotIn("Abrir", index)
-        self.assertNotIn("Filtrar", index)
-        self.assertIn("arquitectura-web-oke-adb", architectures)
-        self.assertIn("../examples/arquitectura-web-oke-adb.html", architectures)
-        self.assertIn("arquitectura-web-oke-adb-generative-ai", architectures)
-        self.assertIn("../examples/arquitectura-web-oke-adb-generative-ai.html", architectures)
-        self.assertIn("window.OCI_ARCHITECTURES", architectures)
+        self.assertEqual(1, projects["version"])
+        self.assertGreaterEqual(len(projects["projects"]), 4)
+        self.assertTrue(all(project["path"].startswith("../examples/") for project in projects["projects"]))
+        self.assertIn('fetch(DATABASE_URL', app)
+        self.assertIn('method: "PUT"', app)
+        self.assertIn('const SAVE_URL = "/api/projects"', app)
         self.assertIn("embeddedPath", app)
-        self.assertIn("hideRepeatedFrameTitle", app)
         self.assertIn("resizeFrameToContent", app)
+        self.assertIn("beginInlineEdit", app)
+        self.assertIn('addEventListener("dblclick"', app)
+        self.assertIn("duplicateProject", app)
+        self.assertIn("deleteProject", app)
+        self.assertIn("confirmAction", app)
+        self.assertNotIn("requestInlineEdit", app)
+        self.assertIn('"Guardar cambios"', app)
+        self.assertIn("oci-copy-active-slide", app)
+        self.assertIn('[data-capture-enabled]', app)
+        self.assertIn("requestExport", app)
+        self.assertIn('duplicate.className = "duplicate-project"', app)
+        self.assertIn('remove.className = "delete-project"', app)
+        self.assertNotIn("<span>Duplicar</span>", app)
+        self.assertIn('selectionLabel.className = "project-selection"', app)
+        self.assertIn("updateExportControl", app)
+        self.assertIn("exportSelectedProjects", app)
+        self.assertIn("zipStore", app)
+        self.assertIn('type: "application/zip"', app)
+        self.assertIn('frame.classList.contains("is-deck")', app)
         self.assertIn('doc.documentElement.style.overflowY = "hidden"', app)
         viewer_header_css = styles.split(".viewer-header {", 1)[1].split("}", 1)[0]
         self.assertIn("position: sticky;", viewer_header_css)
         self.assertIn("top: 0;", viewer_header_css)
         self.assertIn("z-index: 10;", viewer_header_css)
         self.assertIn(".viewer-logo", styles)
+        self.assertIn(".diagram-frame.is-deck", styles)
+        self.assertIn(".copy-slide", styles)
+        self.assertIn("border: 1px solid #b8c5cf;", styles)
+        self.assertIn(".project-footer", styles)
+        self.assertIn(".duplicate-project", styles)
+        self.assertIn(".delete-project", styles)
+        self.assertIn(".action-confirmation", styles)
+        self.assertIn(".project-row", styles)
+        self.assertIn('[data-edit-field].is-editing', styles)
         self.assertNotIn(".eyebrow", styles)
-        self.assertNotIn("file://", index + architectures + app)
+        self.assertNotIn("file://", index + app)
+        self.assertNotIn("Seleccione al menos un proyecto para generar el ZIP.", index + app)
 
     def test_local_server_defaults_to_src_gallery(self) -> None:
         self.assertEqual("127.0.0.1", site_server.DEFAULT_HOST)
@@ -521,6 +674,71 @@ class LocalArchitectureSiteTests(unittest.TestCase):
             site_server.local_gallery_url("127.0.0.1", 8765, "web-architecture"),
         )
 
+    def test_local_server_validates_project_database_before_writing(self) -> None:
+        database = json.loads((PLUGIN_ROOT / "src" / "projects.json").read_text(encoding="utf-8"))
+
+        self.assertIs(database, site_server.validate_project_database(database))
+        invalid = json.loads(json.dumps(database))
+        invalid["projects"][0]["path"] = "https://example.com/project.html"
+        with self.assertRaisesRegex(ValueError, "must reference"):
+            site_server.validate_project_database(invalid)
+
+    def test_project_export_contains_only_selected_portable_html(self) -> None:
+        payload = site_server.build_project_export(PLUGIN_ROOT, ["case-deck-web"])
+
+        with zipfile.ZipFile(BytesIO(payload)) as archive:
+            names = set(archive.namelist())
+            exported = json.loads(archive.read("src/projects.json"))
+            index = archive.read("src/index.html").decode("utf-8")
+
+        self.assertIn("examples/case-deck-web.html", names)
+        self.assertIn("src/app.js", names)
+        self.assertIn("src/styles.css", names)
+        self.assertIn("assets/icon.svg", names)
+        self.assertIn("assets/ora.svg", names)
+        self.assertEqual(["case-deck-web"], [project["id"] for project in exported["projects"]])
+        self.assertIn('"id": "case-deck-web"', index)
+        self.assertNotIn('"id": "live-query-ecommerce"', index)
+
+    def test_project_version_materializes_independent_html_copy(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "src").mkdir()
+            (root / "examples").mkdir()
+            source = root / "examples" / "case.html"
+            source.write_text("<html>case v1</html>", encoding="utf-8")
+            current = {
+                "version": 1,
+                "updatedAt": "",
+                "projects": [
+                    {
+                        "id": "case",
+                        "familyId": "case",
+                        "version": 1,
+                        "title": "Case",
+                        "description": "Case description",
+                        "category": "Case Deck",
+                        "format": "deck",
+                        "path": "../examples/case.html",
+                    }
+                ],
+            }
+            updated = json.loads(json.dumps(current))
+            updated["projects"].append(
+                {
+                    **current["projects"][0],
+                    "id": "case-v2",
+                    "version": 2,
+                    "title": "Case — v2",
+                    "path": "../examples/case-v2.html",
+                }
+            )
+
+            created = site_server.materialize_project_versions(root, current, updated)
+
+            self.assertEqual([root / "examples" / "case-v2.html"], created)
+            self.assertEqual(source.read_bytes(), created[0].read_bytes())
+
 
 class SkillPackagingTests(unittest.TestCase):
     def test_plugin_is_published_as_repo_marketplace(self) -> None:
@@ -529,6 +747,7 @@ class SkillPackagingTests(unittest.TestCase):
         plugin_entry = marketplace["plugins"][0]
 
         self.assertEqual("oci-architecture-diagram", manifest["name"])
+        self.assertEqual("0.4.0", manifest["version"])
         self.assertEqual("Joel Gangini", manifest["author"]["name"])
         self.assertEqual("Joel Gangini", manifest["interface"]["developerName"])
         self.assertEqual("oci-architecture", marketplace["name"])
@@ -565,9 +784,14 @@ class SkillPackagingTests(unittest.TestCase):
                 "?diagram=<diagram-id>",
             ],
             "oci-diagram-visual-qa": ["Browser Checks", "diagram-toolbar", "Browser plugin", "Browser Delivery"],
+            "oci-architecture-case-deck": ["Start gate", "Workflow", "Delivery"],
+            "oci-architecture-commercial-discovery": ["facts", "assumptions"],
+            "oci-architecture-solution": ["service map", "sizing driver"],
+            "oci-architecture-sizing": ["Oracle Cost Estimator JSON", "pricing"],
+            "oci-architecture-curation": ["Audit", "customer evidence"],
         }
 
-        self.assertGreaterEqual(len(list(SKILLS.glob("*/SKILL.md"))), 6)
+        self.assertGreaterEqual(len(list(SKILLS.glob("*/SKILL.md"))), 11)
         for skill_name, required_phrases in expected.items():
             with self.subTest(skill=skill_name):
                 skill_path = SKILLS / skill_name / "SKILL.md"

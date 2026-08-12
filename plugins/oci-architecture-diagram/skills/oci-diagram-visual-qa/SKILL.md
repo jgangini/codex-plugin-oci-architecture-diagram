@@ -24,7 +24,9 @@ URL with the Browser plugin, then verify:
   service name below it. Functional component names stay out of the visible card.
 - Icons must not have an extra colored tile, rounded square, or other backdrop
   behind the official SVG.
-- Edge labels sit on or near their paths and do not overlap node cards.
+- Edge labels sit on or near their paths and do not overlap node cards. Their
+  rectangles use a light fill and their text uses a contrasting semantic color;
+  no label may inherit SVG's black default fill.
 - Edge colors differ by semantic flow.
 - Group labels have enough top padding and do not touch node cards.
 - Public, app, data, operations, and platform groups are aligned, readable, and
@@ -41,7 +43,17 @@ URL with the Browser plugin, then verify:
 - Service inventory uses the English heading `Architecture Services` and a
   table with visible column headers. Rows must flow naturally without vertical
   pagination or an internal height-limited scroll area.
+- In case decks, each service card shows only the service name and its concise
+  architectural role. Hover and keyboard focus must highlight the corresponding
+  SVG node and clear the highlight on exit or blur.
+- The upper-right capture icon is visible on every tab, copies the active slide
+  as a 1920×1080 PNG, omits itself from the image, and reports clipboard status
+  accessibly.
 - The gallery root shows links to generated diagrams without debug counters.
+- The project menu remains available for diagrams and decks, loads from
+  `projects.json`, supports double-click metadata editing and creates a new
+  version when duplicating. ZIP export must contain only checked projects and a
+  matching portable project database.
 
 Use the Browser plugin as the visual QA surface. Do not import standalone
 Playwright packages or drive a separate browser process for this plugin flow;

@@ -4,10 +4,12 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import html
 import json
 import math
 import re
+import subprocess
 import sys
 import textwrap
 import unicodedata
@@ -17,6 +19,8 @@ from typing import Any
 
 PLUGIN_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CATALOG = PLUGIN_ROOT / "assets" / "oci-icons" / "catalog.json"
+DEFAULT_BOM_TOOL = PLUGIN_ROOT / "scripts" / "oracle-bom.mjs"
+DECK_BRAND_FILE = PLUGIN_ROOT / "assets" / "ora.svg"
 
 NODE_W = 184
 NODE_H = 112
@@ -519,6 +523,7 @@ def extract_svg_inner(svg: str) -> tuple[str, str]:
     body_match = re.search(r"<svg[^>]*>(.*)</svg>", svg, re.IGNORECASE | re.DOTALL)
     viewbox = viewbox_match.group(1) if viewbox_match else "0 0 100 100"
     body = body_match.group(1).strip() if body_match else GENERIC_SVG
+    body = "\n".join(line.rstrip() for line in body.splitlines())
     return viewbox, body
 
 
@@ -1328,6 +1333,546 @@ def render_html(spec: dict[str, Any], catalog: dict[str, Any], catalog_path: Pat
 """
 
 
+def require_deck_string(value: Any, path: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise DiagramError(f"{path} must be a non-empty string.")
+    return value.strip()
+
+
+def optional_deck_list(value: Any, path: str) -> list[str]:
+    if value is None:
+        return []
+    if not isinstance(value, list) or any(not isinstance(item, str) or not item.strip() for item in value):
+        raise DiagramError(f"{path} must be an array of non-empty strings.")
+    return [item.strip() for item in value]
+
+
+def read_bom_detail(bom_path: Path, bom_tool: Path = DEFAULT_BOM_TOOL) -> dict[str, Any]:
+    if not bom_tool.exists():
+        raise DiagramError(f"Oracle BoM validator not found: {bom_tool}")
+    try:
+        completed = subprocess.run(
+            ["node", str(bom_tool), "detail", str(bom_path)],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
+    except FileNotFoundError as exc:
+        raise DiagramError("Node.js is required to validate the Oracle Cost Estimator JSON.") from exc
+    if completed.returncode:
+        detail = completed.stderr.strip() or completed.stdout.strip() or "unknown Oracle BoM validation error"
+        raise DiagramError(f"Oracle Cost Estimator JSON rejected: {detail}")
+    try:
+        detail = json.loads(completed.stdout)
+    except json.JSONDecodeError as exc:
+        raise DiagramError("Oracle BoM validator returned invalid JSON.") from exc
+    if not isinstance(detail, dict) or not isinstance(detail.get("summary"), dict) or not isinstance(detail.get("items"), list):
+        raise DiagramError("Oracle BoM validator returned an incomplete detail payload.")
+    return detail
+
+
+def validate_deck_spec(
+    deck: dict[str, Any],
+    architecture: dict[str, Any],
+    bom_detail: dict[str, Any],
+) -> list[dict[str, Any]]:
+    if deck.get("version") != 1:
+        raise DiagramError("Case deck version must be 1.")
+    case = deck.get("case")
+    if not isinstance(case, dict):
+        raise DiagramError("Case deck requires a case object.")
+    require_deck_string(case.get("summary"), "case.summary")
+    require_deck_string(case.get("objective"), "case.objective")
+    if case.get("description") is not None:
+        require_deck_string(case.get("description"), "case.description")
+    for key in ("scope", "assumptions", "openDecisions"):
+        optional_deck_list(case.get(key), f"case.{key}")
+
+    bom = deck.get("bom")
+    if not isinstance(bom, dict):
+        raise DiagramError("Case deck requires a bom object.")
+    if bom.get("scenario") not in {"low", "base", "high"}:
+        raise DiagramError("bom.scenario must be low, base, or high.")
+    if bom.get("validation") not in {"browser_validated", "locally_validated", "blocked"}:
+        raise DiagramError("bom.validation must be browser_validated, locally_validated, or blocked.")
+    if bom.get("priceFreshness") not in {"current", "unverified"}:
+        raise DiagramError("bom.priceFreshness must be current or unverified.")
+
+    components = deck.get("components")
+    if not isinstance(components, list) or not components:
+        raise DiagramError("Case deck requires at least one component.")
+    if len(components) > 14:
+        raise DiagramError("Case deck supports at most 14 components per 16:9 slide.")
+
+    architecture_node_ids = {str(node["id"]) for node in architecture.get("nodes", [])}
+    items_by_ref: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for item in bom_detail["items"]:
+        key = (str(item["configuration"]), str(item["service"]))
+        items_by_ref.setdefault(key, []).append(item)
+    estimated_price_lines = {
+        (str(item["configuration"]), str(item["service"]), str(item["sku"]))
+        for item in bom_detail["items"]
+        if float(item["monthlyCost"]) > 0
+    }
+
+    component_ids: set[str] = set()
+    mapped_node_ids: set[str] = set()
+    referenced_price_lines: set[tuple[str, str, str | None]] = set()
+    covered_price_lines: set[tuple[str, str, str]] = set()
+    validated_components: list[dict[str, Any]] = []
+    for index, component in enumerate(components):
+        base = f"components[{index}]"
+        if not isinstance(component, dict):
+            raise DiagramError(f"{base} must be an object.")
+        component_id = require_deck_string(component.get("id"), f"{base}.id")
+        if component_id in component_ids:
+            raise DiagramError(f"Duplicate case deck component id: {component_id}")
+        component_ids.add(component_id)
+        node_id = require_deck_string(component.get("nodeId"), f"{base}.nodeId")
+        if node_id not in architecture_node_ids:
+            raise DiagramError(f"{base}.nodeId must reference an architecture node.")
+        if node_id in mapped_node_ids:
+            raise DiagramError(f"Duplicate case deck architecture node: {node_id}")
+        mapped_node_ids.add(node_id)
+        for key in ("service", "component", "role", "sizing"):
+            require_deck_string(component.get(key), f"{base}.{key}")
+
+        pricing_refs = component.get("pricingRefs", [])
+        if not isinstance(pricing_refs, list) or not pricing_refs:
+            raise DiagramError(f"{base}.pricingRefs must contain at least one estimated Oracle BoM line.")
+        embedded_monthly_cost = 0.0
+        for reference_index, reference in enumerate(pricing_refs):
+            ref_base = f"{base}.pricingRefs[{reference_index}]"
+            if not isinstance(reference, dict):
+                raise DiagramError(f"{ref_base} must be an object.")
+            configuration = require_deck_string(reference.get("configuration"), f"{ref_base}.configuration")
+            service = require_deck_string(reference.get("service"), f"{ref_base}.service")
+            sku = reference.get("sku")
+            if sku is not None:
+                sku = require_deck_string(sku, f"{ref_base}.sku")
+            line_key = (configuration, service, sku)
+            if line_key in referenced_price_lines:
+                raise DiagramError(f"Duplicate Oracle BoM price reference: {configuration} / {service} / {sku or '*'}")
+            matches = items_by_ref.get((configuration, service), [])
+            if sku is not None:
+                matches = [item for item in matches if str(item["sku"]) == sku]
+            if not matches:
+                raise DiagramError(f"Unknown Oracle BoM price reference: {configuration} / {service} / {sku or '*'}")
+            referenced_price_lines.add(line_key)
+            matched_price_lines = {
+                (configuration, service, str(item["sku"]))
+                for item in matches
+                if float(item["monthlyCost"]) > 0
+            }
+            overlap = covered_price_lines & matched_price_lines
+            if overlap:
+                raise DiagramError(f"Oracle BoM price lines are referenced more than once: {configuration} / {service}")
+            covered_price_lines.update(matched_price_lines)
+            embedded_monthly_cost += sum(float(item["monthlyCost"]) for item in matches)
+        if embedded_monthly_cost <= 0:
+            raise DiagramError(f"{base} must have a positive monthly estimate in the Oracle BoM.")
+        validated_components.append({**component, "embeddedMonthlyCost": embedded_monthly_cost})
+    if mapped_node_ids != architecture_node_ids:
+        missing = sorted(architecture_node_ids - mapped_node_ids)
+        extra = sorted(mapped_node_ids - architecture_node_ids)
+        detail = "; ".join(part for part in (
+            f"architecture-only nodes: {', '.join(missing)}" if missing else "",
+            f"component-only nodes: {', '.join(extra)}" if extra else "",
+        ) if part)
+        raise DiagramError(f"Architecture and estimated BoM components must match one-to-one ({detail}).")
+    uncovered_price_lines = estimated_price_lines - covered_price_lines
+    if uncovered_price_lines:
+        configurations = sorted({configuration for configuration, _service, _sku in uncovered_price_lines})
+        raise DiagramError(f"Estimated Oracle BoM lines are missing from the architecture: {', '.join(configurations)}")
+    return validated_components
+
+
+def render_deck_list(items: list[str], empty_text: str) -> str:
+    if not items:
+        return f'<p class="empty-copy">{html.escape(empty_text)}</p>'
+    return "<ul>" + "".join(f"<li>{html.escape(item)}</li>" for item in items) + "</ul>"
+
+
+def render_deck_component_cards(components: list[dict[str, Any]]) -> str:
+    return "".join(
+        f"""
+        <article class="service-card" data-node-id="{html.escape(str(component["nodeId"]))}" tabindex="0" aria-label="{html.escape(str(component["service"]))}: {html.escape(str(component["role"]))}">
+          <strong>{html.escape(str(component["service"]))}</strong>
+          <p>{html.escape(str(component["role"]))}</p>
+        </article>"""
+        for component in components
+    )
+
+
+def order_deck_components_by_architecture(
+    components: list[dict[str, Any]], architecture: dict[str, Any]
+) -> list[dict[str, Any]]:
+    nodes, edges, groups, _warnings = validate_spec(architecture)
+    positions = layout_nodes(nodes, edges)
+    positions = resolve_group_overlaps(groups, nodes, positions)
+    positions = normalize_canvas_origin(groups, nodes, positions)
+    reading_order = {
+        node_id: index
+        for index, (node_id, _position) in enumerate(
+            sorted(positions.items(), key=lambda item: (item[1][0], item[1][1], item[0]))
+        )
+    }
+    return sorted(
+        components,
+        key=lambda component: (
+            reading_order.get(str(component["nodeId"]), len(reading_order)),
+            str(component["nodeId"]),
+        ),
+    )
+
+
+def format_money(value: float, currency: str) -> str:
+    return f"{currency} {value:,.2f}"
+
+
+def render_deck_bom_rows(components: list[dict[str, Any]], currency: str) -> str:
+    rows = []
+    for component in components:
+        amount = float(component["embeddedMonthlyCost"])
+        price_text = format_money(amount, currency)
+        rows.append(
+            f"""
+            <tr>
+              <td>{html.escape(str(component["service"]))}</td>
+              <td><strong>{html.escape(str(component["component"]))}</strong><span>{html.escape(str(component["role"]))}</span></td>
+              <td>{html.escape(str(component["sizing"]))}</td>
+              <td>{html.escape(price_text)}</td>
+            </tr>"""
+        )
+    return "".join(rows)
+
+
+def render_case_deck_html(
+    architecture: dict[str, Any],
+    deck: dict[str, Any],
+    bom_detail: dict[str, Any],
+    catalog: dict[str, Any],
+    catalog_path: Path,
+    bom_path: Path,
+) -> str:
+    components = validate_deck_spec(deck, architecture, bom_detail)
+    architecture_components = order_deck_components_by_architecture(components, architecture)
+    svg, warnings, _used_services = render_svg(architecture, catalog, catalog_path)
+    case = deck["case"]
+    bom = deck["bom"]
+    summary = bom_detail["summary"]
+    title = str(architecture.get("title", "OCI Architecture Case"))
+    currency = str(summary["currency"])
+    case_page_description = "Resumen del propósito y del contexto funcional del caso de uso analizado."
+    architecture_page_description = "Vista de los servicios OCI, sus relaciones y el flujo de interacción de la solución."
+    case_description = str(case.get("description") or f'Este caso de uso presenta la necesidad funcional de la solución: {case["objective"]}')
+    bom_download = base64.b64encode(bom_path.read_bytes()).decode("ascii")
+    try:
+        deck_brand = "data:image/svg+xml;base64," + base64.b64encode(DECK_BRAND_FILE.read_bytes()).decode("ascii")
+    except OSError as exc:
+        raise DiagramError(f"Unable to embed deck brand asset: {DECK_BRAND_FILE}") from exc
+    warnings_markup = "" if not warnings else (
+        '<aside class="deck-warnings"><strong>Advertencias del diagrama</strong><ul>'
+        + "".join(f"<li>{html.escape(warning)}</li>" for warning in warnings)
+        + "</ul></aside>"
+    )
+    return f"""<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{html.escape(title)} — Deck</title>
+  <style>
+    :root {{ color-scheme: light; --ink:#252a30; --muted:#52616f; --line:#ced6dd; --oci:#c74634; --teal:#235967; --soft:#f4f7f8; }}
+    * {{ box-sizing:border-box; }}
+    html, body {{ width:100%; min-width:320px; min-height:100%; margin:0; overflow:hidden; font-family:Arial, Helvetica, sans-serif; color:var(--ink); background:#e8edf0; }}
+    .deck-host {{ display:flex; width:100vw; min-height:100vh; align-items:center; justify-content:center; overflow:hidden; }}
+    .deck {{ position:relative; width:1920px; height:1080px; flex:0 0 auto; overflow:hidden; background:#fff; box-shadow:0 16px 42px rgba(30, 47, 57, .18); transform-origin:center center; }}
+    .deck-header {{ display:grid; grid-template-columns:minmax(0, 1fr) auto; gap:28px; height:146px; padding:34px 56px 0; border-bottom:1px solid var(--line); background:linear-gradient(105deg, #ffffff 0%, #edf4fb 52%, #f8d8d2 100%); }}
+    .eyebrow {{ margin:0 0 8px; color:var(--oci); font-size:18px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }}
+    h1 {{ margin:0; font-size:38px; line-height:1.05; }} .case-summary {{ max-width:none; margin:10px 0 0; color:var(--muted); font-size:19px; line-height:1.32; white-space:nowrap; }}
+    .header-actions {{ align-self:end; display:flex; align-items:center; gap:10px; }} [role="tablist"] {{ display:flex; gap:8px; }} [role="tab"] {{ min-width:132px; min-height:46px; border:1px solid var(--line); border-radius:7px 7px 0 0; padding:0 18px; color:#41515e; background:#fff; font-size:17px; font-weight:700; cursor:pointer; }} [role="tab"][aria-selected="true"] {{ border-color:var(--oci); color:#fff; background:var(--oci); }}
+    .capture-status {{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }}
+    [role="tabpanel"] {{ display:none; height:934px; padding:34px 56px 42px; }} [role="tabpanel"].is-active {{ display:block; }}
+    .slide-title {{ margin:0; font-size:29px; line-height:1.15; }} .slide-subtitle {{ margin:8px 0 22px; color:var(--muted); font-size:18px; }}
+    .case-layout {{ display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1fr); gap:34px; height:100%; align-items:stretch; }}
+    .case-visual {{ display:flex; flex-direction:column; min-width:0; margin:0; padding:32px; border:1px solid var(--line); background:linear-gradient(145deg,#f7fafb,#eef4f6); }} .case-image {{ width:100%; height:100%; min-height:0; }} .case-visual figcaption {{ margin-top:16px; color:var(--muted); font-size:16px; text-align:center; }}
+    .case-content {{ display:flex; align-items:center; min-width:0; padding:28px 22px; }} .case-content p {{ margin:0; color:var(--ink); font-size:30px; font-weight:700; line-height:1.42; }}
+    .architecture-layout {{ display:grid; grid-template-columns:390px minmax(0, 1fr); grid-template-rows:1fr; gap:20px; height:858px; }}
+    .architecture-canvas {{ position:relative; grid-column:2; grid-row:1; min-height:0; overflow:hidden; border:1px solid var(--line); background:#fff; }}
+    .architecture-canvas .canvas {{ fill:#fff; }} .architecture-canvas .edge {{ fill:none; stroke:var(--muted); stroke-width:1.65; stroke-linecap:round; opacity:.9; }} .architecture-canvas .node {{ transition:opacity .16s ease; }} .architecture-canvas .node.is-muted {{ opacity:.28; }} .architecture-canvas .node-card {{ fill:#fff; stroke:#c9d1d9; stroke-width:1.2; filter:drop-shadow(0 2px 5px rgba(49,45,42,.10)); transition:stroke .16s ease,stroke-width .16s ease; }} .architecture-canvas .node.is-highlighted .node-card {{ stroke:var(--oci); stroke-width:3; filter:drop-shadow(0 4px 9px rgba(199,70,52,.24)); }} .architecture-canvas .node-service-name {{ fill:var(--ink); font-size:13px; font-weight:700; }}
+    .architecture-canvas .edge-label {{ pointer-events:none; }}
+    .architecture-canvas .edge-label rect {{ fill:rgba(255,255,255,.96); stroke:#c7d0da; stroke-width:1; }}
+    .architecture-canvas .edge-label text {{ fill:var(--muted); font-size:10px; font-weight:700; }}
+    .architecture-canvas .edge-label-traffic rect {{ stroke:#93b6bd; fill:#f1f9fa; }} .architecture-canvas .edge-label-traffic text {{ fill:#2c5967; }}
+    .architecture-canvas .edge-label-data rect {{ stroke:#b3c99d; fill:#f6fbf1; }} .architecture-canvas .edge-label-data text {{ fill:#557537; }}
+    .architecture-canvas .edge-label-events rect {{ stroke:#d2b18e; fill:#fff8f0; }} .architecture-canvas .edge-label-events text {{ fill:#865825; }}
+    .architecture-canvas .edge-label-admin rect {{ stroke:#c0b7df; fill:#f7f5ff; }} .architecture-canvas .edge-label-admin text {{ fill:#5f4f98; }}
+    .architecture-canvas .edge-label-security rect {{ stroke:#d6aaa5; fill:#fff5f3; }} .architecture-canvas .edge-label-security text {{ fill:#8f3f37; }}
+    .architecture-canvas .edge-label-observability rect {{ stroke:#a6c6d1; fill:#f2f9fb; }} .architecture-canvas .edge-label-observability text {{ fill:#426f82; }}
+    .service-band {{ grid-column:1; grid-row:1; align-self:start; overflow:hidden; padding:10px 12px; border-right:5px solid var(--oci); background:#f8fafb; }}
+    .service-grid {{ display:grid; grid-template-columns:1fr; grid-auto-rows:auto; gap:7px; }} .service-card {{ min-height:0; padding:10px 12px; border:1px solid var(--line); background:#fff; overflow:hidden; cursor:pointer; transition:border-color .16s ease,background .16s ease,box-shadow .16s ease; }} .service-card:hover,.service-card:focus-visible,.service-card.is-active {{ border-color:var(--oci); background:#fff7f5; box-shadow:0 2px 8px rgba(199,70,52,.14); outline:none; }} .service-card strong,.service-card p {{ display:block; white-space:normal; }} .service-card strong {{ color:var(--teal); font-size:14px; }} .service-card p {{ margin:5px 0 0; color:var(--muted); font-size:13px; line-height:1.34; }}
+    .diagram-viewport {{ position:absolute; inset:0; overflow:auto; background:#f7f9fb; cursor:grab; scrollbar-color:#8ea0aa transparent; scrollbar-width:thin; }} .diagram-viewport.is-panning {{ cursor:grabbing; user-select:none; }} .diagram-stage {{ width:max-content; min-width:100%; min-height:100%; padding:0; }} .diagram-viewport .diagram {{ display:block; max-width:none; }}
+    .diagram-toolbar {{ position:absolute; right:16px; bottom:16px; z-index:4; display:flex; flex-direction:column; gap:6px; }} .diagram-toolbar button {{ min-width:44px; height:36px; border:1px solid #c9d1d9; border-radius:6px; color:var(--ink); background:#fff; box-shadow:0 2px 5px rgba(49,45,42,.14); font:700 15px Arial,Helvetica,sans-serif; cursor:pointer; }} .diagram-toolbar button:hover {{ border-color:var(--teal); color:var(--teal); }} .diagram-toolbar .zoom-fit {{ min-width:54px; font-size:13px; }}
+    .bom-head {{ display:grid; grid-template-columns:minmax(0, 420px) minmax(0, 1fr); gap:14px; margin-bottom:22px; }} .metric {{ padding:17px 20px; border:1px solid var(--line); background:var(--soft); }} .metric span {{ display:block; color:var(--muted); font-size:14px; font-weight:700; text-transform:uppercase; }} .metric strong {{ display:block; margin-top:6px; color:var(--teal); font-size:24px; line-height:1.12; }}
+    .bom-actions {{ display:flex; align-items:center; justify-content:space-between; gap:24px; padding:14px 18px; border:1px solid var(--line); background:#fff; }} .bom-actions p {{ margin:0; color:var(--muted); font-size:15px; line-height:1.35; }} .bom-actions strong {{ color:var(--ink); }} .bom-action-links {{ display:flex; flex:0 0 auto; align-items:center; gap:10px; }} .bom-action-links a,.download-bom {{ display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:42px; border-radius:5px; padding:0 16px; font:700 15px Arial,Helvetica,sans-serif; text-decoration:none; cursor:pointer; }} .bom-action-links a {{ border:1px solid var(--teal); color:var(--teal); background:#fff; }} .download-bom {{ border:1px solid var(--oci); color:#fff; background:var(--oci); }} .bom-action-links .action-icon {{ width:20px; height:20px; flex:0 0 auto; }} .bom-action-links a:hover,.bom-action-links a:focus-visible,.download-bom:hover,.download-bom:focus-visible {{ outline:3px solid rgba(199,70,52,.18); outline-offset:2px; }}
+    .bom-table {{ width:100%; border-collapse:collapse; table-layout:fixed; font-size:16px; }} .bom-table th {{ padding:12px 14px; color:#fff; background:var(--teal); text-align:left; font-size:14px; text-transform:uppercase; }} .bom-table td {{ padding:11px 14px; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.25; }} .bom-table tbody tr:nth-child(even) {{ background:#f7f9fa; }} .bom-table th:nth-child(1) {{ width:20%; }} .bom-table th:nth-child(2) {{ width:26%; }} .bom-table th:nth-child(3) {{ width:38%; }} .bom-table th:nth-child(4) {{ width:16%; text-align:right; }} .bom-table td:nth-child(4) {{ text-align:right; font-weight:700; }} .bom-table td span {{ display:block; margin-top:4px; color:var(--muted); font-size:14px; }}
+    .deck-warnings {{ position:absolute; right:20px; bottom:20px; max-width:440px; padding:12px 16px; border:1px solid #dfb6a9; background:#fff4f1; font-size:13px; }}
+    .deck-brand {{ position:absolute; right:56px; bottom:0; z-index:6; width:80px; height:80px; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; pointer-events:none; }} .deck-brand img {{ display:block; width:100%; height:100%; object-fit:contain; }} #slide-architecture .diagram-toolbar {{ right:110px; }}
+    @media print {{ html, body {{ background:#fff; }} .deck {{ box-shadow:none; }} }}
+  </style>
+</head>
+<body>
+  <div class="deck-host"><main class="deck" data-capture-enabled>
+    <header class="deck-header">
+      <div><p class="eyebrow">OCI Architecture + BoM</p><h1>Use Case</h1><p class="case-summary">{html.escape(case_page_description)}</p></div>
+      <div class="header-actions"><div role="tablist" aria-label="Láminas del caso">
+        <button type="button" role="tab" id="tab-case" aria-controls="slide-case" aria-selected="true" data-tab="case">Caso</button>
+        <button type="button" role="tab" id="tab-architecture" aria-controls="slide-architecture" aria-selected="false" data-tab="architecture">Arquitectura</button>
+        <button type="button" role="tab" id="tab-bom" aria-controls="slide-bom" aria-selected="false" data-tab="bom">BoM</button>
+      </div><span class="capture-status" data-capture-exclude aria-live="polite"></span></div>
+    </header>
+    <div class="deck-brand"><img src="{deck_brand}" alt="Oracle"/></div>
+    <section id="slide-case" role="tabpanel" aria-labelledby="tab-case" class="is-active"><div class="case-layout"><figure class="case-visual"><svg class="case-image" viewBox="0 0 760 560" role="img" aria-labelledby="case-image-title case-image-description"><title id="case-image-title">Flujo visual del caso de uso</title><desc id="case-image-description">Una entrada es procesada por una solución OCI para producir un resultado útil.</desc><defs><marker id="case-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#235967"/></marker></defs><rect x="16" y="16" width="728" height="528" rx="24" fill="#ffffff" stroke="#ced6dd"/><path d="M220 280 H302" fill="none" stroke="#235967" stroke-width="5" marker-end="url(#case-arrow)"/><path d="M458 280 H540" fill="none" stroke="#235967" stroke-width="5" marker-end="url(#case-arrow)"/><g transform="translate(54 180)"><rect width="166" height="200" rx="16" fill="#f4f7f8" stroke="#93b6bd" stroke-width="2"/><path d="M54 48 H112 M54 72 H112 M54 96 H98" stroke="#235967" stroke-width="7" stroke-linecap="round"/><text x="83" y="150" text-anchor="middle" fill="#252a30" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="700">Entrada</text></g><g transform="translate(302 154)"><rect width="156" height="252" rx="20" fill="#fff4f1" stroke="#c74634" stroke-width="3"/><circle cx="78" cy="76" r="36" fill="#ffffff" stroke="#c74634" stroke-width="3"/><path d="M60 76 H96 M78 58 V94" stroke="#c74634" stroke-width="7" stroke-linecap="round"/><text x="78" y="152" text-anchor="middle" fill="#252a30" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="700">Solución</text><text x="78" y="180" text-anchor="middle" fill="#235967" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="700">OCI</text></g><g transform="translate(540 180)"><rect width="166" height="200" rx="16" fill="#f6fbf1" stroke="#b3c99d" stroke-width="2"/><path d="M47 60 L72 85 L119 42" fill="none" stroke="#557537" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><text x="83" y="150" text-anchor="middle" fill="#252a30" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="700">Resultado</text></g></svg><figcaption>Entrada → solución OCI → resultado</figcaption></figure><article class="case-content"><p>{html.escape(case_description)}</p></article></div></section>
+    <section id="slide-architecture" role="tabpanel" aria-labelledby="tab-architecture">
+      <div class="architecture-layout"><section class="service-band" aria-label="Servicios y roles"><div class="service-grid">{render_deck_component_cards(architecture_components)}</div></section><div class="architecture-canvas"><div class="diagram-viewport"><div class="diagram-stage">{svg}</div></div><div class="diagram-toolbar" aria-label="Navegación del diagrama"><button type="button" class="zoom-out" aria-label="Alejar">−</button><button type="button" class="zoom-in" aria-label="Acercar">+</button><button type="button" class="zoom-fit" aria-label="Ajustar diagrama">100%</button></div></div></div>
+    </section>
+    <section id="slide-bom" role="tabpanel" aria-labelledby="tab-bom">
+      <div class="bom-head"><article class="metric"><span>Total mensual estimado</span><strong>{html.escape(format_money(float(summary["embeddedMonthlyCost"]), currency))}</strong></article><aside class="bom-actions" aria-label="Uso del JSON"><p><strong>¿Dónde usarlo?</strong> En Oracle Cloud Cost Estimator, abra el menú de tres puntos, seleccione <em>Import</em> y cargue este archivo JSON.</p><div class="bom-action-links"><a href="https://www.oracle.com/cloud/costestimator.html" target="_blank" rel="noopener noreferrer" aria-label="Abrir Oracle Cloud Cost Estimator" title="Abrir Oracle Cloud Cost Estimator"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h10a2.5 2.5 0 0 1 2.5 2.5v10A2.5 2.5 0 0 1 15 19.5H5A2.5 2.5 0 0 1 2.5 17V7A2.5 2.5 0 0 1 5 4.5Z M13 2.5h6.5V9 M11 13 19.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Cost Estimator</span></a><button type="button" class="download-bom" aria-label="Descargar JSON" title="Descargar JSON"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11 M7.5 10.5 12 15l4.5-4.5 M4.5 18.5v1A2 2 0 0 0 6.5 21.5h11a2 2 0 0 0 2-2v-1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>JSON</span></button></div></aside></div>
+      <table class="bom-table"><thead><tr><th>Servicio</th><th>Componente y rol</th><th>Sizing</th><th>Mensual</th></tr></thead><tbody>{render_deck_bom_rows(components, currency)}</tbody></table>
+    </section>
+    {warnings_markup}
+    <script type="application/json" id="architecture-spec">{html.escape(json.dumps(architecture, ensure_ascii=False))}</script>
+    <script type="application/json" id="case-deck-spec">{html.escape(json.dumps(deck, ensure_ascii=False))}</script>
+    <script type="application/octet-stream" id="bom-download-data">{bom_download}</script>
+  </main></div>
+  <script>
+    (() => {{
+      const deck = document.querySelector(".deck");
+      const host = document.querySelector(".deck-host");
+      const tabs = [...document.querySelectorAll('[role="tab"]')];
+      const panels = [...document.querySelectorAll('[role="tabpanel"]')];
+      const allowed = new Set(["case", "architecture", "bom"]);
+      const headerTitle = document.querySelector(".deck-header h1");
+      const headerDescription = document.querySelector(".deck-header .case-summary");
+      const captureStatus = document.querySelector(".capture-status");
+      const headers = {{
+        case: ["Use Case", {json.dumps(case_page_description, ensure_ascii=False)}],
+        architecture: ["Arquitectura", {json.dumps(architecture_page_description, ensure_ascii=False)}],
+        bom: ["Bill of Materials (BoM)", "Detalle de los servicios y componentes con importe mensual estimado en el BoM suministrado."]
+      }};
+      const canvas = document.querySelector(".architecture-canvas");
+      const viewport = canvas?.querySelector(".diagram-viewport");
+      const stage = canvas?.querySelector(".diagram-stage");
+      const diagram = canvas?.querySelector("svg.diagram");
+      const zoomOut = canvas?.querySelector(".zoom-out");
+      const zoomIn = canvas?.querySelector(".zoom-in");
+      const zoomFit = canvas?.querySelector(".zoom-fit");
+      const serviceCards = [...document.querySelectorAll(".service-card[data-node-id]")];
+      const diagramNodes = [...document.querySelectorAll(".architecture-canvas g.node")];
+      const downloadBom = document.querySelector(".download-bom");
+      const bomDownloadData = document.querySelector("#bom-download-data");
+      const baseWidth = Number(diagram?.getAttribute("width")) || 1;
+      const baseHeight = Number(diagram?.getAttribute("height")) || 1;
+      let zoom = 1;
+      let isFit = false;
+      let initialized = false;
+      let pan = null;
+      function fitScale() {{ return Math.min(viewport.clientWidth / baseWidth, viewport.clientHeight / baseHeight); }}
+      function renderDiagram(nextZoom, fitted = false) {{
+        zoom = Math.max(0.35, Math.min(2, nextZoom));
+        isFit = fitted;
+        const width = Math.round(baseWidth * zoom);
+        const height = Math.round(baseHeight * zoom);
+        diagram.style.width = width + "px";
+        diagram.style.height = height + "px";
+        stage.style.width = width + "px";
+        stage.style.height = height + "px";
+        zoomFit.textContent = Math.round(zoom * 100) + "%";
+      }}
+      function fitDiagram() {{ renderDiagram(fitScale(), true); viewport.scrollLeft = 0; viewport.scrollTop = 0; }}
+      function initializeDiagram() {{
+        if (initialized || !viewport || !stage || !diagram || !zoomFit) return;
+        initialized = true;
+        fitDiagram();
+      }}
+      function highlightService(card) {{
+        const targetId = "node-" + card.dataset.nodeId;
+        serviceCards.forEach((item) => item.classList.toggle("is-active", item === card));
+        diagramNodes.forEach((node) => {{
+          const selected = node.id === targetId;
+          node.classList.toggle("is-highlighted", selected);
+          node.classList.toggle("is-muted", !selected);
+        }});
+      }}
+      function clearServiceHighlight() {{
+        serviceCards.forEach((item) => item.classList.remove("is-active"));
+        diagramNodes.forEach((node) => node.classList.remove("is-highlighted", "is-muted"));
+      }}
+      function selectTab(name, updateUrl) {{
+        const selected = allowed.has(name) ? name : "case";
+        tabs.forEach((tab) => tab.setAttribute("aria-selected", String(tab.dataset.tab === selected)));
+        panels.forEach((panel) => panel.classList.toggle("is-active", panel.id === "slide-" + selected));
+        headerTitle.textContent = headers[selected][0];
+        headerDescription.textContent = headers[selected][1];
+        if (selected === "architecture") requestAnimationFrame(initializeDiagram);
+        if (updateUrl) {{ const url = new URL(window.location.href); url.searchParams.set("tab", selected); window.history.replaceState({{}}, "", url); }}
+      }}
+      function fitDeck() {{
+        const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+        deck.style.transform = "scale(" + scale + ")";
+        host.style.width = (1920 * scale) + "px";
+        host.style.height = (1080 * scale) + "px";
+      }}
+      function slideBox(rect, deckRect, scale) {{
+        return {{ x:(rect.left - deckRect.left) / scale, y:(rect.top - deckRect.top) / scale, width:rect.width / scale, height:rect.height / scale }};
+      }}
+      function paintBorder(context, box, style, side) {{
+        const width = parseFloat(style["border" + side + "Width"]);
+        if (!width || style["border" + side + "Style"] === "none") return;
+        context.fillStyle = style["border" + side + "Color"];
+        if (side === "Top") context.fillRect(box.x, box.y, box.width, width);
+        if (side === "Right") context.fillRect(box.x + box.width - width, box.y, width, box.height);
+        if (side === "Bottom") context.fillRect(box.x, box.y + box.height - width, box.width, width);
+        if (side === "Left") context.fillRect(box.x, box.y, width, box.height);
+      }}
+      function paintTextNode(context, node, deckRect, scale) {{
+        const text = node.nodeValue || "";
+        const parent = node.parentElement;
+        if (!parent || !text.trim()) return;
+        const style = getComputedStyle(parent);
+        context.save();
+        context.fillStyle = style.color;
+        context.font = [style.fontStyle, style.fontWeight, style.fontSize, style.fontFamily].join(" ");
+        context.textBaseline = "alphabetic";
+        for (const match of text.matchAll(/\\S+/g)) {{
+          const range = document.createRange();
+          range.setStart(node, match.index);
+          range.setEnd(node, match.index + match[0].length);
+          const rect = range.getBoundingClientRect();
+          if (!rect.width || !rect.height) continue;
+          const box = slideBox(rect, deckRect, scale);
+          const token = style.textTransform === "uppercase" ? match[0].toUpperCase() : match[0];
+          context.fillText(token, box.x, box.y + parseFloat(style.fontSize) * .86);
+        }}
+        context.restore();
+      }}
+      async function paintSlideElement(context, element, deckRect, scale, styleText) {{
+        if (element.hasAttribute?.("data-capture-exclude")) return;
+        const style = getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        if (style.display === "none" || style.visibility === "hidden" || !rect.width || !rect.height) return;
+        const box = slideBox(rect, deckRect, scale);
+        context.save();
+        context.globalAlpha = Number(style.opacity) || 1;
+        if (style.backgroundColor !== "rgba(0, 0, 0, 0)" && style.backgroundColor !== "transparent") {{
+          context.fillStyle = style.backgroundColor;
+          context.fillRect(box.x, box.y, box.width, box.height);
+        }}
+        for (const side of ["Top", "Right", "Bottom", "Left"]) paintBorder(context, box, style, side);
+        context.restore();
+        if (element.tagName.toLowerCase() === "img") {{
+          try {{
+            if (!element.complete) await new Promise((resolve, reject) => {{ element.addEventListener("load", resolve, {{ once:true }}); element.addEventListener("error", reject, {{ once:true }}); }});
+            if (element.naturalWidth) context.drawImage(element, box.x, box.y, box.width, box.height);
+          }} catch (_error) {{}}
+          return;
+        }}
+        if (element.namespaceURI === "http://www.w3.org/2000/svg" && element.tagName.toLowerCase() === "svg") {{
+          const svgClone = element.cloneNode(true);
+          svgClone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+          const svgStyle = document.createElementNS("http://www.w3.org/2000/svg", "style");
+          svgStyle.textContent = styleText;
+          svgClone.insertBefore(svgStyle, svgClone.firstChild);
+          const objectUrl = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(svgClone)], {{ type:"image/svg+xml;charset=utf-8" }}));
+          const image = new Image();
+          image.src = objectUrl;
+          await image.decode();
+          context.drawImage(image, box.x, box.y, box.width, box.height);
+          URL.revokeObjectURL(objectUrl);
+          return;
+        }}
+        for (const child of element.childNodes) {{
+          if (child.nodeType === Node.TEXT_NODE) paintTextNode(context, child, deckRect, scale);
+          else if (child.nodeType === Node.ELEMENT_NODE) await paintSlideElement(context, child, deckRect, scale, styleText);
+        }}
+      }}
+      async function copySlide() {{
+        if (!navigator.clipboard?.write || typeof ClipboardItem === "undefined") {{
+          if (captureStatus) captureStatus.textContent = "La copia de imagen no está disponible en este navegador.";
+          return;
+        }}
+        try {{
+          const canvas = document.createElement("canvas");
+          canvas.width = 1920;
+          canvas.height = 1080;
+          const context = canvas.getContext("2d");
+          context.fillStyle = "#ffffff";
+          context.fillRect(0, 0, 1920, 1080);
+          const deckRect = deck.getBoundingClientRect();
+          const scale = deckRect.width / 1920;
+          const styleText = [...document.querySelectorAll("style")].map((style) => style.textContent).join("\\n");
+          await paintSlideElement(context, deck, deckRect, scale, styleText);
+          const png = await new Promise((resolve, reject) => canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("PNG capture failed")), "image/png"));
+          await navigator.clipboard.write([new ClipboardItem({{ "image/png":png }})]);
+          if (captureStatus) captureStatus.textContent = "Página 16:9 copiada al portapapeles.";
+        }} catch (error) {{
+          if (captureStatus) captureStatus.textContent = "No fue posible copiar la página 16:9.";
+          console.error(error);
+        }}
+      }}
+      zoomOut?.addEventListener("click", () => renderDiagram(zoom - 0.1));
+      zoomIn?.addEventListener("click", () => renderDiagram(zoom + 0.1));
+      zoomFit?.addEventListener("click", fitDiagram);
+      viewport?.addEventListener("pointerdown", (event) => {{
+        if (event.button !== 0) return;
+        pan = {{ x:event.clientX, y:event.clientY, left:viewport.scrollLeft, top:viewport.scrollTop }};
+        viewport.classList.add("is-panning");
+        viewport.setPointerCapture(event.pointerId);
+      }});
+      viewport?.addEventListener("pointermove", (event) => {{
+        if (!pan) return;
+        viewport.scrollLeft = pan.left - (event.clientX - pan.x);
+        viewport.scrollTop = pan.top - (event.clientY - pan.y);
+      }});
+      viewport?.addEventListener("pointerup", () => {{ pan = null; viewport.classList.remove("is-panning"); }});
+      viewport?.addEventListener("pointercancel", () => {{ pan = null; viewport.classList.remove("is-panning"); }});
+      serviceCards.forEach((card) => {{
+        card.addEventListener("mouseenter", () => highlightService(card));
+        card.addEventListener("mouseleave", () => {{ if (document.activeElement !== card) clearServiceHighlight(); }});
+        card.addEventListener("focus", () => highlightService(card));
+        card.addEventListener("blur", clearServiceHighlight);
+      }});
+      tabs.forEach((tab) => tab.addEventListener("click", () => selectTab(tab.dataset.tab, true)));
+      window.ociCopyActiveSlide = copySlide;
+      window.addEventListener("message", (event) => {{
+        if (event.origin === window.location.origin && event.data?.type === "oci-copy-active-slide") copySlide();
+      }});
+      downloadBom?.addEventListener("click", () => {{
+        const encoded = bomDownloadData?.textContent.trim();
+        if (!encoded) return;
+        const binary = atob(encoded);
+        const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+        const url = URL.createObjectURL(new Blob([bytes], {{ type:"application/json" }}));
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = {json.dumps(bom_path.name, ensure_ascii=False)};
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 0);
+      }});
+      window.addEventListener("resize", () => {{ fitDeck(); if (isFit) fitDiagram(); }});
+      selectTab(new URLSearchParams(window.location.search).get("tab"), false);
+      fitDeck();
+    }})();
+  </script>
+</body>
+</html>
+"""
+
+
 def resolve_path(raw: str) -> Path:
     path = Path(raw)
     if path.is_absolute():
@@ -1340,6 +1885,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--spec", required=True, help="Path to normalized architecture JSON.")
     parser.add_argument("--out", required=True, help="Output HTML path.")
     parser.add_argument("--catalog", default=str(DEFAULT_CATALOG), help="Path to OCI icon catalog.json.")
+    parser.add_argument("--deck", help="Path to a version 1 case-deck JSON manifest.")
+    parser.add_argument("--bom", help="Path to the exact Oracle Cost Estimator JSON used by the case deck.")
     parser.add_argument("--validate-only", action="store_true", help="Validate the spec and exit without writing HTML.")
     args = parser.parse_args(argv)
 
@@ -1350,12 +1897,24 @@ def main(argv: list[str] | None = None) -> int:
         spec = read_json(spec_path)
         catalog = load_catalog(catalog_path)
         validate_spec(spec)
+        if bool(args.deck) != bool(args.bom):
+            raise DiagramError("--deck and --bom must be provided together.")
         if args.validate_only:
+            if args.deck and args.bom:
+                deck = read_json(resolve_path(args.deck))
+                bom_detail = read_bom_detail(resolve_path(args.bom))
+                validate_deck_spec(deck, spec, bom_detail)
             print(f"Valid diagram spec: {spec_path}")
             return 0
-        html_output = render_html(spec, catalog, catalog_path)
+        if args.deck and args.bom:
+            deck = read_json(resolve_path(args.deck))
+            bom_path = resolve_path(args.bom)
+            bom_detail = read_bom_detail(bom_path)
+            html_output = render_case_deck_html(spec, deck, bom_detail, catalog, catalog_path, bom_path)
+        else:
+            html_output = render_html(spec, catalog, catalog_path)
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(html_output, encoding="utf-8")
+        out_path.write_text("\n".join(line.rstrip() for line in html_output.splitlines()) + "\n", encoding="utf-8")
     except DiagramError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2

@@ -1,0 +1,66 @@
+{
+  "label": "Example OCI Web BoM",
+  "timeFrame": {
+    "months": 1,
+    "from": null,
+    "to": null,
+    "leapYear": [],
+    "calculation": "simple"
+  },
+  "currency": "USD",
+  "meta": {
+    "exportVersion": 1,
+    "hash": "6f3a8b799ba506819b050a5b31c229ad"
+  },
+  "configs": [
+    {
+      "label": "Example OKE",
+      "services": [
+        {
+          "label": "Compute - Virtual Machine",
+          "items": [
+            {
+              "sku": "B000001",
+              "quantity": 1,
+              "unitPrice": 20,
+              "monthlyCost": 20
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Example Load Balancer",
+      "services": [
+        {
+          "label": "Flexible Load Balancer",
+          "items": [
+            { "sku": "B000002", "quantity": 1, "unitPrice": 5, "monthlyCost": 5 }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Example ADB",
+      "services": [
+        {
+          "label": "Database - Autonomous AI Database",
+          "items": [
+            { "sku": "B000003", "quantity": 1, "unitPrice": 40, "monthlyCost": 40 }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Example Object Storage",
+      "services": [
+        {
+          "label": "Storage - Object Storage",
+          "items": [
+            { "sku": "B000004", "quantity": 1, "unitPrice": 10, "monthlyCost": 10 }
+          ]
+        }
+      ]
+    }
+  ]
+}

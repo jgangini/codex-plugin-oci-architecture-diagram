@@ -21,6 +21,8 @@ user-facing delivery must be the local HTTP gallery opened in the Codex Browser.
 - Use `oci-diagram-renderer` to run the CLI renderer or regenerate examples.
 - Use `oci-diagram-visual-qa` after frontend/layout changes or when the user
   reports overlaps, bad arrows, bad spacing, unreadable text, or broken icons.
+- Use oci-architecture-case-deck when the case also needs a 16:9 Case,
+  Architecture and BoM deck with the exact Oracle Cost Estimator JSON.
 
 ## Default Workflow
 
@@ -36,6 +38,11 @@ user-facing delivery must be the local HTTP gallery opened in the Codex Browser.
 7. Iterate until icons, labels, arrows, groups, and navigation look solid.
 8. Return the generated HTML path, local gallery URL, warnings, and verification
    performed.
+
+For a case deck, retain the normalized architecture JSON and the delivered
+Oracle Cost Estimator JSON as separate artifacts. Render the companion deck
+manifest only with --deck and --bom; do not synthesize or overwrite either
+source JSON.
 
 Use the Browser plugin for local visual QA. Do not import the standalone
 Playwright package or open `file://` pages unless the user explicitly requests
