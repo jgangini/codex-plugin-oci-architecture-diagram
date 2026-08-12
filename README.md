@@ -13,7 +13,7 @@ Users can add the marketplace with any of these forms:
 
 ```powershell
 codex plugin marketplace add jgangini/codex-plugin-oci-architecture-diagram
-codex plugin marketplace add jgangini/codex-plugin-oci-architecture-diagram@v0.4.0
+codex plugin marketplace add jgangini/codex-plugin-oci-architecture-diagram@v0.4.1
 codex plugin marketplace add https://github.com/jgangini/codex-plugin-oci-architecture-diagram.git
 ```
 
@@ -35,7 +35,7 @@ codex plugin marketplace upgrade oci-architecture
 ```
 
 Pinned installs can be upgraded by changing the Git ref, for example from a
-tag to `main` or from `v0.4.0` to a newer release tag.
+tag to `main` or from `v0.4.1` to a newer release tag.
 
 ## Marketplace Layout
 
@@ -103,6 +103,11 @@ source files.
   and service icon mappings.
 - `oci-architecture-case-deck`: coordinates discovery, cost-aligned OCI
   architecture, Oracle Cost Estimator JSON and portable 16:9 Case/Architecture/BoM decks.
+
+## Release 0.4.1
+
+Fixes the 16:9 architecture canvas so it fills the available viewport without
+white margins and uses the slide's neutral gray background.
 
 ## Release 0.4.0
 

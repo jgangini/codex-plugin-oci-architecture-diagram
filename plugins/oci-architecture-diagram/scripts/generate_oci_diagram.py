@@ -1600,8 +1600,8 @@ def render_case_deck_html(
     .case-visual {{ display:flex; flex-direction:column; min-width:0; margin:0; padding:32px; border:1px solid var(--line); background:linear-gradient(145deg,#f7fafb,#eef4f6); }} .case-image {{ width:100%; height:100%; min-height:0; }} .case-visual figcaption {{ margin-top:16px; color:var(--muted); font-size:16px; text-align:center; }}
     .case-content {{ display:flex; align-items:center; min-width:0; padding:28px 22px; }} .case-content p {{ margin:0; color:var(--ink); font-size:30px; font-weight:700; line-height:1.42; }}
     .architecture-layout {{ display:grid; grid-template-columns:390px minmax(0, 1fr); grid-template-rows:1fr; gap:20px; height:858px; }}
-    .architecture-canvas {{ position:relative; grid-column:2; grid-row:1; min-height:0; overflow:hidden; border:1px solid var(--line); background:#fff; }}
-    .architecture-canvas .canvas {{ fill:#fff; }} .architecture-canvas .edge {{ fill:none; stroke:var(--muted); stroke-width:1.65; stroke-linecap:round; opacity:.9; }} .architecture-canvas .node {{ transition:opacity .16s ease; }} .architecture-canvas .node.is-muted {{ opacity:.28; }} .architecture-canvas .node-card {{ fill:#fff; stroke:#c9d1d9; stroke-width:1.2; filter:drop-shadow(0 2px 5px rgba(49,45,42,.10)); transition:stroke .16s ease,stroke-width .16s ease; }} .architecture-canvas .node.is-highlighted .node-card {{ stroke:var(--oci); stroke-width:3; filter:drop-shadow(0 4px 9px rgba(199,70,52,.24)); }} .architecture-canvas .node-service-name {{ fill:var(--ink); font-size:13px; font-weight:700; }}
+    .architecture-canvas {{ position:relative; grid-column:2; grid-row:1; min-height:0; overflow:hidden; border:1px solid var(--line); background:#eef2f5; }}
+    .architecture-canvas .canvas {{ fill:#eef2f5; }} .architecture-canvas .edge {{ fill:none; stroke:var(--muted); stroke-width:1.65; stroke-linecap:round; opacity:.9; }} .architecture-canvas .node {{ transition:opacity .16s ease; }} .architecture-canvas .node.is-muted {{ opacity:.28; }} .architecture-canvas .node-card {{ fill:#fff; stroke:#c9d1d9; stroke-width:1.2; filter:drop-shadow(0 2px 5px rgba(49,45,42,.10)); transition:stroke .16s ease,stroke-width .16s ease; }} .architecture-canvas .node.is-highlighted .node-card {{ stroke:var(--oci); stroke-width:3; filter:drop-shadow(0 4px 9px rgba(199,70,52,.24)); }} .architecture-canvas .node-service-name {{ fill:var(--ink); font-size:13px; font-weight:700; }}
     .architecture-canvas .edge-label {{ pointer-events:none; }}
     .architecture-canvas .edge-label rect {{ fill:rgba(255,255,255,.96); stroke:#c7d0da; stroke-width:1; }}
     .architecture-canvas .edge-label text {{ fill:var(--muted); font-size:10px; font-weight:700; }}
@@ -1613,7 +1613,7 @@ def render_case_deck_html(
     .architecture-canvas .edge-label-observability rect {{ stroke:#a6c6d1; fill:#f2f9fb; }} .architecture-canvas .edge-label-observability text {{ fill:#426f82; }}
     .service-band {{ grid-column:1; grid-row:1; align-self:start; overflow:hidden; padding:10px 12px; border-right:5px solid var(--oci); background:#f8fafb; }}
     .service-grid {{ display:grid; grid-template-columns:1fr; grid-auto-rows:auto; gap:7px; }} .service-card {{ min-height:0; padding:10px 12px; border:1px solid var(--line); background:#fff; overflow:hidden; cursor:pointer; transition:border-color .16s ease,background .16s ease,box-shadow .16s ease; }} .service-card:hover,.service-card:focus-visible,.service-card.is-active {{ border-color:var(--oci); background:#fff7f5; box-shadow:0 2px 8px rgba(199,70,52,.14); outline:none; }} .service-card strong,.service-card p {{ display:block; white-space:normal; }} .service-card strong {{ color:var(--teal); font-size:14px; }} .service-card p {{ margin:5px 0 0; color:var(--muted); font-size:13px; line-height:1.34; }}
-    .diagram-viewport {{ position:absolute; inset:0; overflow:auto; background:#f7f9fb; cursor:grab; scrollbar-color:#8ea0aa transparent; scrollbar-width:thin; }} .diagram-viewport.is-panning {{ cursor:grabbing; user-select:none; }} .diagram-stage {{ width:max-content; min-width:100%; min-height:100%; padding:0; }} .diagram-viewport .diagram {{ display:block; max-width:none; }}
+    .diagram-viewport {{ position:absolute; inset:0; overflow:auto; background:#eef2f5; cursor:grab; scrollbar-color:#8ea0aa transparent; scrollbar-width:thin; }} .diagram-viewport.is-panning {{ cursor:grabbing; user-select:none; }} .diagram-stage {{ width:100%; min-width:100%; height:100%; min-height:100%; padding:0; }} .diagram-viewport .diagram {{ display:block; max-width:none; }}
     .diagram-toolbar {{ position:absolute; right:16px; bottom:16px; z-index:4; display:flex; flex-direction:column; gap:6px; }} .diagram-toolbar button {{ min-width:44px; height:36px; border:1px solid #c9d1d9; border-radius:6px; color:var(--ink); background:#fff; box-shadow:0 2px 5px rgba(49,45,42,.14); font:700 15px Arial,Helvetica,sans-serif; cursor:pointer; }} .diagram-toolbar button:hover {{ border-color:var(--teal); color:var(--teal); }} .diagram-toolbar .zoom-fit {{ min-width:54px; font-size:13px; }}
     .bom-head {{ display:grid; grid-template-columns:minmax(0, 420px) minmax(0, 1fr); gap:14px; margin-bottom:22px; }} .metric {{ padding:17px 20px; border:1px solid var(--line); background:var(--soft); }} .metric span {{ display:block; color:var(--muted); font-size:14px; font-weight:700; text-transform:uppercase; }} .metric strong {{ display:block; margin-top:6px; color:var(--teal); font-size:24px; line-height:1.12; }}
     .bom-actions {{ display:flex; align-items:center; justify-content:space-between; gap:24px; padding:14px 18px; border:1px solid var(--line); background:#fff; }} .bom-actions p {{ margin:0; color:var(--muted); font-size:15px; line-height:1.35; }} .bom-actions strong {{ color:var(--ink); }} .bom-action-links {{ display:flex; flex:0 0 auto; align-items:center; gap:10px; }} .bom-action-links a,.download-bom {{ display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:42px; border-radius:5px; padding:0 16px; font:700 15px Arial,Helvetica,sans-serif; text-decoration:none; cursor:pointer; }} .bom-action-links a {{ border:1px solid var(--teal); color:var(--teal); background:#fff; }} .download-bom {{ border:1px solid var(--oci); color:#fff; background:var(--oci); }} .bom-action-links .action-icon {{ width:20px; height:20px; flex:0 0 auto; }} .bom-action-links a:hover,.bom-action-links a:focus-visible,.download-bom:hover,.download-bom:focus-visible {{ outline:3px solid rgba(199,70,52,.18); outline-offset:2px; }}
@@ -1673,18 +1673,17 @@ def render_case_deck_html(
       const diagramNodes = [...document.querySelectorAll(".architecture-canvas g.node")];
       const downloadBom = document.querySelector(".download-bom");
       const bomDownloadData = document.querySelector("#bom-download-data");
-      const baseWidth = Number(diagram?.getAttribute("width")) || 1;
-      const baseHeight = Number(diagram?.getAttribute("height")) || 1;
       let zoom = 1;
       let isFit = false;
       let initialized = false;
       let pan = null;
-      function fitScale() {{ return Math.min(viewport.clientWidth / baseWidth, viewport.clientHeight / baseHeight); }}
+      function fitScale() {{ return 1; }}
       function renderDiagram(nextZoom, fitted = false) {{
         zoom = Math.max(0.35, Math.min(2, nextZoom));
         isFit = fitted;
-        const width = Math.round(baseWidth * zoom);
-        const height = Math.round(baseHeight * zoom);
+        const width = Math.round(viewport.clientWidth * zoom);
+        const height = Math.round(viewport.clientHeight * zoom);
+        diagram.setAttribute("preserveAspectRatio", "none");
         diagram.style.width = width + "px";
         diagram.style.height = height + "px";
         stage.style.width = width + "px";

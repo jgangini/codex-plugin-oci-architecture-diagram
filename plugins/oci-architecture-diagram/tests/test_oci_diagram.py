@@ -296,8 +296,12 @@ class RendererTests(unittest.TestCase):
         self.assertIn("height:146px; padding:34px 56px 0; border-bottom:1px solid var(--line);", output)
         self.assertIn(".service-card strong { color:var(--teal); font-size:14px; }", output)
         self.assertIn(".service-card p { margin:5px 0 0; color:var(--muted); font-size:13px; line-height:1.34; }", output)
-        self.assertIn(".diagram-stage { width:max-content; min-width:100%; min-height:100%; padding:0; }", output)
-        self.assertIn("viewport.clientWidth / baseWidth", output)
+        self.assertIn(".architecture-canvas { position:relative; grid-column:2; grid-row:1; min-height:0; overflow:hidden; border:1px solid var(--line); background:#eef2f5; }", output)
+        self.assertIn(".architecture-canvas .canvas { fill:#eef2f5; }", output)
+        self.assertIn(".diagram-stage { width:100%; min-width:100%; height:100%; min-height:100%; padding:0; }", output)
+        self.assertIn("function fitScale() { return 1; }", output)
+        self.assertIn("const width = Math.round(viewport.clientWidth * zoom);", output)
+        self.assertIn('diagram.setAttribute("preserveAspectRatio", "none");', output)
         self.assertIn("zoom = Math.max(0.35, Math.min(2, nextZoom));", output)
         self.assertIn("initialized = true;\n        fitDiagram();", output)
         self.assertIn('data-node-id="oke"', output)
@@ -747,7 +751,7 @@ class SkillPackagingTests(unittest.TestCase):
         plugin_entry = marketplace["plugins"][0]
 
         self.assertEqual("oci-architecture-diagram", manifest["name"])
-        self.assertEqual("0.4.0", manifest["version"])
+        self.assertEqual("0.4.1", manifest["version"])
         self.assertEqual("Joel Gangini", manifest["author"]["name"])
         self.assertEqual("Joel Gangini", manifest["interface"]["developerName"])
         self.assertEqual("oci-architecture", marketplace["name"])
