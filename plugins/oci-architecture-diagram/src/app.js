@@ -2,7 +2,7 @@
   const DATABASE_URL = "./projects.json";
   const SAVE_URL = "/api/projects";
   const STORAGE_KEY = "oci-architecture-projects:" + window.location.pathname;
-  const PORTFOLIO_VERSION = "portfolio-v12";
+const PORTFOLIO_VERSION = "portfolio-v17";
   const list = document.querySelector("#architecture-list");
   const search = document.querySelector("#architecture-search");
   const frame = document.querySelector("#diagram-frame");

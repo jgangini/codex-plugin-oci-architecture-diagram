@@ -701,11 +701,11 @@ def adjust_edge_label_position(
     return x, fallback_y, edge_label_box(label, x, fallback_y)
 
 
-def render_edge_label(label: str, x: float, y: float, kind: str) -> str:
+def render_edge_label(label: str, x: float, y: float, kind: str, source: str, target: str) -> str:
     safe_label = html.escape(label)
     width = edge_label_width(label)
     return (
-        f'<g class="edge-label edge-label-{html.escape(kind)}" transform="translate({fmt(x)} {fmt(y)})">'
+        f'<g class="edge-label edge-label-{html.escape(kind)}" data-source="{html.escape(source)}" data-target="{html.escape(target)}" transform="translate({fmt(x)} {fmt(y)})">'
         f'<rect x="{fmt(-width / 2)}" y="-11" width="{fmt(width)}" height="17" rx="4"/>'
         f'<text text-anchor="middle" y="1">{safe_label}</text>'
         f"</g>"
@@ -767,11 +767,14 @@ def render_svg(spec: dict[str, Any], catalog: dict[str, Any], catalog_path: Path
         path, lx, ly = edge_path(positions[edge["from"]], positions[edge["to"]], source_offset, target_offset)
         label = edge.get("label", "")
         kind = edge_kind(label)
-        edge_markup.append(f'<path class="edge edge-{html.escape(kind)}" d="{path}" marker-end="url(#arrow-{html.escape(kind)})"/>')
+        edge_markup.append(
+            f'<path class="edge edge-{html.escape(kind)}" data-source="{html.escape(edge["from"])}" '
+            f'data-target="{html.escape(edge["to"])}" d="{path}" marker-end="url(#arrow-{html.escape(kind)})"/>'
+        )
         if label:
             lx, ly, label_box = adjust_edge_label_position(label, lx, ly, node_boxes, label_boxes)
             label_boxes.append(label_box)
-            edge_markup.append(render_edge_label(label, lx, ly, kind))
+            edge_markup.append(render_edge_label(label, lx, ly, kind, edge["from"], edge["to"]))
 
     used_services: dict[str, str] = {}
     node_markup = [
@@ -785,6 +788,10 @@ def render_svg(spec: dict[str, Any], catalog: dict[str, Any], catalog_path: Path
     </marker>"""
         for kind, color in EDGE_COLORS.items()
     )
+    marker_markup += """
+    <marker id="arrow-highlight" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 1.5 1.5 L 8.5 5 L 1.5 8.5 z" fill="#c74634"/>
+    </marker>"""
     svg = f"""
 <svg class="diagram" xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-labelledby="diagram-title">
   <title id="diagram-title">{title}</title>
@@ -1386,6 +1393,8 @@ def validate_deck_spec(
     require_deck_string(case.get("objective"), "case.objective")
     if case.get("description") is not None:
         require_deck_string(case.get("description"), "case.description")
+    if case.get("imagePrompt") is not None:
+        require_deck_string(case.get("imagePrompt"), "case.imagePrompt")
     for key in ("scope", "assumptions", "openDecisions"):
         optional_deck_list(case.get(key), f"case.{key}")
 
@@ -1548,6 +1557,244 @@ def render_deck_bom_rows(components: list[dict[str, Any]], currency: str) -> str
     return "".join(rows)
 
 
+def build_case_image_prompt(title: str, case: dict[str, Any]) -> str:
+    project_context = re.sub(r"\s+", " ", title).strip()
+    solution_context = re.sub(r"\s+", " ", str(case.get("description") or case["objective"])).strip()
+    return (
+        "Create a polished corporate image for an Oracle Cloud use case. "
+        f"Client and project context: {project_context}. "
+        f"Use-case context: {solution_context}. "
+        "Show field-service technicians using an intelligent, secure conversational assistant that accesses approved "
+        "knowledge and coordinates authorised operational work. Blend the client context with a clean Oracle Cloud "
+        "environment, subtle OCI red accents, professional blue and grey technical tones, and a modern enterprise style. "
+        "Do not include text, UI screenshots, watermarks, or third-party logos unless they are supplied separately."
+    )
+
+
+def render_case_deck_editor_dialog() -> str:
+    return """
+    <div class="deck-editor-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="deck-editor-title">
+      <form>
+        <h2 id="deck-editor-title">Editar contenido</h2>
+        <textarea id="deck-editor-input" aria-label="Contenido editable" rows="6"></textarea>
+        <div><button type="button" class="cancel-deck-edit">Cancelar</button><button type="button" class="save-deck-edit">Guardar</button></div>
+      </form>
+    </div>
+    <div class="case-prompt-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="case-prompt-dialog-title">
+      <section>
+        <h2 id="case-prompt-dialog-title">Prompt para generar imagen en GPT</h2>
+        <div class="case-prompt-text-wrap"><textarea class="case-prompt-dialog-text" aria-label="Prompt de imagen" rows="9"></textarea><button type="button" class="case-prompt-copy" aria-label="Copiar prompt" title="Copiar prompt"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="7" width="11" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 16V5a2 2 0 0 1 2-2h8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
+        <div class="case-dialog-actions"><button type="button" class="case-prompt-close">Cerrar</button><button type="button" class="case-prompt-save">Guardar</button></div>
+      </section>
+    </div>
+    <div class="case-image-actions-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="case-image-actions-title">
+      <section>
+        <h2 id="case-image-actions-title">Imagen del caso de uso</h2>
+        <p>Puede descargar o eliminar la imagen cargada.</p>
+        <div class="case-dialog-actions"><button type="button" class="case-image-actions-close">Cerrar</button><button type="button" class="case-image-actions-download">Descargar</button><button type="button" class="case-image-actions-delete">Eliminar imagen</button></div>
+      </section>
+    </div>
+    <div class="deck-toast" role="status" aria-live="polite"></div>
+    """
+
+
+def render_case_deck_interaction_styles() -> str:
+    return """
+    .case-visual { display:block; padding:0; }
+    .case-image-slot { position:relative; display:grid; place-items:center; width:100%; height:100%; min-height:100%; padding:0; overflow:hidden; border:1px dashed #93a7b4; background:#f6fafc; box-sizing:border-box; }
+    .case-image-slot.has-image { display:block; padding-top:0; }
+    .case-image-upload { display:flex; flex-direction:column; align-items:center; gap:10px; border:0; color:var(--teal); background:transparent; cursor:pointer; }
+    .case-image-upload[hidden] { display:none; }
+    .case-image-upload svg { width:64px; height:64px; } .case-image-upload span { color:var(--muted); font:400 14px Arial,Helvetica,sans-serif; }
+    .case-uploaded-image { position:absolute; inset:0; display:block; width:100%; height:100%; object-fit:cover; cursor:pointer; }
+    .case-uploaded-image[hidden] { display:none; }
+    .case-image-prompt-toggle { position:absolute; right:14px; bottom:14px; display:grid; place-items:center; width:40px; height:40px; border:1px solid var(--line); border-radius:50%; color:var(--teal); background:#fff; box-shadow:0 2px 7px rgba(37,42,48,.2); cursor:pointer; }
+    .case-image-prompt-toggle svg { width:22px; height:22px; }
+    .deck-editable { cursor:text; outline-offset:5px; } .deck-editable:hover,.deck-editable:focus-visible { outline:2px dashed var(--teal); }
+    .architecture-canvas .node-service-name.deck-editable { cursor:text; pointer-events:all; }
+    .deck-editor-dialog { position:absolute; z-index:20; inset:0; display:grid; place-items:center; padding:24px; background:rgba(30,47,57,.42); }
+    .deck-editor-dialog[hidden] { display:none; }
+    .deck-editor-dialog form { display:grid; width:min(620px, calc(100vw - 48px)); gap:14px; padding:24px; border:1px solid var(--line); border-radius:10px; color:var(--ink); background:#fff; box-shadow:0 18px 48px rgba(30,47,57,.3); } .deck-editor-dialog h2 { margin:0; font-size:24px; } .deck-editor-dialog label { font-weight:700; }
+    .deck-editor-dialog textarea { width:100%; min-height:140px; resize:vertical; border:1px solid var(--line); border-radius:5px; padding:10px; color:var(--ink); font:16px/1.4 Arial,Helvetica,sans-serif; }
+    .deck-editor-dialog form > div { display:flex; justify-content:flex-end; gap:10px; } .deck-editor-dialog button { min-height:38px; padding:0 16px; border:1px solid var(--line); border-radius:5px; color:var(--ink); background:#fff; font:700 15px Arial,Helvetica,sans-serif; cursor:pointer; } .deck-editor-dialog .save-deck-edit { border-color:var(--oci); color:#fff; background:var(--oci); }
+    .case-prompt-dialog,.case-image-actions-dialog { position:absolute; z-index:21; inset:0; display:grid; place-items:center; padding:24px; background:rgba(30,47,57,.42); } .case-prompt-dialog[hidden],.case-image-actions-dialog[hidden] { display:none; }
+    .case-prompt-dialog section,.case-image-actions-dialog section { display:grid; width:min(720px, calc(100vw - 48px)); gap:16px; padding:24px; border:1px solid var(--line); border-radius:10px; color:var(--ink); background:#fff; box-shadow:0 18px 48px rgba(30,47,57,.3); } .case-prompt-dialog h2,.case-image-actions-dialog h2,.case-image-actions-dialog p { margin:0; } .case-prompt-dialog h2,.case-image-actions-dialog h2 { font-size:24px; }
+    .case-prompt-text-wrap { position:relative; } .case-prompt-dialog textarea { display:block; width:100%; min-height:210px; resize:vertical; border:1px solid var(--line); border-radius:5px; padding:10px 56px 52px 10px; color:var(--ink); background:#f8fafb; font:16px/1.4 Arial,Helvetica,sans-serif; }
+    .case-dialog-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:4px; } .case-dialog-actions button { min-height:36px; padding:0 13px; border:1px solid var(--line); border-radius:6px; color:var(--teal); background:#fff; font:700 15px Arial,Helvetica,sans-serif; cursor:pointer; } .case-dialog-actions .case-prompt-save,.case-dialog-actions .case-image-actions-delete { border-color:var(--oci)!important; color:#fff!important; background:var(--oci)!important; } .case-dialog-actions .case-image-actions-download { border-color:var(--teal)!important; color:#fff!important; background:var(--teal)!important; }
+    .case-prompt-copy { position:absolute; right:10px; bottom:10px; display:grid; place-items:center; width:30px; min-height:30px!important; height:30px; padding:0!important; border-color:transparent!important; border-radius:4px; color:rgba(35,89,103,.62)!important; background:transparent!important; box-shadow:none; opacity:.62; transition:opacity .16s ease,color .16s ease,background .16s ease,border-color .16s ease,box-shadow .16s ease; } .case-prompt-copy svg { width:16px; height:16px; } .case-prompt-copy:hover,.case-prompt-copy:focus-visible { border-color:rgba(35,89,103,.35)!important; color:var(--teal)!important; background:rgba(255,255,255,.92)!important; box-shadow:0 2px 6px rgba(35,89,103,.16); opacity:1; outline:none; }
+    .deck-toast { position:fixed; z-index:30; left:50%; bottom:28px; max-width:calc(100vw - 48px); padding:11px 16px; border-radius:6px; color:#fff; background:#2f7d32; box-shadow:0 4px 16px rgba(30,47,57,.28); font:700 15px Arial,Helvetica,sans-serif; opacity:0; pointer-events:none; transform:translate(-50%, 12px); transition:opacity .16s ease,transform .16s ease,background .16s ease; } .deck-toast.is-visible { opacity:1; transform:translate(-50%, 0); } .deck-toast.is-error { background:var(--oci); }
+    """
+
+
+def render_case_deck_interaction_script(image_prompt: str) -> str:
+    return """
+      const defaultCaseImagePrompt = __CASE_IMAGE_PROMPT__;
+      const caseVisual = document.querySelector(".case-visual");
+      if (caseVisual) {
+        const slot = document.createElement("div");
+        slot.className = "case-image-slot";
+        slot.dataset.caseImageSlot = "";
+        const image = document.createElement("img");
+        image.className = "case-uploaded-image";
+        image.alt = "";
+        image.setAttribute("aria-hidden", "true");
+        image.hidden = true;
+        const upload = document.createElement("button");
+        upload.type = "button";
+        upload.className = "case-image-upload";
+        upload.setAttribute("aria-label", "Subir imagen para el caso de uso");
+        upload.title = "Subir imagen";
+        upload.innerHTML = '<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="7" y="10" width="50" height="43" rx="6" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="24" cy="26" r="5" fill="none" stroke="currentColor" stroke-width="3"/><path d="m12 47 14-14 9 9 7-7 10 12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="case-image-dimensions"></span>';
+        const promptToggle = document.createElement("button");
+        promptToggle.type = "button";
+        promptToggle.className = "case-image-prompt-toggle";
+        promptToggle.dataset.captureExclude = "";
+        promptToggle.setAttribute("aria-label", "Ver y copiar el prompt para generar la imagen");
+        promptToggle.title = "Ver prompt";
+        promptToggle.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v12H9l-4 4V4Zm4 4h6m-6 4h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        const file = document.createElement("input");
+        file.className = "case-image-file";
+        file.type = "file";
+        file.accept = "image/png,image/jpeg,image/webp";
+        file.hidden = true;
+        slot.append(image, upload, promptToggle, file);
+        caseVisual.replaceChildren(slot);
+      }
+      const editStorageKey = "oci-case-deck-edits:" + window.location.pathname;
+      const editorDialog = document.querySelector(".deck-editor-dialog");
+      const editorTitle = document.querySelector("#deck-editor-title");
+      const editorInput = document.querySelector("#deck-editor-input");
+      const caseDescriptionElement = document.querySelector(".case-content p");
+      const caseImageSlot = document.querySelector("[data-case-image-slot]");
+      const caseImage = document.querySelector(".case-uploaded-image");
+      const caseImageUpload = document.querySelector(".case-image-upload");
+      const caseImageFile = document.querySelector(".case-image-file");
+      const casePromptToggle = document.querySelector(".case-image-prompt-toggle");
+      const casePromptDialog = document.querySelector(".case-prompt-dialog");
+      const casePromptDialogText = document.querySelector(".case-prompt-dialog-text");
+      const casePromptClose = document.querySelector(".case-prompt-close");
+      const casePromptCopy = document.querySelector(".case-prompt-copy");
+      const casePromptSave = document.querySelector(".case-prompt-save");
+      const caseImageActions = document.querySelector(".case-image-actions-dialog");
+      const caseImageActionsClose = document.querySelector(".case-image-actions-close");
+      const caseImageActionsDownload = document.querySelector(".case-image-actions-download");
+      const caseImageActionsDelete = document.querySelector(".case-image-actions-delete");
+      const deckToast = document.querySelector(".deck-toast");
+      const nodeDefaults = new Map();
+      let activeTab = "case";
+      let toastTimer = 0;
+      let deckEdits = { headers: {}, nodes: {}, image: "", imagePrompt: "" };
+      try {
+        const stored = JSON.parse(localStorage.getItem(editStorageKey) || "{}");
+        if (stored && typeof stored === "object") deckEdits = { ...deckEdits, ...stored, headers: stored.headers || {}, nodes: stored.nodes || {} };
+      } catch (_error) {}
+      function saveDeckEdits(message) {
+        try { localStorage.setItem(editStorageKey, JSON.stringify(deckEdits)); if (captureStatus) captureStatus.textContent = message; showToast(message); }
+        catch (_error) { const fallback = "El cambio se mantiene en esta sesión, pero el navegador no pudo guardarlo localmente."; if (captureStatus) captureStatus.textContent = fallback; showToast(fallback, "error"); }
+      }
+      function showToast(message, kind = "success") {
+        if (!deckToast) return;
+        deckToast.textContent = message;
+        deckToast.classList.toggle("is-error", kind === "error");
+        deckToast.classList.add("is-visible");
+        window.clearTimeout(toastTimer);
+        toastTimer = window.setTimeout(() => deckToast.classList.remove("is-visible"), 2600);
+      }
+      const editorCancel = document.querySelector(".cancel-deck-edit");
+      const editorSave = document.querySelector(".save-deck-edit");
+      let editorSaveHandler = null;
+      function closeEditor(save) {
+        if (save && editorInput?.value.trim() && editorSaveHandler) editorSaveHandler(editorInput.value.trim());
+        editorSaveHandler = null;
+        if (editorDialog) editorDialog.hidden = true;
+      }
+      function openEditor(label, value, onSave) {
+        if (!editorDialog || !editorInput) return;
+        editorTitle.textContent = label;
+        editorInput.value = value;
+        editorSaveHandler = onSave;
+        editorDialog.hidden = false;
+        editorInput.focus();
+        editorInput.select();
+      }
+      editorCancel?.addEventListener("click", () => closeEditor(false));
+      editorSave?.addEventListener("click", () => closeEditor(true));
+      editorInput?.addEventListener("keydown", (event) => { if (event.key === "Escape") closeEditor(false); if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) { event.preventDefault(); closeEditor(true); } });
+      function bindEditable(element, label, getValue, onSave) {
+        if (!element) return;
+        element.classList.add("deck-editable");
+        element.tabIndex = 0;
+        element.setAttribute("role", "button");
+        element.setAttribute("aria-label", label);
+        const edit = (event) => { event?.preventDefault(); event?.stopPropagation(); openEditor(label, getValue(), onSave); };
+        element.addEventListener("pointerdown", (event) => event.stopPropagation());
+        element.addEventListener("click", edit);
+        element.addEventListener("keydown", (event) => { if (event.key === "Enter" || event.key === " ") edit(event); });
+      }
+      Object.entries(deckEdits.headers).forEach(([tab, value]) => { if (headers[tab] && typeof value === "string") headers[tab][1] = value; });
+      if (typeof deckEdits.caseDescription === "string" && caseDescriptionElement) caseDescriptionElement.textContent = deckEdits.caseDescription;
+      bindEditable(headerDescription, "Editar la descripción de la página", () => headers[activeTab][1], (value) => { headers[activeTab][1] = value; headerDescription.textContent = value; deckEdits.headers[activeTab] = value; saveDeckEdits("Descripción de página guardada localmente."); });
+      bindEditable(caseDescriptionElement, "Editar la descripción del caso de uso", () => caseDescriptionElement.textContent, (value) => { caseDescriptionElement.textContent = value; deckEdits.caseDescription = value; saveDeckEdits("Descripción del caso guardada localmente."); });
+      function setNodeLabel(text, value) {
+        const words = value.trim().split(/\\s+/); const lines = []; let current = "";
+        words.forEach((word) => { const candidate = (current + " " + word).trim(); if (candidate.length > 22 && current) { lines.push(current); current = word; } else current = candidate; });
+        if (current) lines.push(current); const visibleLines = lines.length > 2 ? [lines.slice(0, Math.ceil(lines.length / 2)).join(" "), lines.slice(Math.ceil(lines.length / 2)).join(" ")] : lines;
+        const x = text.getAttribute("x") || "92"; text.textContent = ""; text.setAttribute("y", visibleLines.length > 1 ? "82" : "89");
+        visibleLines.forEach((line, index) => { const span = document.createElementNS("http://www.w3.org/2000/svg", "tspan"); span.setAttribute("x", x); if (index) span.setAttribute("dy", "1.12em"); span.textContent = line; text.append(span); });
+      }
+      document.querySelectorAll(".architecture-canvas .node-service-name").forEach((text) => {
+        const nodeId = text.closest("g.node")?.id; if (!nodeId) return; const original = text.textContent.trim(); nodeDefaults.set(nodeId, original);
+        const stored = deckEdits.nodes[nodeId]; if (typeof stored === "string") setNodeLabel(text, stored);
+        bindEditable(text, "Editar el nombre del servicio", () => deckEdits.nodes[nodeId] || nodeDefaults.get(nodeId), (value) => { setNodeLabel(text, value); deckEdits.nodes[nodeId] = value; const card = document.querySelector('.service-card[data-node-id="' + nodeId.replace(/^node-/, "") + '"] strong'); if (card) card.textContent = value; saveDeckEdits("Nombre del servicio guardado localmente."); });
+      });
+      function imageFormat() {
+        const width = Math.max(1, Math.round(caseImageSlot?.clientWidth || 885));
+        const height = Math.max(1, Math.round(caseImageSlot?.clientHeight || 856));
+        const targetHeight = 1536;
+        const targetWidth = Math.max(2, 2 * Math.round((targetHeight * width / height) / 2));
+        return { width, height, targetWidth, targetHeight, ratio: (width / height).toFixed(3) };
+      }
+      function normalizedPromptBase() {
+        const base = defaultCaseImagePrompt.replace(/^(?:Crear una ilustración corporativa|Create a polished) 16:9 [(]1920 × 1080[)] /i, "").trim();
+        return /^para /i.test(base) ? "Contexto del cliente y proyecto: " + base.slice(5) : base;
+      }
+      function generatedImagePrompt() {
+        const format = imageFormat();
+        return "Crear una imagen corporativa para Oracle Cloud de " + format.targetWidth + " × " + format.targetHeight + " px (proporción " + format.ratio + ":1, igual al área de imagen de esta página). Debe cubrir por completo el encuadre, sin bordes, franjas ni texto. " + normalizedPromptBase();
+      }
+      function currentImagePrompt() { return typeof deckEdits.imagePrompt === "string" && deckEdits.imagePrompt.trim() ? deckEdits.imagePrompt.trim() : generatedImagePrompt(); }
+      function refreshImageFormat() {
+        const format = imageFormat();
+        const dimensions = document.querySelector(".case-image-dimensions");
+        if (dimensions) dimensions.textContent = format.width + " × " + format.height + " px";
+        if (!deckEdits.imagePrompt && casePromptDialogText) casePromptDialogText.value = generatedImagePrompt();
+      }
+      function isSupportedImage(value) { return typeof value === "string" && /^data:image[/](?:png|jpeg|webp);base64,/i.test(value); }
+      function applyCaseImage(value) {
+        if (!caseImage || !caseImageUpload) return;
+        const hasImage = isSupportedImage(value); caseImage.hidden = !hasImage; caseImageUpload.hidden = hasImage; caseImageSlot?.classList.toggle("has-image", hasImage);
+        if (hasImage) { caseImage.src = value; caseImage.tabIndex = 0; caseImage.setAttribute("role", "button"); caseImage.setAttribute("aria-label", "Administrar la imagen cargada del caso de uso"); caseImage.title = "Descargar o eliminar imagen"; }
+        else { caseImage.removeAttribute("src"); caseImage.removeAttribute("role"); caseImage.removeAttribute("aria-label"); caseImage.removeAttribute("title"); }
+      }
+      applyCaseImage(deckEdits.image);
+      window.requestAnimationFrame(refreshImageFormat);
+      window.addEventListener("resize", refreshImageFormat);
+      caseImageUpload?.addEventListener("click", () => caseImageFile?.click());
+      caseImageFile?.addEventListener("change", () => { const file = caseImageFile.files?.[0]; if (!file) return; if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size > 2 * 1024 * 1024) { if (captureStatus) captureStatus.textContent = "Use una imagen PNG, JPEG o WebP de hasta 2 MB."; return; } const reader = new FileReader(); reader.addEventListener("load", () => { const imageValue = String(reader.result || ""); if (!isSupportedImage(imageValue)) return; deckEdits.image = imageValue; applyCaseImage(deckEdits.image); saveDeckEdits("Imagen guardada localmente."); }); reader.readAsDataURL(file); });
+      casePromptDialogText && (casePromptDialogText.value = currentImagePrompt());
+      casePromptToggle?.addEventListener("click", () => { if (!casePromptDialog || !casePromptDialogText) return; casePromptDialogText.value = currentImagePrompt(); casePromptDialog.hidden = false; casePromptDialogText.focus(); });
+      casePromptClose?.addEventListener("click", () => { if (casePromptDialog) casePromptDialog.hidden = true; });
+      casePromptSave?.addEventListener("click", () => { const prompt = casePromptDialogText?.value.trim(); if (!prompt) return; deckEdits.imagePrompt = prompt; saveDeckEdits("Prompt guardado localmente."); });
+      casePromptCopy?.addEventListener("click", async () => { const prompt = casePromptDialogText?.value.trim() || currentImagePrompt(); try { await navigator.clipboard.writeText(prompt); if (captureStatus) captureStatus.textContent = "Prompt copiado al portapapeles."; showToast("Prompt copiado."); } catch (_error) { casePromptDialogText?.focus(); casePromptDialogText?.select(); const copied = document.execCommand("copy"); if (captureStatus) captureStatus.textContent = copied ? "Prompt copiado al portapapeles." : "No fue posible copiar el prompt."; showToast(copied ? "Prompt copiado." : "No fue posible copiar el prompt."); } });
+      function openImageActions() { if (isSupportedImage(deckEdits.image) && caseImageActions) caseImageActions.hidden = false; }
+      caseImage?.addEventListener("click", openImageActions);
+      caseImage?.addEventListener("keydown", (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openImageActions(); } });
+      caseImageActionsClose?.addEventListener("click", () => { if (caseImageActions) caseImageActions.hidden = true; });
+      caseImageActionsDownload?.addEventListener("click", () => { if (!isSupportedImage(deckEdits.image)) return; const extension = (deckEdits.image.match(/^data:image[/]([a-z]+)/i)?.[1] || "png").replace("jpeg", "jpg"); const link = document.createElement("a"); link.href = deckEdits.image; link.download = "case-image." + extension; link.click(); if (captureStatus) captureStatus.textContent = "Descarga de imagen iniciada."; });
+      caseImageActionsDelete?.addEventListener("click", () => { deckEdits.image = ""; caseImageFile && (caseImageFile.value = ""); applyCaseImage(""); if (caseImageActions) caseImageActions.hidden = true; saveDeckEdits("Imagen eliminada localmente."); });
+    """.replace("__CASE_IMAGE_PROMPT__", json.dumps(image_prompt, ensure_ascii=False))
+
+
 def render_case_deck_html(
     architecture: dict[str, Any],
     deck: dict[str, Any],
@@ -1569,6 +1816,7 @@ def render_case_deck_html(
     case_page_description = "Resumen del propósito y del contexto funcional del caso de uso analizado."
     architecture_page_description = "Vista de los servicios OCI, sus relaciones y el flujo de interacción de la solución."
     case_description = str(case.get("description") or f'Este caso de uso presenta la necesidad funcional de la solución: {case["objective"]}')
+    case_image_prompt = str(case.get("imagePrompt") or build_case_image_prompt(title, case))
     bom_download = base64.b64encode(bom_path.read_bytes()).decode("ascii")
     try:
         deck_brand = "data:image/svg+xml;base64," + base64.b64encode(DECK_BRAND_FILE.read_bytes()).decode("ascii")
@@ -1603,8 +1851,8 @@ def render_case_deck_html(
     .case-content {{ display:flex; align-items:center; min-width:0; padding:28px 22px; border:1px solid var(--line); border-left:5px solid var(--oci); }} .case-content p {{ margin:0; color:var(--ink); font-size:30px; font-weight:700; line-height:1.42; }}
     .architecture-layout {{ display:grid; grid-template-columns:360px minmax(0, 1fr); grid-template-rows:1fr; gap:20px; height:858px; }}
     .architecture-canvas {{ position:relative; grid-column:2; grid-row:1; min-height:0; overflow:hidden; border:1px solid var(--line); background:#eef2f5; }}
-    .architecture-canvas .canvas {{ fill:#eef2f5; }} .architecture-canvas .edge {{ fill:none; stroke:var(--muted); stroke-width:1.65; stroke-linecap:round; opacity:.9; }} .architecture-canvas .node {{ transition:opacity .16s ease; }} .architecture-canvas .node.is-muted {{ opacity:.28; }} .architecture-canvas .node-card {{ fill:#fff; stroke:#c9d1d9; stroke-width:1.2; filter:drop-shadow(0 2px 5px rgba(49,45,42,.10)); transition:stroke .16s ease,stroke-width .16s ease; }} .architecture-canvas .node.is-highlighted .node-card {{ stroke:var(--oci); stroke-width:3; filter:drop-shadow(0 4px 9px rgba(199,70,52,.24)); }} .architecture-canvas .node-service-name {{ fill:var(--ink); font-size:13px; font-weight:700; }}
-    .architecture-canvas .edge-label {{ pointer-events:none; }}
+    .architecture-canvas .canvas {{ fill:#eef2f5; }} .architecture-canvas .edge {{ fill:none; stroke:var(--muted); stroke-width:1.65; stroke-linecap:round; opacity:.9; transition:stroke .16s ease,stroke-width .16s ease,opacity .16s ease; }} .architecture-canvas .edge.is-muted,.architecture-canvas .edge-label.is-muted {{ opacity:.18; }} .architecture-canvas .edge.is-highlighted {{ stroke:var(--oci)!important; stroke-width:3.2; opacity:1; marker-end:url(#arrow-highlight)!important; }} .architecture-canvas .node {{ transition:opacity .16s ease; }} .architecture-canvas .node.is-muted {{ opacity:.28; }} .architecture-canvas .node-card {{ fill:#fff; stroke:#c9d1d9; stroke-width:1.2; filter:drop-shadow(0 2px 5px rgba(49,45,42,.10)); transition:stroke .16s ease,stroke-width .16s ease; }} .architecture-canvas .node.is-highlighted .node-card {{ stroke:var(--oci); stroke-width:3; filter:drop-shadow(0 4px 9px rgba(199,70,52,.24)); }} .architecture-canvas .node.is-flow-target .node-card {{ stroke:var(--teal); stroke-width:2.5; filter:drop-shadow(0 3px 8px rgba(35,89,103,.18)); }} .architecture-canvas .node-service-name {{ fill:var(--ink); font-size:13px; font-weight:700; }}
+    .architecture-canvas .edge-label {{ pointer-events:none; transition:opacity .16s ease; }}
     .architecture-canvas .edge-label rect {{ fill:rgba(255,255,255,.96); stroke:#c7d0da; stroke-width:1; }}
     .architecture-canvas .edge-label text {{ fill:var(--muted); font-size:10px; font-weight:700; }}
     .architecture-canvas .edge-label-traffic rect {{ stroke:#93b6bd; fill:#f1f9fa; }} .architecture-canvas .edge-label-traffic text {{ fill:#2c5967; }}
@@ -1613,8 +1861,9 @@ def render_case_deck_html(
     .architecture-canvas .edge-label-admin rect {{ stroke:#c0b7df; fill:#f7f5ff; }} .architecture-canvas .edge-label-admin text {{ fill:#5f4f98; }}
     .architecture-canvas .edge-label-security rect {{ stroke:#d6aaa5; fill:#fff5f3; }} .architecture-canvas .edge-label-security text {{ fill:#8f3f37; }}
     .architecture-canvas .edge-label-observability rect {{ stroke:#a6c6d1; fill:#f2f9fb; }} .architecture-canvas .edge-label-observability text {{ fill:#426f82; }}
+    .architecture-canvas .edge-label.is-highlighted rect {{ fill:#fff7f5; stroke:var(--oci); stroke-width:1.5; }} .architecture-canvas .edge-label.is-highlighted text {{ fill:var(--oci); }}
     .service-band {{ grid-column:1; grid-row:1; align-self:stretch; overflow:hidden; padding:0 12px 0 0; border-right:5px solid var(--oci); background:transparent; }}
-    .service-grid {{ display:grid; grid-template-columns:1fr; grid-auto-rows:auto; gap:7px; }} .service-card {{ min-height:0; padding:10px 12px; border:1px solid var(--line); background:#fff; overflow:hidden; cursor:pointer; transition:border-color .16s ease,background .16s ease,box-shadow .16s ease; }} .service-card:hover,.service-card:focus-visible,.service-card.is-active {{ border-color:var(--oci); background:#fff7f5; box-shadow:0 2px 8px rgba(199,70,52,.14); outline:none; }} .service-card strong,.service-card p {{ display:block; white-space:normal; }} .service-card strong {{ color:var(--teal); font-size:14px; }} .service-card p {{ margin:5px 0 0; color:var(--muted); font-size:13px; line-height:1.34; }}
+    .service-grid {{ display:grid; grid-template-columns:1fr; grid-auto-rows:auto; gap:7px; }} .service-card {{ min-height:0; padding:10px 12px; border:1px solid var(--line); background:#fff; overflow:hidden; cursor:pointer; transition:border-color .16s ease,background .16s ease,box-shadow .16s ease; }} .service-card:hover,.service-card:focus-visible,.service-card.is-active {{ border-color:var(--oci); background:#fff7f5; box-shadow:0 2px 8px rgba(199,70,52,.14); outline:none; }} .service-card.is-flow-target {{ border-color:var(--teal); background:#f1f9fa; box-shadow:0 2px 8px rgba(35,89,103,.12); }} .service-card strong,.service-card p {{ display:block; white-space:normal; }} .service-card strong {{ color:var(--teal); font-size:14px; }} .service-card p {{ margin:5px 0 0; color:var(--muted); font-size:13px; line-height:1.34; }}
     .diagram-viewport {{ position:absolute; inset:0; overflow:auto; background:#eef2f5; cursor:grab; scrollbar-color:#8ea0aa transparent; scrollbar-width:thin; }} .diagram-viewport.is-panning {{ cursor:grabbing; user-select:none; }} .diagram-stage {{ width:100%; min-width:100%; height:100%; min-height:100%; padding:0; }} .diagram-viewport .diagram {{ display:block; max-width:none; }}
     .diagram-toolbar {{ position:absolute; right:16px; bottom:16px; z-index:4; display:flex; flex-direction:column; gap:5px; }} .diagram-toolbar button {{ min-width:36px; height:30px; border:1px solid #c9d1d9; border-radius:5px; color:var(--ink); background:#fff; box-shadow:0 2px 5px rgba(49,45,42,.14); font:700 13px Arial,Helvetica,sans-serif; cursor:pointer; }} .diagram-toolbar button:hover {{ border-color:var(--teal); color:var(--teal); }} .diagram-toolbar .zoom-fit {{ min-width:46px; font-size:11px; }}
     .bom-head {{ display:grid; grid-template-columns:minmax(0, 840px) minmax(0, 1fr); gap:14px; margin-bottom:22px; }} .bom-metrics {{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; }} .metric {{ padding:17px 20px; border:1px solid var(--line); background:var(--soft); }} .metric span {{ display:block; color:var(--muted); font-size:14px; font-weight:700; text-transform:uppercase; }} .metric strong {{ display:block; margin-top:6px; color:var(--teal); font-size:24px; line-height:1.12; }}
@@ -1623,6 +1872,7 @@ def render_case_deck_html(
     .deck-warnings {{ position:absolute; right:20px; bottom:20px; max-width:440px; padding:12px 16px; border:1px solid #dfb6a9; background:#fff4f1; font-size:13px; }}
     .deck-brand {{ position:absolute; right:56px; bottom:0; z-index:6; width:80px; height:80px; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; pointer-events:none; }} .deck-brand img {{ display:block; width:100%; height:100%; object-fit:contain; }} #slide-architecture .diagram-toolbar {{ right:16px; bottom:54px; z-index:7; }}
     @media print {{ html, body {{ background:#fff; }} .deck {{ box-shadow:none; }} }}
+    {render_case_deck_interaction_styles()}
   </style>
 </head>
 <body>
@@ -1648,7 +1898,7 @@ def render_case_deck_html(
     <script type="application/json" id="architecture-spec">{html.escape(json.dumps(architecture, ensure_ascii=False))}</script>
     <script type="application/json" id="case-deck-spec">{html.escape(json.dumps(deck, ensure_ascii=False))}</script>
     <script type="application/octet-stream" id="bom-download-data">{bom_download}</script>
-  </main></div>
+  </main>{render_case_deck_editor_dialog()}</div>
   <script>
     (() => {{
       const deck = document.querySelector(".deck");
@@ -1673,6 +1923,8 @@ def render_case_deck_html(
       const zoomFit = canvas?.querySelector(".zoom-fit");
       const serviceCards = [...document.querySelectorAll(".service-card[data-node-id]")];
       const diagramNodes = [...document.querySelectorAll(".architecture-canvas g.node")];
+      const diagramEdges = [...document.querySelectorAll(".architecture-canvas .edge[data-source]")];
+      const edgeLabels = [...document.querySelectorAll(".architecture-canvas .edge-label[data-source]")];
       const downloadBom = document.querySelector(".download-bom");
       const bomDownloadData = document.querySelector("#bom-download-data");
       let zoom = 1;
@@ -1698,21 +1950,41 @@ def render_case_deck_html(
         initialized = true;
         fitDiagram();
       }}
-      function highlightService(card) {{
-        const targetId = "node-" + card.dataset.nodeId;
-        serviceCards.forEach((item) => item.classList.toggle("is-active", item === card));
+      function highlightService(nodeId) {{
+        const downstream = new Set(diagramEdges.filter((edge) => edge.dataset.source === nodeId).map((edge) => edge.dataset.target));
+        const visibleNodes = new Set([nodeId, ...downstream]);
+        serviceCards.forEach((card) => {{
+          const selected = card.dataset.nodeId === nodeId;
+          const target = downstream.has(card.dataset.nodeId);
+          card.classList.toggle("is-active", selected);
+          card.classList.toggle("is-flow-target", target);
+        }});
         diagramNodes.forEach((node) => {{
-          const selected = node.id === targetId;
-          node.classList.toggle("is-highlighted", selected);
-          node.classList.toggle("is-muted", !selected);
+          const currentId = node.id.replace(/^node-/, "");
+          node.classList.toggle("is-highlighted", currentId === nodeId);
+          node.classList.toggle("is-flow-target", downstream.has(currentId));
+          node.classList.toggle("is-muted", !visibleNodes.has(currentId));
+        }});
+        diagramEdges.forEach((edge) => {{
+          const selected = edge.dataset.source === nodeId;
+          edge.classList.toggle("is-highlighted", selected);
+          edge.classList.toggle("is-muted", !selected);
+        }});
+        edgeLabels.forEach((label) => {{
+          const selected = label.dataset.source === nodeId;
+          label.classList.toggle("is-highlighted", selected);
+          label.classList.toggle("is-muted", !selected);
         }});
       }}
       function clearServiceHighlight() {{
-        serviceCards.forEach((item) => item.classList.remove("is-active"));
-        diagramNodes.forEach((node) => node.classList.remove("is-highlighted", "is-muted"));
+        serviceCards.forEach((item) => item.classList.remove("is-active", "is-flow-target"));
+        diagramNodes.forEach((node) => node.classList.remove("is-highlighted", "is-flow-target", "is-muted"));
+        diagramEdges.forEach((edge) => edge.classList.remove("is-highlighted", "is-muted"));
+        edgeLabels.forEach((label) => label.classList.remove("is-highlighted", "is-muted"));
       }}
       function selectTab(name, updateUrl) {{
         const selected = allowed.has(name) ? name : "case";
+        activeTab = selected;
         tabs.forEach((tab) => tab.setAttribute("aria-selected", String(tab.dataset.tab === selected)));
         panels.forEach((panel) => panel.classList.toggle("is-active", panel.id === "slide-" + selected));
         headerTitle.textContent = headers[selected][0];
@@ -1801,7 +2073,9 @@ def render_case_deck_html(
       }}
       async function copySlide() {{
         if (!navigator.clipboard?.write || typeof ClipboardItem === "undefined") {{
-          if (captureStatus) captureStatus.textContent = "La copia de imagen no está disponible en este navegador.";
+          const message = "La copia de imagen no está disponible en este navegador.";
+          if (captureStatus) captureStatus.textContent = message;
+          showToast(message, "error");
           return;
         }}
         try {{
@@ -1817,9 +2091,13 @@ def render_case_deck_html(
           await paintSlideElement(context, deck, deckRect, scale, styleText);
           const png = await new Promise((resolve, reject) => canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("PNG capture failed")), "image/png"));
           await navigator.clipboard.write([new ClipboardItem({{ "image/png":png }})]);
-          if (captureStatus) captureStatus.textContent = "Página 16:9 copiada al portapapeles.";
+          const message = "Página 16:9 capturada y copiada al portapapeles.";
+          if (captureStatus) captureStatus.textContent = message;
+          showToast(message);
         }} catch (error) {{
-          if (captureStatus) captureStatus.textContent = "No fue posible copiar la página 16:9.";
+          const message = "No fue posible copiar la página 16:9.";
+          if (captureStatus) captureStatus.textContent = message;
+          showToast(message, "error");
           console.error(error);
         }}
       }}
@@ -1840,10 +2118,17 @@ def render_case_deck_html(
       viewport?.addEventListener("pointerup", () => {{ pan = null; viewport.classList.remove("is-panning"); }});
       viewport?.addEventListener("pointercancel", () => {{ pan = null; viewport.classList.remove("is-panning"); }});
       serviceCards.forEach((card) => {{
-        card.addEventListener("mouseenter", () => highlightService(card));
+        card.addEventListener("mouseenter", () => highlightService(card.dataset.nodeId));
         card.addEventListener("mouseleave", () => {{ if (document.activeElement !== card) clearServiceHighlight(); }});
-        card.addEventListener("focus", () => highlightService(card));
+        card.addEventListener("focus", () => highlightService(card.dataset.nodeId));
         card.addEventListener("blur", clearServiceHighlight);
+      }});
+      diagramNodes.forEach((node) => {{
+        const nodeId = node.id.replace(/^node-/, "");
+        node.addEventListener("mouseenter", () => highlightService(nodeId));
+        node.addEventListener("mouseleave", () => {{ if (!node.contains(document.activeElement)) clearServiceHighlight(); }});
+        node.addEventListener("focusin", () => highlightService(nodeId));
+        node.addEventListener("focusout", () => {{ if (!node.contains(document.activeElement)) clearServiceHighlight(); }});
       }});
       tabs.forEach((tab) => tab.addEventListener("click", () => selectTab(tab.dataset.tab, true)));
       window.ociCopyActiveSlide = copySlide;
@@ -1864,6 +2149,7 @@ def render_case_deck_html(
         link.remove();
         window.setTimeout(() => URL.revokeObjectURL(url), 0);
       }});
+      {render_case_deck_interaction_script(case_image_prompt)}
       window.addEventListener("resize", () => {{ fitDeck(); if (isFit) fitDiagram(); }});
       selectTab(new URLSearchParams(window.location.search).get("tab"), false);
       fitDeck();

@@ -30,7 +30,19 @@ Use `Use Case` as the case-tab heading. Its one-line header description must be
 generic and explain what the page contains; do not use the case-specific
 objective as that subtitle. Present the objective once in the tab body without
 adding scope, assumptions or open-decision panels unless the user requests them.
-Lay out the Use Case body in two equal columns: a portable, accessible visual
+Lay out the Use Case body in two equal columns. The visual column must be a
+replaceable image area that fills its container with `object-fit: cover`. Center
+the upload-image icon and show the exact rendered width and height of that area,
+not a fixed 16:9 size. Generate a GPT image prompt using the same calculated
+aspect ratio and dimensions so the generated asset fills the area without crop
+or bars. In the editable prompt dialog, place a copy icon inside the textarea's
+lower-right corner and show a toast after copying; do not use a separate text
+copy button. Persist an uploaded image, its editable prompt and direct text
+edits locally in the portable deck; clicking the uploaded image must open
+download and delete actions, while the prompt text icon remains in the image
+corner.
+Make the page subtitle, case description and architecture service labels editable
+on click through an explicit Save action. Use a portable, accessible visual
 illustration on the left and the case-specific objective on the right. Embed the
 visual in the HTML so the deck does not depend on an external image file.
 Generate a concise `case.description` paragraph from discovery evidence and
@@ -42,8 +54,9 @@ In the Architecture tab, use a generic one-line header description that tells
 the reader the page contains OCI services, their relationships and the solution
 flow; do not enumerate customer-specific services in that subtitle. Each service
 card shows only the OCI service name and a brief explanation of its role in that
-architecture. Hovering or focusing a card must highlight the matching diagram
-node and visually de-emphasize the other nodes. Order the cards by the final
+architecture. Hovering or focusing a card or diagram component must highlight the
+matching source node, its immediate destination nodes, and its outgoing lines and
+labels; visually de-emphasize unrelated nodes and connections. Order the cards by the final
 diagram coordinates: left to right, then top to bottom within each column, so
 keyboard and pointer reading order match the architecture.
 

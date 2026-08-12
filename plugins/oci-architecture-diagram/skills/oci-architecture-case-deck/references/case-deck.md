@@ -6,6 +6,9 @@ Required fields:
 
 - version: 1
 - case.summary and case.objective: non-empty strings
+- case.description and case.imagePrompt: optional non-empty strings; imagePrompt
+  overrides the generated prompt, whose size and aspect ratio match the rendered
+  Use Case image area
 - case.scope, case.assumptions and case.openDecisions: optional string arrays
 - bom.scenario: low, base or high
 - bom.validation: browser_validated, locally_validated or blocked
