@@ -228,6 +228,14 @@ class RendererTests(unittest.TestCase):
         self.assertNotIn("static architecture diagram", output)
         self.assertNotIn("Unknown OCI service", output)
 
+    def test_svg_uses_an_accessible_label_without_a_hover_tooltip(self) -> None:
+        spec = renderer.read_json(PLUGIN_ROOT / "examples" / "web-architecture.json")
+
+        svg, _warnings, _services = renderer.render_svg(spec, self.catalog, CATALOG)
+
+        self.assertIn('role="img" aria-label="OCI Web Architecture"', svg)
+        self.assertNotIn('<title id="diagram-title">', svg)
+
     def test_case_deck_renders_three_16_by_9_tabs_from_validated_bom(self) -> None:
         architecture = renderer.read_json(PLUGIN_ROOT / "examples" / "case-deck-web-architecture.json")
         deck = renderer.read_json(PLUGIN_ROOT / "examples" / "case-deck-web.json")
@@ -280,7 +288,8 @@ class RendererTests(unittest.TestCase):
         self.assertIn('width:6px; height:6px', output)
         self.assertIn('font:14px/1.35 Arial,Helvetica,sans-serif', output)
         self.assertIn('top:24px; right:24px; min-width:260px', output)
-        self.assertIn('Página 16:9 capturada y copiada al portapapeles.', output)
+        self.assertIn('async function renderAllSlidesPngs()', output)
+        self.assertIn('window.ociRenderAllSlides = renderAllSlidesPngs;', output)
         self.assertIn('object-fit:cover', output)
         self.assertNotIn('Agregar imagen', output)
         self.assertIn('Prompt para generar imagen en GPT', output)
@@ -303,12 +312,17 @@ class RendererTests(unittest.TestCase):
         self.assertIn(str(deck["case"]["description"]), output)
         self.assertNotIn('class="capture-slide"', output)
         self.assertIn('data-capture-enabled', output)
-        self.assertIn("window.ociCopyActiveSlide = copySlide", output)
-        self.assertIn('type === "oci-copy-active-slide"', output)
+        self.assertNotIn("navigator.clipboard.write([{", output)
         self.assertIn('canvas.width = 1920', output)
         self.assertIn('canvas.height = 1080', output)
-        self.assertIn('new ClipboardItem({ "image/png":png })', output)
+        self.assertNotIn('new ClipboardItem({ "image/png":png })', output)
         self.assertIn("async function paintSlideElement", output)
+        self.assertIn("function serializableSvgClone", output)
+        self.assertNotIn('"marker-end": style.markerEnd', output)
+        self.assertIn('svgClone.classList.add("architecture-canvas")', output)
+        self.assertIn('styleNode.textContent = styleText', output)
+        self.assertIn('const brand = deck.querySelector(".deck-brand")', output)
+        self.assertIn('paintSlideElement(context, brand, deckRect, scale, styleText, true)', output)
         self.assertIn("document.createRange()", output)
         self.assertIn("await paintSlideElement(context, deck", output)
         self.assertNotIn("<foreignObject", output)
@@ -324,8 +338,14 @@ class RendererTests(unittest.TestCase):
         self.assertIn("Total mensual estimado</span><strong>USD 75.00</strong>", output)
         self.assertIn(".bom-metrics { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; }", output)
         self.assertIn("Bill of Materials (BoM)", output)
-        self.assertIn('aria-label="Descargar JSON"', output)
+        self.assertIn('aria-label="Descargar JSON de Oracle Cost Estimator"', output)
         self.assertIn('aria-label="Abrir Oracle Cloud Cost Estimator"', output)
+        self.assertIn('<th>SKU</th>', output)
+        self.assertIn('class="bom-sku"', output)
+        self.assertIn('Exportación homologada:', output)
+        self.assertNotIn('aria-label="Descargar Excel"', output)
+        self.assertNotIn('downloadBomExcel?.addEventListener("click"', output)
+        self.assertNotIn('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', output)
         self.assertIn('<span>JSON</span>', output)
         self.assertIn('<span>Cost Estimator</span>', output)
         self.assertIn('class="action-icon"', output)
@@ -340,7 +360,7 @@ class RendererTests(unittest.TestCase):
         self.assertIn('.diagram-toolbar .zoom-fit { min-width:46px; font-size:11px; }', output)
         self.assertIn('context.drawImage(element, box.x, box.y, box.width, box.height)', output)
         self.assertIn("https://www.oracle.com/cloud/costestimator.html", output)
-        self.assertIn("menú de tres puntos", output)
+        self.assertIn("Exportación homologada:", output)
         embedded_bom = re.search(r'<script type="application/octet-stream" id="bom-download-data">([^<]+)</script>', output)
         self.assertIsNotNone(embedded_bom)
         self.assertEqual(base64.b64decode(embedded_bom.group(1)), bom_path.read_bytes())
@@ -476,6 +496,27 @@ class RendererTests(unittest.TestCase):
         self.assertNotIn('class="node-service"', node_html)
         self.assertNotIn('class="icon-tile"', node_html)
         self.assertIn(">DNS</tspan>", node_html)
+
+    def test_node_card_keeps_the_service_name_clear_of_the_icon(self) -> None:
+        spec = renderer.read_json(PLUGIN_ROOT / "examples" / "live-query-ecommerce.json")
+        html = renderer.render_html(spec, self.catalog, CATALOG)
+
+        self.assertEqual(renderer.NODE_H, 128)
+        self.assertIn('class="node-icon" x="66" y="15"', html)
+        self.assertIn('class="node-service-name" text-anchor="middle" x="92" y="98"', html)
+
+    def test_edge_label_adjustment_stays_close_to_its_connector(self) -> None:
+        x, y, _ = renderer.adjust_edge_label_position(
+            "object API",
+            626,
+            298,
+            [],
+            [renderer.edge_label_box("test SQL", 626, 298)],
+        )
+
+        self.assertEqual(x, 626)
+        self.assertEqual(y, 322)
+        self.assertLessEqual(abs(y - 298), 24)
 
     def test_live_query_group_palette_and_vcn_label_visibility(self) -> None:
         spec = renderer.read_json(PLUGIN_ROOT / "examples" / "live-query-ecommerce.json")
@@ -662,7 +703,7 @@ class LocalArchitectureSiteTests(unittest.TestCase):
         self.assertIn("diagram-frame", index)
         self.assertIn("viewer-logo", index)
         self.assertIn("menu-toggle", index)
-        self.assertIn("copy-slide", index)
+        self.assertIn("download-pptx", index)
         self.assertIn("export-projects", index)
         self.assertIn("project-footer", index)
         self.assertIn('id="action-confirmation"', index)
@@ -700,8 +741,11 @@ class LocalArchitectureSiteTests(unittest.TestCase):
         self.assertIn("confirmAction", app)
         self.assertNotIn("requestInlineEdit", app)
         self.assertIn('"Guardar cambios"', app)
-        self.assertIn("oci-copy-active-slide", app)
-        self.assertIn('[data-capture-enabled]', app)
+        self.assertIn("ociRenderAllSlides", app)
+        self.assertIn("buildPptx", app)
+        self.assertIn("pptxThemeXml", app)
+        self.assertIn('ppt/theme/theme1.xml', app)
+        self.assertIn("supportsPptx", app)
         self.assertIn("requestExport", app)
         self.assertIn('duplicate.className = "duplicate-project"', app)
         self.assertIn('remove.className = "delete-project"', app)
@@ -722,7 +766,8 @@ class LocalArchitectureSiteTests(unittest.TestCase):
         self.assertIn("overflow: hidden;", styles)
         self.assertIn(".viewer-logo", styles)
         self.assertIn(".diagram-frame.is-deck", styles)
-        self.assertIn(".copy-slide", styles)
+        self.assertIn(".download-pptx", styles)
+        self.assertIn(".viewer-toast", styles)
         self.assertIn("border: 1px solid #b8c5cf;", styles)
         self.assertIn(".project-footer", styles)
         self.assertIn(".duplicate-project", styles)
@@ -824,7 +869,7 @@ class SkillPackagingTests(unittest.TestCase):
         plugin_entry = marketplace["plugins"][0]
 
         self.assertEqual("oci-architecture-diagram", manifest["name"])
-        self.assertEqual("0.4.4", manifest["version"])
+        self.assertEqual("0.4.6", manifest["version"])
         self.assertEqual("Joel Gangini", manifest["author"]["name"])
         self.assertEqual("Joel Gangini", manifest["interface"]["developerName"])
         self.assertEqual("oci-architecture", marketplace["name"])

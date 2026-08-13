@@ -23,7 +23,7 @@ DEFAULT_BOM_TOOL = PLUGIN_ROOT / "scripts" / "oracle-bom.mjs"
 DECK_BRAND_FILE = PLUGIN_ROOT / "assets" / "ora.svg"
 
 NODE_W = 184
-NODE_H = 112
+NODE_H = 128
 ICON_SIZE = 52
 MARGIN_X = 54
 MARGIN_Y = 84
@@ -573,10 +573,10 @@ def render_node(
     return f"""
     <g class="node" id="node-{html.escape(node['id'])}" transform="translate({fmt(x)} {fmt(y)})">
       <rect class="node-card" width="{NODE_W}" height="{NODE_H}" rx="8"/>
-      <svg class="node-icon" x="{fmt((NODE_W - ICON_SIZE) / 2)}" y="21" width="{ICON_SIZE}" height="{ICON_SIZE}" viewBox="{html.escape(viewbox)}" preserveAspectRatio="xMidYMid meet">
+      <svg class="node-icon" x="{fmt((NODE_W - ICON_SIZE) / 2)}" y="15" width="{ICON_SIZE}" height="{ICON_SIZE}" viewBox="{html.escape(viewbox)}" preserveAspectRatio="xMidYMid meet">
         {body}
       </svg>
-      <text class="node-service-name" text-anchor="middle" x="{fmt(NODE_W / 2)}" y="89">{"".join(service_markup)}</text>
+      <text class="node-service-name" text-anchor="middle" x="{fmt(NODE_W / 2)}" y="98">{"".join(service_markup)}</text>
     </g>
 """
 
@@ -677,8 +677,11 @@ def adjust_edge_label_position(
     node_boxes: list[tuple[float, float, float, float]],
     label_boxes: list[tuple[float, float, float, float]],
 ) -> tuple[float, float, tuple[float, float, float, float]]:
-    offsets = [0, -20, 20, -40, 40, -64, 64, -88, 88, -116, 116, -144, 144]
-    x_offsets = [0, -36, 36, -72, 72, -112, 112, -148, 148]
+    # Keep labels visually attached to their connector before considering wider moves.
+    # Prefer the lower side when an adjacent label occupies the path midpoint: it keeps
+    # the label with its outgoing connector instead of visually joining an upper curve.
+    offsets = [0, 12, -12, 24, -24]
+    x_offsets = [0, -32, 32, -64, 64]
     for dx in x_offsets:
         for dy in offsets:
             candidate_x = x + dx
@@ -689,15 +692,15 @@ def adjust_edge_label_position(
             if any(intersects(candidate, other, pad=6) for other in label_boxes):
                 continue
             return candidate_x, candidate_y, candidate
-    for dx in range(-240, 241, 40):
-        for dy in range(-176, 177, 22):
+    for dx in range(-120, 121, 32):
+        for dy in range(-48, 49, 16):
             candidate_x = x + dx
             candidate_y = max(42, y + dy)
             candidate = edge_label_box(label, candidate_x, candidate_y)
             if any(intersects(candidate, node, pad=8) for node in node_boxes):
                 continue
             return candidate_x, candidate_y, candidate
-    fallback_y = max(42, y - 196)
+    fallback_y = max(42, y - 48)
     return x, fallback_y, edge_label_box(label, x, fallback_y)
 
 
@@ -759,6 +762,7 @@ def render_svg(spec: dict[str, Any], catalog: dict[str, Any], catalog_path: Path
             )
 
     edge_markup: list[str] = []
+    label_entries: list[tuple[float, int, str, float, float, str, str, str]] = []
     edge_offsets = port_offsets(edges, positions)
     node_boxes = [(x, y, x + NODE_W, y + NODE_H) for x, y in positions.values()]
     label_boxes: list[tuple[float, float, float, float]] = []
@@ -772,9 +776,23 @@ def render_svg(spec: dict[str, Any], catalog: dict[str, Any], catalog_path: Path
             f'data-target="{html.escape(edge["to"])}" d="{path}" marker-end="url(#arrow-{html.escape(kind)})"/>'
         )
         if label:
-            lx, ly, label_box = adjust_edge_label_position(label, lx, ly, node_boxes, label_boxes)
-            label_boxes.append(label_box)
-            edge_markup.append(render_edge_label(label, lx, ly, kind, edge["from"], edge["to"]))
+            label_entries.append(
+                (
+                    abs(target_offset - source_offset + positions[edge["to"]][1] - positions[edge["from"]][1]),
+                    index,
+                    label,
+                    lx,
+                    ly,
+                    kind,
+                    edge["from"],
+                    edge["to"],
+                )
+            )
+
+    for _, _, label, lx, ly, kind, source, target in sorted(label_entries):
+        lx, ly, label_box = adjust_edge_label_position(label, lx, ly, node_boxes, label_boxes)
+        label_boxes.append(label_box)
+        edge_markup.append(render_edge_label(label, lx, ly, kind, source, target))
 
     used_services: dict[str, str] = {}
     node_markup = [
@@ -793,8 +811,7 @@ def render_svg(spec: dict[str, Any], catalog: dict[str, Any], catalog_path: Path
       <path d="M 1.5 1.5 L 8.5 5 L 1.5 8.5 z" fill="#c74634"/>
     </marker>"""
     svg = f"""
-<svg class="diagram" xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-labelledby="diagram-title">
-  <title id="diagram-title">{title}</title>
+<svg class="diagram" xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-label="{title}">
   <defs>
 {marker_markup}
   </defs>
@@ -1451,6 +1468,7 @@ def validate_deck_spec(
         if not isinstance(pricing_refs, list) or not pricing_refs:
             raise DiagramError(f"{base}.pricingRefs must contain at least one estimated Oracle BoM line.")
         embedded_monthly_cost = 0.0
+        bom_lines: list[dict[str, Any]] = []
         for reference_index, reference in enumerate(pricing_refs):
             ref_base = f"{base}.pricingRefs[{reference_index}]"
             if not isinstance(reference, dict):
@@ -1479,9 +1497,10 @@ def validate_deck_spec(
                 raise DiagramError(f"Oracle BoM price lines are referenced more than once: {configuration} / {service}")
             covered_price_lines.update(matched_price_lines)
             embedded_monthly_cost += sum(float(item["monthlyCost"]) for item in matches)
+            bom_lines.extend(item for item in matches if float(item["monthlyCost"]) > 0)
         if embedded_monthly_cost <= 0:
             raise DiagramError(f"{base} must have a positive monthly estimate in the Oracle BoM.")
-        validated_components.append({**component, "embeddedMonthlyCost": embedded_monthly_cost})
+        validated_components.append({**component, "embeddedMonthlyCost": embedded_monthly_cost, "bomLines": bom_lines})
     if mapped_node_ids != architecture_node_ids:
         missing = sorted(architecture_node_ids - mapped_node_ids)
         extra = sorted(mapped_node_ids - architecture_node_ids)
@@ -1540,6 +1559,10 @@ def format_money(value: float, currency: str) -> str:
     return f"{currency} {value:,.2f}"
 
 
+def component_skus(component: dict[str, Any]) -> str:
+    return ", ".join(sorted({str(item["sku"]) for item in component.get("bomLines", []) if item.get("sku")})) or "â€”"
+
+
 def render_deck_bom_rows(components: list[dict[str, Any]], currency: str) -> str:
     rows = []
     for component in components:
@@ -1551,6 +1574,7 @@ def render_deck_bom_rows(components: list[dict[str, Any]], currency: str) -> str
               <td>{html.escape(str(component["service"]))}</td>
               <td><strong>{html.escape(str(component["component"]))}</strong><span>{html.escape(str(component["role"]))}</span></td>
               <td>{html.escape(str(component["sizing"]))}</td>
+              <td class="bom-sku">{html.escape(component_skus(component))}</td>
               <td>{html.escape(price_text)}</td>
             </tr>"""
         )
@@ -1869,7 +1893,7 @@ def render_case_deck_html(
     .diagram-toolbar {{ position:absolute; right:16px; bottom:16px; z-index:4; display:flex; flex-direction:column; gap:5px; }} .diagram-toolbar button {{ min-width:36px; height:30px; border:1px solid #c9d1d9; border-radius:5px; color:var(--ink); background:#fff; box-shadow:0 2px 5px rgba(49,45,42,.14); font:700 13px Arial,Helvetica,sans-serif; cursor:pointer; }} .diagram-toolbar button:hover {{ border-color:var(--teal); color:var(--teal); }} .diagram-toolbar .zoom-fit {{ min-width:46px; font-size:11px; }}
     .bom-head {{ display:grid; grid-template-columns:minmax(0, 840px) minmax(0, 1fr); gap:14px; margin-bottom:22px; }} .bom-metrics {{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; }} .metric {{ padding:17px 20px; border:1px solid var(--line); background:var(--soft); }} .metric span {{ display:block; color:var(--muted); font-size:14px; font-weight:700; text-transform:uppercase; }} .metric strong {{ display:block; margin-top:6px; color:var(--teal); font-size:24px; line-height:1.12; }}
     .bom-actions {{ display:flex; align-items:center; justify-content:space-between; gap:24px; padding:14px 18px; border:1px solid var(--line); background:#fff; }} .bom-actions p {{ margin:0; color:var(--muted); font-size:15px; line-height:1.35; }} .bom-actions strong {{ color:var(--ink); }} .bom-action-links {{ display:flex; flex:0 0 auto; align-items:center; gap:10px; }} .bom-action-links a,.download-bom {{ display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:42px; border-radius:5px; padding:0 16px; font:700 15px Arial,Helvetica,sans-serif; text-decoration:none; cursor:pointer; }} .bom-action-links a {{ border:1px solid var(--teal); color:var(--teal); background:#fff; }} .download-bom {{ border:1px solid var(--oci); color:#fff; background:var(--oci); }} .bom-action-links .action-icon {{ width:20px; height:20px; flex:0 0 auto; }} .bom-action-links a:hover,.bom-action-links a:focus-visible,.download-bom:hover,.download-bom:focus-visible {{ outline:3px solid rgba(199,70,52,.18); outline-offset:2px; }}
-    .bom-table {{ width:100%; border-collapse:collapse; table-layout:fixed; font-size:16px; }} .bom-table th {{ padding:12px 14px; color:#fff; background:var(--teal); text-align:left; font-size:14px; text-transform:uppercase; }} .bom-table td {{ padding:11px 14px; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.25; }} .bom-table tbody tr:nth-child(even) {{ background:#f7f9fa; }} .bom-table th:nth-child(1) {{ width:20%; }} .bom-table th:nth-child(2) {{ width:26%; }} .bom-table th:nth-child(3) {{ width:38%; }} .bom-table th:nth-child(4) {{ width:16%; text-align:right; }} .bom-table td:nth-child(4) {{ text-align:right; font-weight:700; }} .bom-table td span {{ display:block; margin-top:4px; color:var(--muted); font-size:14px; }}
+    .bom-table {{ width:100%; border-collapse:collapse; table-layout:fixed; font-size:16px; }} .bom-table th {{ padding:12px 14px; color:#fff; background:var(--teal); text-align:left; font-size:14px; text-transform:uppercase; }} .bom-table td {{ padding:11px 14px; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.25; }} .bom-table tbody tr:nth-child(even) {{ background:#f7f9fa; }} .bom-table th:nth-child(1) {{ width:17%; }} .bom-table th:nth-child(2) {{ width:24%; }} .bom-table th:nth-child(3) {{ width:36%; }} .bom-table th:nth-child(4) {{ width:13%; }} .bom-table th:nth-child(5) {{ width:10%; text-align:right; }} .bom-table td:nth-child(5) {{ text-align:right; font-weight:700; }} .bom-table td span {{ display:block; margin-top:4px; color:var(--muted); font-size:14px; }} .bom-sku {{ color:var(--teal); font-family:Consolas,Monaco,monospace; font-size:13px; overflow-wrap:anywhere; }}
     .deck-warnings {{ position:absolute; right:20px; bottom:20px; max-width:440px; padding:12px 16px; border:1px solid #dfb6a9; background:#fff4f1; font-size:13px; }}
     .deck-brand {{ position:absolute; right:56px; bottom:0; z-index:6; width:80px; height:80px; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; pointer-events:none; }} .deck-brand img {{ display:block; width:100%; height:100%; object-fit:contain; }} #slide-architecture .diagram-toolbar {{ right:16px; bottom:54px; z-index:7; }}
     @media print {{ html, body {{ background:#fff; }} .deck {{ box-shadow:none; }} }}
@@ -1892,8 +1916,8 @@ def render_case_deck_html(
       <div class="architecture-layout"><section class="service-band" aria-label="Servicios y roles"><div class="service-grid">{render_deck_component_cards(architecture_components)}</div></section><div class="architecture-canvas"><div class="diagram-viewport"><div class="diagram-stage">{svg}</div></div><div class="diagram-toolbar" aria-label="Navegación del diagrama"><button type="button" class="zoom-out" aria-label="Alejar">−</button><button type="button" class="zoom-in" aria-label="Acercar">+</button><button type="button" class="zoom-fit" aria-label="Ajustar diagrama">100%</button></div></div></div>
     </section>
     <section id="slide-bom" role="tabpanel" aria-labelledby="tab-bom">
-      <div class="bom-head"><div class="bom-metrics"><article class="metric"><span>Costo anual estimado</span><strong>{html.escape(format_money(annual_cost, currency))}</strong></article><article class="metric"><span>Total mensual estimado</span><strong>{html.escape(format_money(monthly_cost, currency))}</strong></article></div><aside class="bom-actions" aria-label="Uso del JSON"><p><strong>¿Dónde usarlo?</strong> En Oracle Cloud Cost Estimator, abra el menú de tres puntos, seleccione <em>Import</em> y cargue este archivo JSON.</p><div class="bom-action-links"><a href="https://www.oracle.com/cloud/costestimator.html" target="_blank" rel="noopener noreferrer" aria-label="Abrir Oracle Cloud Cost Estimator" title="Abrir Oracle Cloud Cost Estimator"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h10a2.5 2.5 0 0 1 2.5 2.5v10A2.5 2.5 0 0 1 15 19.5H5A2.5 2.5 0 0 1 2.5 17V7A2.5 2.5 0 0 1 5 4.5Z M13 2.5h6.5V9 M11 13 19.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Cost Estimator</span></a><button type="button" class="download-bom" aria-label="Descargar JSON" title="Descargar JSON"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11 M7.5 10.5 12 15l4.5-4.5 M4.5 18.5v1A2 2 0 0 0 6.5 21.5h11a2 2 0 0 0 2-2v-1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>JSON</span></button></div></aside></div>
-      <table class="bom-table"><thead><tr><th>Servicio</th><th>Componente y rol</th><th>Sizing</th><th>Mensual</th></tr></thead><tbody>{render_deck_bom_rows(components, currency)}</tbody></table>
+      <div class="bom-head"><div class="bom-metrics"><article class="metric"><span>Costo anual estimado</span><strong>{html.escape(format_money(annual_cost, currency))}</strong></article><article class="metric"><span>Total mensual estimado</span><strong>{html.escape(format_money(monthly_cost, currency))}</strong></article></div><aside class="bom-actions" aria-label="Uso del JSON"><p><strong>Exportación homologada:</strong> descargue el JSON, impórtelo en Oracle Cloud Cost Estimator y use <em>Export</em> allí para obtener su archivo Excel oficial.</p><div class="bom-action-links"><a href="https://www.oracle.com/cloud/costestimator.html" target="_blank" rel="noopener noreferrer" aria-label="Abrir Oracle Cloud Cost Estimator" title="Abrir Oracle Cloud Cost Estimator"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h10a2.5 2.5 0 0 1 2.5 2.5v10A2.5 2.5 0 0 1 15 19.5H5A2.5 2.5 0 0 1 2.5 17V7A2.5 2.5 0 0 1 5 4.5Z M13 2.5h6.5V9 M11 13 19.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Cost Estimator</span></a><button type="button" class="download-bom" aria-label="Descargar JSON de Oracle Cost Estimator" title="Descargar JSON de Oracle Cost Estimator"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11 M7.5 10.5 12 15l4.5-4.5 M4.5 18.5v1A2 2 0 0 0 6.5 21.5h11a2 2 0 0 0 2-2v-1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>JSON</span></button></div></aside></div>
+      <table class="bom-table"><thead><tr><th>Servicio</th><th>Componente y rol</th><th>Sizing</th><th>SKU</th><th>Mensual</th></tr></thead><tbody>{render_deck_bom_rows(components, currency)}</tbody></table>
     </section>
     {warnings_markup}
     <script type="application/json" id="architecture-spec">{html.escape(json.dumps(architecture, ensure_ascii=False))}</script>
@@ -2032,8 +2056,30 @@ def render_case_deck_html(
         }}
         context.restore();
       }}
-      async function paintSlideElement(context, element, deckRect, scale, styleText) {{
+      function serializableSvgClone(element, styleText) {{
+        const svgClone = element.cloneNode(true);
+        svgClone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        svgClone.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+        svgClone.classList.add("architecture-canvas");
+        [...svgClone.querySelectorAll("*")].forEach((node) => {{
+          if (node.nodeName.includes(":")) {{ node.remove(); return; }}
+          [...node.attributes].forEach((attribute) => {{
+            if (attribute.name.includes(":") && attribute.name !== "xlink:href") node.removeAttribute(attribute.name);
+          }});
+        }});
+        const rootStyle = getComputedStyle(element);
+        ["--ink", "--muted", "--teal", "--oci", "--line", "--soft"].forEach((property) => {{
+          const value = rootStyle.getPropertyValue(property);
+          if (value) svgClone.style.setProperty(property, value);
+        }});
+        const styleNode = document.createElementNS("http://www.w3.org/2000/svg", "style");
+        styleNode.textContent = styleText;
+        svgClone.insertBefore(styleNode, svgClone.firstChild);
+        return svgClone;
+      }}
+      async function paintSlideElement(context, element, deckRect, scale, styleText, includeFloating = false) {{
         if (element.hasAttribute?.("data-capture-exclude")) return;
+        if (element.classList?.contains("deck-brand") && !includeFloating) return;
         const style = getComputedStyle(element);
         const rect = element.getBoundingClientRect();
         if (style.display === "none" || style.visibility === "hidden" || !rect.width || !rect.height) return;
@@ -2054,17 +2100,18 @@ def render_case_deck_html(
           return;
         }}
         if (element.namespaceURI === "http://www.w3.org/2000/svg" && element.tagName.toLowerCase() === "svg") {{
-          const svgClone = element.cloneNode(true);
-          svgClone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-          const svgStyle = document.createElementNS("http://www.w3.org/2000/svg", "style");
-          svgStyle.textContent = styleText;
-          svgClone.insertBefore(svgStyle, svgClone.firstChild);
+          const svgClone = serializableSvgClone(element, styleText);
           const objectUrl = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(svgClone)], {{ type:"image/svg+xml;charset=utf-8" }}));
-          const image = new Image();
-          image.src = objectUrl;
-          await image.decode();
-          context.drawImage(image, box.x, box.y, box.width, box.height);
-          URL.revokeObjectURL(objectUrl);
+          try {{
+            const image = new Image();
+            image.src = objectUrl;
+            await image.decode();
+            context.drawImage(image, box.x, box.y, box.width, box.height);
+          }} catch (_error) {{
+            // ponytail: omit only an SVG asset the browser canvas cannot decode; use a full SVG renderer if diagrams need pixel-perfect export.
+          }} finally {{
+            URL.revokeObjectURL(objectUrl);
+          }}
           return;
         }}
         for (const child of element.childNodes) {{
@@ -2072,34 +2119,34 @@ def render_case_deck_html(
           else if (child.nodeType === Node.ELEMENT_NODE) await paintSlideElement(context, child, deckRect, scale, styleText);
         }}
       }}
-      async function copySlide() {{
-        if (!navigator.clipboard?.write || typeof ClipboardItem === "undefined") {{
-          const message = "La copia de imagen no está disponible en este navegador.";
-          if (captureStatus) captureStatus.textContent = message;
-          showToast(message, "error");
-          return;
-        }}
+      async function renderActiveSlidePng() {{
+        const canvas = document.createElement("canvas");
+        canvas.width = 1920;
+        canvas.height = 1080;
+        const context = canvas.getContext("2d");
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, 1920, 1080);
+        const deckRect = deck.getBoundingClientRect();
+        const scale = deckRect.width / 1920;
+        const styleText = [...document.querySelectorAll("style")].map((style) => style.textContent).join("\\n");
+        await paintSlideElement(context, deck, deckRect, scale, styleText);
+        const brand = deck.querySelector(".deck-brand");
+        if (brand) await paintSlideElement(context, brand, deckRect, scale, styleText, true);
+        return new Promise((resolve, reject) => canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("PNG capture failed")), "image/png"));
+      }}
+      async function renderAllSlidesPngs() {{
+        const originalTab = activeTab;
+        const rendered = [];
         try {{
-          const canvas = document.createElement("canvas");
-          canvas.width = 1920;
-          canvas.height = 1080;
-          const context = canvas.getContext("2d");
-          context.fillStyle = "#ffffff";
-          context.fillRect(0, 0, 1920, 1080);
-          const deckRect = deck.getBoundingClientRect();
-          const scale = deckRect.width / 1920;
-          const styleText = [...document.querySelectorAll("style")].map((style) => style.textContent).join("\\n");
-          await paintSlideElement(context, deck, deckRect, scale, styleText);
-          const png = await new Promise((resolve, reject) => canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("PNG capture failed")), "image/png"));
-          await navigator.clipboard.write([new ClipboardItem({{ "image/png":png }})]);
-          const message = "Página 16:9 capturada y copiada al portapapeles.";
-          if (captureStatus) captureStatus.textContent = message;
-          showToast(message);
-        }} catch (error) {{
-          const message = "No fue posible copiar la página 16:9.";
-          if (captureStatus) captureStatus.textContent = message;
-          showToast(message, "error");
-          console.error(error);
+          for (const tabName of ["case", "architecture", "bom"]) {{
+            selectTab(tabName, false);
+            clearServiceHighlight();
+            await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+            rendered.push({{ id:tabName, title:headers[tabName][0], blob:await renderActiveSlidePng() }});
+          }}
+          return rendered;
+        }} finally {{
+          selectTab(originalTab, false);
         }}
       }}
       zoomOut?.addEventListener("click", () => renderDiagram(zoom - 0.1));
@@ -2132,10 +2179,7 @@ def render_case_deck_html(
         node.addEventListener("focusout", () => {{ if (!node.contains(document.activeElement)) clearServiceHighlight(); }});
       }});
       tabs.forEach((tab) => tab.addEventListener("click", () => selectTab(tab.dataset.tab, true)));
-      window.ociCopyActiveSlide = copySlide;
-      window.addEventListener("message", (event) => {{
-        if (event.origin === window.location.origin && event.data?.type === "oci-copy-active-slide") copySlide();
-      }});
+      window.ociRenderAllSlides = renderAllSlidesPngs;
       downloadBom?.addEventListener("click", () => {{
         const encoded = bomDownloadData?.textContent.trim();
         if (!encoded) return;

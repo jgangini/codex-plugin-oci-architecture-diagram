@@ -63,15 +63,25 @@ keyboard and pointer reading order match the architecture.
 
 In the BoM tab, show the annual estimate (monthly total multiplied by 12) directly
 to the left of the monthly total; this is a presentation total, not a discounted
-price. Place a `Descargar JSON` button to the right of those totals. The portable deck must embed and download the exact bytes of the supplied
-Oracle Cost Estimator JSON. Alongside the button, explain that the user should
-open Oracle Cloud Cost Estimator, choose the three-dot menu, select `Import`, and
-upload the JSON; include the official Cost Estimator link.
+price. Show an SKU column from the exact priced lines in the supplied Cost
+Estimator JSON. Place a `Descargar JSON` button to the right of those totals.
+The portable deck must embed and download the exact bytes of the supplied Oracle
+Cost Estimator JSON; do not generate a custom spreadsheet and present it as a
+Cost Estimator export. Alongside the button, explain that the user should open
+Oracle Cloud Cost Estimator, choose the three-dot menu, select `Import`, upload
+the JSON, and then use the Cost Estimator's own Export action to obtain the
+official Excel file; include the official Cost Estimator link.
 
-Every tab must expose a camera-icon button in the upper-right header. It copies
-the active 16:9 page to the clipboard as a 1920×1080 PNG so it can be pasted into
-PowerPoint. Exclude the capture control itself from the copied image and announce
-success or failure through an accessible live region.
+The portfolio header must expose a download icon for a PowerPoint file. It must
+render the Use Case, Architecture and BoM tabs as full 1920×1080 PNGs and package
+them as three 16:9 slides in an Office-compatible `.pptx`; do not depend on
+clipboard permissions or rebuild the diagram with PowerPoint shapes. Rasterize
+the complete deck surface, preserving the Oracle brand as the final floating
+layer. Do not rewrite SVG marker definitions or marker presentation attributes
+during rasterization. The generated package must include the slide master,
+layout, theme and relationships PowerPoint requires. Exclude the download
+control itself from the rendered slides and announce success or failure through
+an accessible toast.
 
 Use a compact, minimal scrollbar treatment consistently for scrollable deck
 controls. Keep success and error toasts compact in the upper-right corner of
