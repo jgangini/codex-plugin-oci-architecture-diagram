@@ -1,6 +1,6 @@
 {
   "name": "oci-architecture-diagram",
-  "version": "0.4.8",
+  "version": "0.4.9",
   "description": "Generate, version, manage and share portable OCI diagrams and 16:9 Case/Architecture/BoM projects.",
   "author": {
     "name": "Joel Gangini",

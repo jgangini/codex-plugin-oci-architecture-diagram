@@ -3,7 +3,7 @@
   const SAVE_URL = "/api/projects";
   const STORAGE_KEY = "oci-architecture-projects:" + window.location.pathname;
   const STORAGE_FALLBACK_KEY = STORAGE_KEY + ":fallback";
-const PORTFOLIO_VERSION = "portfolio-v34";
+  const PORTFOLIO_VERSION = "portfolio-v35";
   const list = document.querySelector("#architecture-list");
   const search = document.querySelector("#architecture-search");
   const frame = document.querySelector("#diagram-frame");
@@ -73,6 +73,10 @@ const PORTFOLIO_VERSION = "portfolio-v34";
   function projectListTitle(project) {
     const version = projectVersion(project);
     return project.title.replace(new RegExp("\\s+[\\u2014-]\\s+v" + version + "$", "i"), "");
+  }
+
+  function projectHasBom(project) {
+    return project.format === "deck" || project.path.endsWith("-case-deck.html");
   }
 
   function normalizeDatabase(value) {
@@ -289,6 +293,34 @@ const PORTFOLIO_VERSION = "portfolio-v34";
         setMenuOpen(false);
         beginInlineEdit(title, "title");
       });
+      const xls = document.createElement("button");
+      xls.type = "button";
+      xls.className = "project-download project-download-xls";
+      xls.title = projectHasBom(project) ? "Exportar XLS oficial para " + project.title : "Este proyecto no contiene un BoM de Cost Estimator";
+      xls.setAttribute("aria-label", xls.title);
+      xls.disabled = !projectHasBom(project);
+      xls.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 15v4h14v-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg><span>XLS</span>';
+      xls.addEventListener("click", async (event) => {
+        event.stopPropagation();
+        if (xls.disabled) return;
+        if (await confirmAction("Exportar XLS oficial", "Se abrirá Oracle Cloud Cost Estimator para importar el JSON de \"" + project.title + "\" y descargar el XLS oficial. ¿Deseas continuar?", "Abrir")) {
+          openProjectCostEstimator(project);
+        }
+      });
+      const json = document.createElement("button");
+      json.type = "button";
+      json.className = "project-download project-download-json";
+      json.title = projectHasBom(project) ? "Descargar JSON de Cost Estimator para " + project.title : "Este proyecto no contiene un BoM de Cost Estimator";
+      json.setAttribute("aria-label", json.title);
+      json.disabled = !projectHasBom(project);
+      json.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 15v4h14v-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg><span>JSON</span>';
+      json.addEventListener("click", async (event) => {
+        event.stopPropagation();
+        if (json.disabled) return;
+        if (await confirmAction("Descargar JSON", "¿Deseas descargar el JSON de Oracle Cloud Cost Estimator de \"" + project.title + "\"?", "Descargar")) {
+          await downloadProjectBomJson(project);
+        }
+      });
       const duplicate = document.createElement("button");
       duplicate.type = "button";
       duplicate.className = "duplicate-project";
@@ -315,7 +347,7 @@ const PORTFOLIO_VERSION = "portfolio-v34";
       });
       const actions = document.createElement("div");
       actions.className = "project-row-actions";
-      actions.append(duplicate, remove);
+      actions.append(xls, json, duplicate, remove);
       row.append(selectionLabel, button, actions);
       list.append(row);
     });
@@ -602,6 +634,39 @@ const PORTFOLIO_VERSION = "portfolio-v34";
 
   function safeFileName(value) {
     return normalize(value).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "project";
+  }
+
+  async function projectBomBytes(project) {
+    const response = await fetch(project.path, { cache: "no-store" });
+    if (!response.ok) throw new Error("No se pudo obtener el BoM del proyecto.");
+    const documentSource = new DOMParser().parseFromString(await response.text(), "text/html");
+    const encoded = documentSource.querySelector("#bom-download-data")?.textContent.replace(/\s+/g, "");
+    if (!encoded) throw new Error("Este proyecto no contiene un JSON de Cost Estimator.");
+    const binary = atob(encoded);
+    return Uint8Array.from(binary, (character) => character.charCodeAt(0));
+  }
+
+  async function downloadProjectBomJson(project) {
+    try {
+      const bytes = await projectBomBytes(project);
+      triggerDownload(new Blob([bytes], { type: "application/json" }), safeFileName(project.title) + "-oracle-cost-estimator.json");
+      showViewerToast("JSON de Cost Estimator descargado.");
+    } catch (error) {
+      console.error(error);
+      showViewerToast(error.message || "No fue posible descargar el JSON.", true);
+    }
+  }
+
+  function openProjectCostEstimator(project) {
+    const costEstimator = document.createElement("a");
+    costEstimator.href = "https://www.oracle.com/cloud/costestimator.html";
+    costEstimator.target = "_blank";
+    costEstimator.rel = "noopener noreferrer";
+    costEstimator.hidden = true;
+    document.body.append(costEstimator);
+    costEstimator.click();
+    costEstimator.remove();
+    showViewerToast("Cost Estimator abierto para exportar el XLS oficial de " + projectListTitle(project) + ".");
   }
 
   async function fetchBytes(path) {

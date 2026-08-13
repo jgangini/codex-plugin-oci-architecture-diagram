@@ -98,6 +98,11 @@ The `XLS` deck link is a handoff to Cost Estimator only. The static
 deck cannot itself upload files or automate a third-party website; the Browser
 plugin performs that task during a Codex run.
 
+The portable project menu must expose the same two actions for every
+BoM-enabled deck: `JSON` downloads the exact embedded Cost Estimator payload
+and `XLS` opens the official Cost Estimator handoff. Disable both actions for a
+diagram-only project rather than exposing an invented BoM export.
+
 The portfolio header must expose a download icon for a PowerPoint file. It must
 render the Use Case, Architecture and BoM tabs as full 1920×1080 PNGs and package
 them as three 16:9 slides in an Office-compatible `.pptx`; do not depend on

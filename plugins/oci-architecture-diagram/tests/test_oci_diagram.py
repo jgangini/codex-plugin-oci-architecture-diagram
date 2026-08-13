@@ -754,6 +754,11 @@ class LocalArchitectureSiteTests(unittest.TestCase):
         self.assertIn("requestExport", app)
         self.assertIn('duplicate.className = "duplicate-project"', app)
         self.assertIn('remove.className = "delete-project"', app)
+        self.assertIn('xls.className = "project-download project-download-xls"', app)
+        self.assertIn('json.className = "project-download project-download-json"', app)
+        self.assertIn("downloadProjectBomJson", app)
+        self.assertIn("openProjectCostEstimator", app)
+        self.assertIn("#bom-download-data", app)
         self.assertNotIn("<span>Duplicar</span>", app)
         self.assertIn('selectionLabel.className = "project-selection"', app)
         self.assertIn("updateExportControl", app)
@@ -777,6 +782,7 @@ class LocalArchitectureSiteTests(unittest.TestCase):
         self.assertIn(".project-footer", styles)
         self.assertIn(".duplicate-project", styles)
         self.assertIn(".delete-project", styles)
+        self.assertIn(".project-download", styles)
         self.assertIn(".action-confirmation", styles)
         self.assertIn(".project-row", styles)
         self.assertIn(".architecture-version", styles)
@@ -968,7 +974,7 @@ class SkillPackagingTests(unittest.TestCase):
         plugin_entry = marketplace["plugins"][0]
 
         self.assertEqual("oci-architecture-diagram", manifest["name"])
-        self.assertEqual("0.4.8", manifest["version"])
+        self.assertEqual("0.4.9", manifest["version"])
         self.assertEqual("Joel Gangini", manifest["author"]["name"])
         self.assertEqual("Joel Gangini", manifest["interface"]["developerName"])
         self.assertEqual("oci-architecture", marketplace["name"])

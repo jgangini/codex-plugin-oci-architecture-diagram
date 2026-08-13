@@ -46,7 +46,9 @@ The plugin is split into focused local skills instead of one large prompt:
 - `src/index.html`: a local HTTP gallery for navigating generated diagrams.
 - `src/projects.json`: a portable database for names, descriptions, versions
   and HTML paths. The project menu edits this file through the localhost server,
-  duplicates cases as explicit versions and exports checked projects as ZIP.
+  duplicates cases as explicit versions and exports checked projects as ZIP. Every
+  BoM-enabled project also exposes `JSON` (the exact Cost Estimator artifact) and
+  `XLS` (the official Cost Estimator export handoff) directly in its menu row.
 
 ## Spec
 
