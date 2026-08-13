@@ -22,8 +22,8 @@
     .case-content { display:flex; align-items:center; min-width:0; padding:28px 22px; border:1px solid var(--line); border-left:5px solid var(--oci); } .case-content p { margin:0; color:var(--ink); font-size:30px; font-weight:700; line-height:1.42; }
     .architecture-layout { display:grid; grid-template-columns:360px minmax(0, 1fr); grid-template-rows:1fr; gap:20px; height:858px; }
     .architecture-canvas { position:relative; grid-column:2; grid-row:1; min-height:0; overflow:hidden; border:1px solid var(--line); background:#eef2f5; }
-    .architecture-canvas .canvas { fill:#eef2f5; } .architecture-canvas .edge { fill:none; stroke:var(--muted); stroke-width:1.65; stroke-linecap:round; opacity:.9; } .architecture-canvas .node { transition:opacity .16s ease; } .architecture-canvas .node.is-muted { opacity:.28; } .architecture-canvas .node-card { fill:#fff; stroke:#c9d1d9; stroke-width:1.2; filter:drop-shadow(0 2px 5px rgba(49,45,42,.10)); transition:stroke .16s ease,stroke-width .16s ease; } .architecture-canvas .node.is-highlighted .node-card { stroke:var(--oci); stroke-width:3; filter:drop-shadow(0 4px 9px rgba(199,70,52,.24)); } .architecture-canvas .node-service-name { fill:var(--ink); font-size:13px; font-weight:700; }
-    .architecture-canvas .edge-label { pointer-events:none; }
+    .architecture-canvas .canvas { fill:#eef2f5; } .architecture-canvas .edge { fill:none; stroke:var(--muted); stroke-width:1.65; stroke-linecap:round; opacity:.9; transition:stroke .16s ease,stroke-width .16s ease,opacity .16s ease; } .architecture-canvas .edge.is-muted,.architecture-canvas .edge-label.is-muted { opacity:.18; } .architecture-canvas .edge.is-highlighted { stroke:var(--oci)!important; stroke-width:3.2; opacity:1; marker-end:url(#arrow-highlight)!important; } .architecture-canvas .node { transition:opacity .16s ease; } .architecture-canvas .node.is-muted { opacity:.28; } .architecture-canvas .node-card { fill:#fff; stroke:#c9d1d9; stroke-width:1.2; filter:drop-shadow(0 2px 5px rgba(49,45,42,.10)); transition:stroke .16s ease,stroke-width .16s ease; } .architecture-canvas .node.is-highlighted .node-card { stroke:var(--oci); stroke-width:3; filter:drop-shadow(0 4px 9px rgba(199,70,52,.24)); } .architecture-canvas .node.is-flow-target .node-card { stroke:var(--teal); stroke-width:2.5; filter:drop-shadow(0 3px 8px rgba(35,89,103,.18)); } .architecture-canvas .node-service-name { fill:var(--ink); font-size:13px; font-weight:700; }
+    .architecture-canvas .edge-label { pointer-events:none; transition:opacity .16s ease; }
     .architecture-canvas .edge-label rect { fill:rgba(255,255,255,.96); stroke:#c7d0da; stroke-width:1; }
     .architecture-canvas .edge-label text { fill:var(--muted); font-size:10px; font-weight:700; }
     .architecture-canvas .edge-label-traffic rect { stroke:#93b6bd; fill:#f1f9fa; } .architecture-canvas .edge-label-traffic text { fill:#2c5967; }
@@ -32,16 +32,43 @@
     .architecture-canvas .edge-label-admin rect { stroke:#c0b7df; fill:#f7f5ff; } .architecture-canvas .edge-label-admin text { fill:#5f4f98; }
     .architecture-canvas .edge-label-security rect { stroke:#d6aaa5; fill:#fff5f3; } .architecture-canvas .edge-label-security text { fill:#8f3f37; }
     .architecture-canvas .edge-label-observability rect { stroke:#a6c6d1; fill:#f2f9fb; } .architecture-canvas .edge-label-observability text { fill:#426f82; }
+    .architecture-canvas .edge-label.is-highlighted rect { fill:#fff7f5; stroke:var(--oci); stroke-width:1.5; } .architecture-canvas .edge-label.is-highlighted text { fill:var(--oci); }
     .service-band { grid-column:1; grid-row:1; align-self:stretch; overflow:hidden; padding:0 12px 0 0; border-right:5px solid var(--oci); background:transparent; }
-    .service-grid { display:grid; grid-template-columns:1fr; grid-auto-rows:auto; gap:7px; } .service-card { min-height:0; padding:10px 12px; border:1px solid var(--line); background:#fff; overflow:hidden; cursor:pointer; transition:border-color .16s ease,background .16s ease,box-shadow .16s ease; } .service-card:hover,.service-card:focus-visible,.service-card.is-active { border-color:var(--oci); background:#fff7f5; box-shadow:0 2px 8px rgba(199,70,52,.14); outline:none; } .service-card strong,.service-card p { display:block; white-space:normal; } .service-card strong { color:var(--teal); font-size:14px; } .service-card p { margin:5px 0 0; color:var(--muted); font-size:13px; line-height:1.34; }
+    .service-grid { display:grid; grid-template-columns:1fr; grid-auto-rows:auto; gap:7px; } .service-card { min-height:0; padding:10px 12px; border:1px solid var(--line); background:#fff; overflow:hidden; cursor:pointer; transition:border-color .16s ease,background .16s ease,box-shadow .16s ease; } .service-card:hover,.service-card:focus-visible,.service-card.is-active { border-color:var(--oci); background:#fff7f5; box-shadow:0 2px 8px rgba(199,70,52,.14); outline:none; } .service-card.is-flow-target { border-color:var(--teal); background:#f1f9fa; box-shadow:0 2px 8px rgba(35,89,103,.12); } .service-card strong,.service-card p { display:block; white-space:normal; } .service-card strong { color:var(--teal); font-size:14px; } .service-card p { margin:5px 0 0; color:var(--muted); font-size:13px; line-height:1.34; }
     .diagram-viewport { position:absolute; inset:0; overflow:auto; background:#eef2f5; cursor:grab; scrollbar-color:#8ea0aa transparent; scrollbar-width:thin; } .diagram-viewport.is-panning { cursor:grabbing; user-select:none; } .diagram-stage { width:100%; min-width:100%; height:100%; min-height:100%; padding:0; } .diagram-viewport .diagram { display:block; max-width:none; }
     .diagram-toolbar { position:absolute; right:16px; bottom:16px; z-index:4; display:flex; flex-direction:column; gap:5px; } .diagram-toolbar button { min-width:36px; height:30px; border:1px solid #c9d1d9; border-radius:5px; color:var(--ink); background:#fff; box-shadow:0 2px 5px rgba(49,45,42,.14); font:700 13px Arial,Helvetica,sans-serif; cursor:pointer; } .diagram-toolbar button:hover { border-color:var(--teal); color:var(--teal); } .diagram-toolbar .zoom-fit { min-width:46px; font-size:11px; }
     .bom-head { display:grid; grid-template-columns:minmax(0, 840px) minmax(0, 1fr); gap:14px; margin-bottom:22px; } .bom-metrics { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; } .metric { padding:17px 20px; border:1px solid var(--line); background:var(--soft); } .metric span { display:block; color:var(--muted); font-size:14px; font-weight:700; text-transform:uppercase; } .metric strong { display:block; margin-top:6px; color:var(--teal); font-size:24px; line-height:1.12; }
-    .bom-actions { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:14px 18px; border:1px solid var(--line); background:#fff; } .bom-actions p { margin:0; color:var(--muted); font-size:15px; line-height:1.35; } .bom-actions strong { color:var(--ink); } .bom-action-links { display:flex; flex:0 0 auto; align-items:center; gap:10px; } .bom-action-links a,.download-bom { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:42px; border-radius:5px; padding:0 16px; font:700 15px Arial,Helvetica,sans-serif; text-decoration:none; cursor:pointer; } .bom-action-links a { border:1px solid var(--teal); color:var(--teal); background:#fff; } .download-bom { border:1px solid var(--oci); color:#fff; background:var(--oci); } .bom-action-links .action-icon { width:20px; height:20px; flex:0 0 auto; } .bom-action-links a:hover,.bom-action-links a:focus-visible,.download-bom:hover,.download-bom:focus-visible { outline:3px solid rgba(199,70,52,.18); outline-offset:2px; }
-    .bom-table { width:100%; border-collapse:collapse; table-layout:fixed; font-size:16px; } .bom-table th { padding:12px 14px; color:#fff; background:var(--teal); text-align:left; font-size:14px; text-transform:uppercase; } .bom-table td { padding:11px 14px; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.25; } .bom-table tbody tr:nth-child(even) { background:#f7f9fa; } .bom-table th:nth-child(1) { width:20%; } .bom-table th:nth-child(2) { width:26%; } .bom-table th:nth-child(3) { width:38%; } .bom-table th:nth-child(4) { width:16%; text-align:right; } .bom-table td:nth-child(4) { text-align:right; font-weight:700; } .bom-table td span { display:block; margin-top:4px; color:var(--muted); font-size:14px; }
+    .bom-actions { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:14px 18px; border:1px solid var(--line); background:#fff; } .bom-actions p { margin:0; color:var(--muted); font-size:15px; line-height:1.35; } .bom-actions strong { color:var(--ink); } .bom-action-links { display:flex; flex:0 0 auto; align-items:center; gap:10px; } .bom-action-links a,.download-bom { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:42px; border-radius:5px; padding:0 16px; font:700 15px Arial,Helvetica,sans-serif; text-decoration:none; cursor:pointer; } .bom-action-links a:not(.download-bom) { border:1px solid var(--teal); color:var(--teal); background:#fff; } .bom-action-links .download-bom { border:1px solid var(--oci); color:#fff; background:var(--oci); } .bom-action-links .action-icon { width:20px; height:20px; flex:0 0 auto; } .bom-action-links a:hover,.bom-action-links a:focus-visible,.download-bom:hover,.download-bom:focus-visible { outline:3px solid rgba(199,70,52,.18); outline-offset:2px; }
+    .bom-table { width:100%; border-collapse:collapse; table-layout:fixed; font-size:16px; } .bom-table th { padding:12px 14px; color:#fff; background:var(--teal); text-align:left; font-size:14px; text-transform:uppercase; } .bom-table td { padding:11px 14px; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.25; } .bom-table tbody tr:nth-child(even) { background:#f7f9fa; } .bom-table th:nth-child(1) { width:17%; } .bom-table th:nth-child(2) { width:24%; } .bom-table th:nth-child(3) { width:36%; } .bom-table th:nth-child(4) { width:13%; } .bom-table th:nth-child(5) { width:10%; text-align:right; } .bom-table td:nth-child(5) { text-align:right; font-weight:700; } .bom-table td span { display:block; margin-top:4px; color:var(--muted); font-size:14px; } .bom-sku { color:var(--teal); font-family:Consolas,Monaco,monospace; font-size:13px; overflow-wrap:anywhere; }
     .deck-warnings { position:absolute; right:20px; bottom:20px; max-width:440px; padding:12px 16px; border:1px solid #dfb6a9; background:#fff4f1; font-size:13px; }
     .deck-brand { position:absolute; right:56px; bottom:0; z-index:6; width:80px; height:80px; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; pointer-events:none; } .deck-brand img { display:block; width:100%; height:100%; object-fit:contain; } #slide-architecture .diagram-toolbar { right:16px; bottom:54px; z-index:7; }
     @media print { html, body { background:#fff; } .deck { box-shadow:none; } }
+
+    .case-visual { display:block; padding:0; }
+    .case-image-slot { position:relative; display:grid; place-items:center; width:100%; height:100%; min-height:100%; padding:0; overflow:hidden; border:1px dashed #93a7b4; background:#f6fafc; box-sizing:border-box; }
+    .case-image-slot.has-image { display:block; padding-top:0; }
+    .case-image-upload { display:flex; flex-direction:column; align-items:center; gap:10px; border:0; color:var(--teal); background:transparent; cursor:pointer; }
+    .case-image-upload[hidden] { display:none; }
+    .case-image-upload svg { width:64px; height:64px; } .case-image-upload span { color:var(--muted); font:400 14px Arial,Helvetica,sans-serif; }
+    .case-uploaded-image { position:absolute; inset:0; display:block; width:100%; height:100%; object-fit:cover; cursor:pointer; }
+    .case-uploaded-image[hidden] { display:none; }
+    .case-image-prompt-toggle { position:absolute; right:14px; bottom:14px; display:grid; place-items:center; width:40px; height:40px; border:1px solid var(--line); border-radius:50%; color:var(--teal); background:#fff; box-shadow:0 2px 7px rgba(37,42,48,.2); cursor:pointer; }
+    .case-image-prompt-toggle svg { width:22px; height:22px; }
+    .deck-editable { cursor:text; outline-offset:5px; } .deck-editable:hover,.deck-editable:focus-visible { outline:2px dashed var(--teal); }
+    .architecture-canvas .node-service-name.deck-editable { cursor:text; pointer-events:all; }
+    .deck-editor-dialog { position:absolute; z-index:20; inset:0; display:grid; place-items:center; padding:24px; background:rgba(30,47,57,.42); }
+    .deck-editor-dialog[hidden] { display:none; }
+    .deck-editor-dialog form { display:grid; width:min(620px, calc(100vw - 48px)); gap:14px; padding:24px; border:1px solid var(--line); border-radius:10px; color:var(--ink); background:#fff; box-shadow:0 18px 48px rgba(30,47,57,.3); } .deck-editor-dialog h2 { margin:0; font-size:24px; } .deck-editor-dialog label { font-weight:700; }
+    .deck-editor-dialog textarea { width:100%; min-height:140px; resize:vertical; border:1px solid var(--line); border-radius:5px; padding:10px; color:var(--ink); font:16px/1.4 Arial,Helvetica,sans-serif; }
+    .deck-editor-dialog form > div { display:flex; justify-content:flex-end; gap:10px; } .deck-editor-dialog button { min-height:38px; padding:0 16px; border:1px solid var(--line); border-radius:5px; color:var(--ink); background:#fff; font:700 15px Arial,Helvetica,sans-serif; cursor:pointer; } .deck-editor-dialog .save-deck-edit { border-color:var(--oci); color:#fff; background:var(--oci); }
+    .case-prompt-dialog,.case-image-actions-dialog { position:absolute; z-index:21; inset:0; display:grid; place-items:center; padding:24px; background:rgba(30,47,57,.42); } .case-prompt-dialog[hidden],.case-image-actions-dialog[hidden] { display:none; }
+    .case-prompt-dialog section,.case-image-actions-dialog section { display:grid; width:min(720px, calc(100vw - 48px)); gap:16px; padding:24px; border:1px solid var(--line); border-radius:10px; color:var(--ink); background:#fff; box-shadow:0 18px 48px rgba(30,47,57,.3); } .case-prompt-dialog h2,.case-image-actions-dialog h2,.case-image-actions-dialog p { margin:0; } .case-prompt-dialog h2,.case-image-actions-dialog h2 { font-size:24px; }
+    .deck-host * { scrollbar-width:thin; scrollbar-color:#93a7b4 transparent; } .deck-host *::-webkit-scrollbar { width:6px; height:6px; } .deck-host *::-webkit-scrollbar-track { background:transparent; } .deck-host *::-webkit-scrollbar-thumb { border-radius:999px; background:#93a7b4; } .deck-host *::-webkit-scrollbar-thumb:hover { background:#6f8796; }
+    .case-prompt-text-wrap { position:relative; } .case-prompt-dialog textarea { display:block; width:100%; min-height:210px; resize:vertical; border:1px solid var(--line); border-radius:5px; padding:10px 56px 52px 10px; color:var(--ink); background:#f8fafb; font:14px/1.35 Arial,Helvetica,sans-serif; }
+    .case-dialog-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:4px; } .case-dialog-actions button { min-height:36px; padding:0 13px; border:1px solid var(--line); border-radius:6px; color:var(--teal); background:#fff; font:700 15px Arial,Helvetica,sans-serif; cursor:pointer; } .case-dialog-actions .case-prompt-save,.case-dialog-actions .case-image-actions-delete { border-color:var(--oci)!important; color:#fff!important; background:var(--oci)!important; } .case-dialog-actions .case-image-actions-download { border-color:var(--teal)!important; color:#fff!important; background:var(--teal)!important; }
+    .case-prompt-copy { position:absolute; right:10px; bottom:10px; display:grid; place-items:center; width:30px; min-height:30px!important; height:30px; padding:0!important; border-color:transparent!important; border-radius:4px; color:rgba(35,89,103,.62)!important; background:transparent!important; box-shadow:none; opacity:.62; transition:opacity .16s ease,color .16s ease,background .16s ease,border-color .16s ease,box-shadow .16s ease; } .case-prompt-copy svg { width:16px; height:16px; } .case-prompt-copy:hover,.case-prompt-copy:focus-visible { border-color:rgba(35,89,103,.35)!important; color:var(--teal)!important; background:rgba(255,255,255,.92)!important; box-shadow:0 2px 6px rgba(35,89,103,.16); opacity:1; outline:none; }
+    .deck-toast { position:fixed; z-index:30; top:24px; right:24px; min-width:260px; max-width:min(360px, calc(100vw - 48px)); padding:12px 14px; border:1px solid rgba(255,255,255,.36); border-radius:8px; color:#fff; background:#2f7d32; box-shadow:0 6px 18px rgba(30,47,57,.24); font:700 14px/1.3 Arial,Helvetica,sans-serif; opacity:0; pointer-events:none; transform:translateY(-12px); transition:opacity .16s ease,transform .16s ease,background .16s ease; } .deck-toast.is-visible { opacity:1; transform:translateY(0); } .deck-toast.is-error { background:var(--oci); }
+
   </style>
 </head>
 <body>
@@ -74,8 +101,7 @@
           <strong>Object Storage</strong>
           <p>Almacena archivos y objetos de la aplicación.</p>
         </article></div></section><div class="architecture-canvas"><div class="diagram-viewport"><div class="diagram-stage">
-<svg class="diagram" xmlns="http://www.w3.org/2000/svg" width="932" height="520" viewBox="0 0 932 520" role="img" aria-labelledby="diagram-title">
-  <title id="diagram-title">OCI Web Case Architecture</title>
+<svg class="diagram" xmlns="http://www.w3.org/2000/svg" width="932" height="520" viewBox="0 0 932 520" role="img" aria-label="OCI Web Case Architecture">
   <defs>
     <marker id="arrow-traffic" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="6" markerHeight="6" orient="auto">
       <path d="M 1.5 1.5 L 8.5 5 L 1.5 8.5 z" fill="#2c5967"/>
@@ -98,13 +124,16 @@
     <marker id="arrow-service" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="6" markerHeight="6" orient="auto">
       <path d="M 1.5 1.5 L 8.5 5 L 1.5 8.5 z" fill="#4f6678"/>
     </marker>
+    <marker id="arrow-highlight" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 1.5 1.5 L 8.5 5 L 1.5 8.5 z" fill="#c74634"/>
+    </marker>
   </defs>
   <rect class="canvas" x="0" y="0" width="932" height="520"/>
   <g class="groups">
 
   </g>
   <g class="edges">
-    <path class="edge edge-traffic" d="M 238 140 C 286.96 140, 325.04 140, 374 140" marker-end="url(#arrow-traffic)"/><g class="edge-label edge-label-traffic" transform="translate(306 140)"><rect x="-18.25" y="-11" width="36.5" height="17" rx="4"/><text text-anchor="middle" y="1">HTTPS</text></g><path class="edge edge-data" d="M 558 132 C 606.96 132, 645.04 140, 694 140" marker-end="url(#arrow-data)"/><g class="edge-label edge-label-data" transform="translate(626 136)"><rect x="-15" y="-11" width="30" height="17" rx="4"/><text text-anchor="middle" y="1">SQL</text></g><path class="edge edge-service" d="M 558 148 C 606.96 148, 645.04 294, 694 294" marker-end="url(#arrow-service)"/><g class="edge-label edge-label-service" transform="translate(626 221)"><rect x="-15" y="-11" width="30" height="17" rx="4"/><text text-anchor="middle" y="1">SDK</text></g>
+    <path class="edge edge-traffic" data-source="lb" data-target="oke" d="M 238 148 C 286.96 148, 325.04 148, 374 148" marker-end="url(#arrow-traffic)"/><path class="edge edge-data" data-source="oke" data-target="adb" d="M 558 140 C 606.96 140, 645.04 148, 694 148" marker-end="url(#arrow-data)"/><path class="edge edge-service" data-source="oke" data-target="object-storage" d="M 558 156 C 606.96 156, 645.04 302, 694 302" marker-end="url(#arrow-service)"/><g class="edge-label edge-label-traffic" data-source="lb" data-target="oke" transform="translate(306 148)"><rect x="-18.25" y="-11" width="36.5" height="17" rx="4"/><text text-anchor="middle" y="1">HTTPS</text></g><g class="edge-label edge-label-data" data-source="oke" data-target="adb" transform="translate(626 144)"><rect x="-15" y="-11" width="30" height="17" rx="4"/><text text-anchor="middle" y="1">SQL</text></g><g class="edge-label edge-label-service" data-source="oke" data-target="object-storage" transform="translate(626 229)"><rect x="-15" y="-11" width="30" height="17" rx="4"/><text text-anchor="middle" y="1">SDK</text></g>
   </g>
   <g class="group-labels">
 
@@ -112,8 +141,8 @@
   <g class="nodes">
 
     <g class="node" id="node-lb" transform="translate(54 84)">
-      <rect class="node-card" width="184" height="112" rx="8"/>
-      <svg class="node-icon" x="66" y="21" width="52" height="52" viewBox="0 0 42.38 42" preserveAspectRatio="xMidYMid meet">
+      <rect class="node-card" width="184" height="128" rx="8"/>
+      <svg class="node-icon" x="66" y="15" width="52" height="52" viewBox="0 0 42.38 42" preserveAspectRatio="xMidYMid meet">
         <g>
 	<g>
 		<g>
@@ -151,12 +180,12 @@
 	</g>
 </g>
       </svg>
-      <text class="node-service-name" text-anchor="middle" x="92" y="89"><tspan x="92" dy="0">Load Balancer - Primary</tspan></text>
+      <text class="node-service-name" text-anchor="middle" x="92" y="98"><tspan x="92" dy="0">Load Balancer - Primary</tspan></text>
     </g>
 
     <g class="node" id="node-oke" transform="translate(374 84)">
-      <rect class="node-card" width="184" height="112" rx="8"/>
-      <svg class="node-icon" x="66" y="21" width="52" height="52" viewBox="0 0 42 42" preserveAspectRatio="xMidYMid meet">
+      <rect class="node-card" width="184" height="128" rx="8"/>
+      <svg class="node-icon" x="66" y="15" width="52" height="52" viewBox="0 0 42 42" preserveAspectRatio="xMidYMid meet">
         <g>
 	<g>
 		<path class="oci-container-engine-for-kubernetes-st0" d="M2.67,41.5c-1.19,0-2.17-0.97-2.17-2.17V2.67c0-1.19,0.97-2.17,2.17-2.17h36.67c1.19,0,2.17,0.97,2.17,2.17
@@ -182,12 +211,12 @@
 	</g>
 </g>
       </svg>
-      <text class="node-service-name" text-anchor="middle" x="92" y="89"><tspan x="92" dy="0">Container Engine for</tspan><tspan x="92" dy="12">Kubernetes</tspan></text>
+      <text class="node-service-name" text-anchor="middle" x="92" y="98"><tspan x="92" dy="0">Container Engine for</tspan><tspan x="92" dy="12">Kubernetes</tspan></text>
     </g>
 
     <g class="node" id="node-adb" transform="translate(694 84)">
-      <rect class="node-card" width="184" height="112" rx="8"/>
-      <svg class="node-icon" x="66" y="21" width="52" height="52" viewBox="0 0 48.47 42.02" preserveAspectRatio="xMidYMid meet">
+      <rect class="node-card" width="184" height="128" rx="8"/>
+      <svg class="node-icon" x="66" y="15" width="52" height="52" viewBox="0 0 48.47 42.02" preserveAspectRatio="xMidYMid meet">
         <g>
 	<g>
 		<path class="oci-oracle-autonomous-database-st0" d="M22.5,41.52c-3.12,0-6.07-0.29-8.29-0.83c-2.95-0.71-4.39-1.78-4.39-3.29V22.9H0.54l0.11-1.52
@@ -230,12 +259,12 @@
 		v4.29c0.39,0.56,3.79,1.84,10.34,1.84s9.96-1.27,10.34-1.84V33.06z" style="fill:#2C5967;"/>
 </g>
       </svg>
-      <text class="node-service-name" text-anchor="middle" x="92" y="89"><tspan x="92" dy="0">Oracle Autonomous</tspan><tspan x="92" dy="12">Database</tspan></text>
+      <text class="node-service-name" text-anchor="middle" x="92" y="98"><tspan x="92" dy="0">Oracle Autonomous</tspan><tspan x="92" dy="12">Database</tspan></text>
     </g>
 
     <g class="node" id="node-object-storage" transform="translate(694 238)">
-      <rect class="node-card" width="184" height="112" rx="8"/>
-      <svg class="node-icon" x="66" y="21" width="52" height="52" viewBox="0 0 42 42" preserveAspectRatio="xMidYMid meet">
+      <rect class="node-card" width="184" height="128" rx="8"/>
+      <svg class="node-icon" x="66" y="15" width="52" height="52" viewBox="0 0 42 42" preserveAspectRatio="xMidYMid meet">
         <g>
 	<g>
 		<g>
@@ -269,7 +298,7 @@
 	</g>
 </g>
       </svg>
-      <text class="node-service-name" text-anchor="middle" x="92" y="89"><tspan x="92" dy="0">Object Storage</tspan></text>
+      <text class="node-service-name" text-anchor="middle" x="92" y="98"><tspan x="92" dy="0">Object Storage</tspan></text>
     </g>
 
   </g>
@@ -277,30 +306,34 @@
 </div></div><div class="diagram-toolbar" aria-label="Navegación del diagrama"><button type="button" class="zoom-out" aria-label="Alejar">−</button><button type="button" class="zoom-in" aria-label="Acercar">+</button><button type="button" class="zoom-fit" aria-label="Ajustar diagrama">100%</button></div></div></div>
     </section>
     <section id="slide-bom" role="tabpanel" aria-labelledby="tab-bom">
-      <div class="bom-head"><div class="bom-metrics"><article class="metric"><span>Costo anual estimado</span><strong>USD 900.00</strong></article><article class="metric"><span>Total mensual estimado</span><strong>USD 75.00</strong></article></div><aside class="bom-actions" aria-label="Uso del JSON"><p><strong>¿Dónde usarlo?</strong> En Oracle Cloud Cost Estimator, abra el menú de tres puntos, seleccione <em>Import</em> y cargue este archivo JSON.</p><div class="bom-action-links"><a href="https://www.oracle.com/cloud/costestimator.html" target="_blank" rel="noopener noreferrer" aria-label="Abrir Oracle Cloud Cost Estimator" title="Abrir Oracle Cloud Cost Estimator"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h10a2.5 2.5 0 0 1 2.5 2.5v10A2.5 2.5 0 0 1 15 19.5H5A2.5 2.5 0 0 1 2.5 17V7A2.5 2.5 0 0 1 5 4.5Z M13 2.5h6.5V9 M11 13 19.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Cost Estimator</span></a><button type="button" class="download-bom" aria-label="Descargar JSON" title="Descargar JSON"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11 M7.5 10.5 12 15l4.5-4.5 M4.5 18.5v1A2 2 0 0 0 6.5 21.5h11a2 2 0 0 0 2-2v-1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>JSON</span></button></div></aside></div>
-      <table class="bom-table"><thead><tr><th>Servicio</th><th>Componente y rol</th><th>Sizing</th><th>Mensual</th></tr></thead><tbody>
+      <div class="bom-head"><div class="bom-metrics"><article class="metric"><span>Costo anual estimado</span><strong>USD 900.00</strong></article><article class="metric"><span>Total mensual estimado</span><strong>USD 75.00</strong></article></div><aside class="bom-actions" aria-label="Uso del JSON"><p><strong>Exportación homologada:</strong> descargue el JSON, impórtelo en Oracle Cloud Cost Estimator y use <em>Export</em> allí para obtener su archivo XLS oficial.</p><div class="bom-action-links"><a href="https://www.oracle.com/cloud/costestimator.html" target="_blank" rel="noopener noreferrer" aria-label="Abrir Oracle Cloud Cost Estimator" title="Abrir Oracle Cloud Cost Estimator"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h10a2.5 2.5 0 0 1 2.5 2.5v10A2.5 2.5 0 0 1 15 19.5H5A2.5 2.5 0 0 1 2.5 17V7A2.5 2.5 0 0 1 5 4.5Z M13 2.5h6.5V9 M11 13 19.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Cost Estimator</span></a><a class="download-bom download-bom-xls" href="https://www.oracle.com/cloud/costestimator.html" target="_blank" rel="noopener noreferrer" aria-label="Exportar XLS oficial desde Oracle Cost Estimator" title="Exportar XLS oficial en Oracle Cost Estimator"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11 M7.5 10.5 12 15l4.5-4.5 M4.5 18.5v1A2 2 0 0 0 6.5 21.5h11a2 2 0 0 0 2-2v-1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>XLS</span></a><button type="button" class="download-bom download-bom-json" aria-label="Descargar JSON de Oracle Cost Estimator" title="Descargar JSON de Oracle Cost Estimator"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11 M7.5 10.5 12 15l4.5-4.5 M4.5 18.5v1A2 2 0 0 0 6.5 21.5h11a2 2 0 0 0 2-2v-1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>JSON</span></button></div></aside></div>
+      <table class="bom-table"><thead><tr><th>Servicio</th><th>Componente y rol</th><th>Sizing</th><th>SKU</th><th>Mensual</th></tr></thead><tbody>
             <tr>
               <td>Load Balancer</td>
               <td><strong>Balanceador público</strong><span>Distribuye solicitudes hacia la aplicación.</span></td>
               <td>Depende de conexiones, ancho de banda y reglas.</td>
+              <td class="bom-sku">B000002</td>
               <td>USD 5.00</td>
             </tr>
             <tr>
               <td>Container Engine for Kubernetes</td>
               <td><strong>Pods de aplicación</strong><span>Ejecuta el runtime privado de la aplicación.</span></td>
               <td>1 VM de ejemplo; confirmar CPU, memoria y réplicas.</td>
+              <td class="bom-sku">B000001</td>
               <td>USD 20.00</td>
             </tr>
             <tr>
               <td>Oracle Autonomous Database</td>
               <td><strong>Base de datos</strong><span>Persiste los datos de la aplicación.</span></td>
               <td>Depende de almacenamiento, consultas y disponibilidad.</td>
+              <td class="bom-sku">B000003</td>
               <td>USD 40.00</td>
             </tr>
             <tr>
               <td>Object Storage</td>
               <td><strong>Activos estáticos</strong><span>Almacena archivos y objetos de la aplicación.</span></td>
               <td>Depende de bytes, operaciones y retención.</td>
+              <td class="bom-sku">B000004</td>
               <td>USD 10.00</td>
             </tr></tbody></table>
     </section>
@@ -308,7 +341,30 @@
     <script type="application/json" id="architecture-spec">{&quot;title&quot;: &quot;OCI Web Case Architecture&quot;, &quot;layout&quot;: &quot;left-to-right&quot;, &quot;groups&quot;: [], &quot;nodes&quot;: [{&quot;id&quot;: &quot;lb&quot;, &quot;label&quot;: &quot;Public Load Balancer&quot;, &quot;service&quot;: &quot;Load Balancer&quot;, &quot;group&quot;: &quot;&quot;}, {&quot;id&quot;: &quot;oke&quot;, &quot;label&quot;: &quot;Application Pods&quot;, &quot;service&quot;: &quot;OKE&quot;, &quot;group&quot;: &quot;&quot;}, {&quot;id&quot;: &quot;adb&quot;, &quot;label&quot;: &quot;Autonomous Database&quot;, &quot;service&quot;: &quot;Autonomous Database&quot;, &quot;group&quot;: &quot;&quot;}, {&quot;id&quot;: &quot;object-storage&quot;, &quot;label&quot;: &quot;Static Assets Bucket&quot;, &quot;service&quot;: &quot;Object Storage&quot;, &quot;group&quot;: &quot;&quot;}], &quot;edges&quot;: [{&quot;from&quot;: &quot;lb&quot;, &quot;to&quot;: &quot;oke&quot;, &quot;label&quot;: &quot;HTTPS&quot;}, {&quot;from&quot;: &quot;oke&quot;, &quot;to&quot;: &quot;adb&quot;, &quot;label&quot;: &quot;SQL&quot;}, {&quot;from&quot;: &quot;oke&quot;, &quot;to&quot;: &quot;object-storage&quot;, &quot;label&quot;: &quot;SDK&quot;}]}</script>
     <script type="application/json" id="case-deck-spec">{&quot;version&quot;: 1, &quot;case&quot;: {&quot;summary&quot;: &quot;Aplicación web OCI con entrada pública, runtime privado y datos administrados.&quot;, &quot;objective&quot;: &quot;Publicar una aplicación resiliente con una arquitectura y un BoM trazables.&quot;, &quot;description&quot;: &quot;El caso presenta una aplicación web resiliente cuyo ingreso público, ejecución privada y persistencia administrada se despliegan en OCI con trazabilidad hacia su BoM.&quot;, &quot;scope&quot;: [&quot;Entrada HTTP/S, aplicación privada y datos administrados.&quot;, &quot;Escenario base mensual en USD.&quot;], &quot;assumptions&quot;: [&quot;Una instancia de aplicación cubre el escenario de ejemplo.&quot;, &quot;La arquitectura muestra únicamente componentes con costo mensual estimado.&quot;], &quot;openDecisions&quot;: [&quot;Confirmar región OCI, disponibilidad y crecimiento.&quot;]}, &quot;bom&quot;: {&quot;scenario&quot;: &quot;base&quot;, &quot;validation&quot;: &quot;locally_validated&quot;, &quot;priceFreshness&quot;: &quot;unverified&quot;}, &quot;components&quot;: [{&quot;id&quot;: &quot;load-balancer&quot;, &quot;nodeId&quot;: &quot;lb&quot;, &quot;service&quot;: &quot;Load Balancer&quot;, &quot;component&quot;: &quot;Balanceador público&quot;, &quot;role&quot;: &quot;Distribuye solicitudes hacia la aplicación.&quot;, &quot;sizing&quot;: &quot;Depende de conexiones, ancho de banda y reglas.&quot;, &quot;pricingRefs&quot;: [{&quot;configuration&quot;: &quot;Example Load Balancer&quot;, &quot;service&quot;: &quot;Flexible Load Balancer&quot;}]}, {&quot;id&quot;: &quot;oke&quot;, &quot;nodeId&quot;: &quot;oke&quot;, &quot;service&quot;: &quot;Container Engine for Kubernetes&quot;, &quot;component&quot;: &quot;Pods de aplicación&quot;, &quot;role&quot;: &quot;Ejecuta el runtime privado de la aplicación.&quot;, &quot;sizing&quot;: &quot;1 VM de ejemplo; confirmar CPU, memoria y réplicas.&quot;, &quot;pricingRefs&quot;: [{&quot;configuration&quot;: &quot;Example OKE&quot;, &quot;service&quot;: &quot;Compute - Virtual Machine&quot;}]}, {&quot;id&quot;: &quot;adb&quot;, &quot;nodeId&quot;: &quot;adb&quot;, &quot;service&quot;: &quot;Oracle Autonomous Database&quot;, &quot;component&quot;: &quot;Base de datos&quot;, &quot;role&quot;: &quot;Persiste los datos de la aplicación.&quot;, &quot;sizing&quot;: &quot;Depende de almacenamiento, consultas y disponibilidad.&quot;, &quot;pricingRefs&quot;: [{&quot;configuration&quot;: &quot;Example ADB&quot;, &quot;service&quot;: &quot;Database - Autonomous AI Database&quot;}]}, {&quot;id&quot;: &quot;object-storage&quot;, &quot;nodeId&quot;: &quot;object-storage&quot;, &quot;service&quot;: &quot;Object Storage&quot;, &quot;component&quot;: &quot;Activos estáticos&quot;, &quot;role&quot;: &quot;Almacena archivos y objetos de la aplicación.&quot;, &quot;sizing&quot;: &quot;Depende de bytes, operaciones y retención.&quot;, &quot;pricingRefs&quot;: [{&quot;configuration&quot;: &quot;Example Object Storage&quot;, &quot;service&quot;: &quot;Storage - Object Storage&quot;}]}]}</script>
     <script type="application/octet-stream" id="bom-download-data">ewogICJsYWJlbCI6ICJFeGFtcGxlIE9DSSBXZWIgQm9NIiwKICAidGltZUZyYW1lIjogewogICAgIm1vbnRocyI6IDEsCiAgICAiZnJvbSI6IG51bGwsCiAgICAidG8iOiBudWxsLAogICAgImxlYXBZZWFyIjogW10sCiAgICAiY2FsY3VsYXRpb24iOiAic2ltcGxlIgogIH0sCiAgImN1cnJlbmN5IjogIlVTRCIsCiAgIm1ldGEiOiB7CiAgICAiZXhwb3J0VmVyc2lvbiI6IDEsCiAgICAiaGFzaCI6ICI2ZjNhOGI3OTliYTUwNjgxOWIwNTBhNWIzMWMyMjlhZCIKICB9LAogICJjb25maWdzIjogWwogICAgewogICAgICAibGFiZWwiOiAiRXhhbXBsZSBPS0UiLAogICAgICAic2VydmljZXMiOiBbCiAgICAgICAgewogICAgICAgICAgImxhYmVsIjogIkNvbXB1dGUgLSBWaXJ0dWFsIE1hY2hpbmUiLAogICAgICAgICAgIml0ZW1zIjogWwogICAgICAgICAgICB7CiAgICAgICAgICAgICAgInNrdSI6ICJCMDAwMDAxIiwKICAgICAgICAgICAgICAicXVhbnRpdHkiOiAxLAogICAgICAgICAgICAgICJ1bml0UHJpY2UiOiAyMCwKICAgICAgICAgICAgICAibW9udGhseUNvc3QiOiAyMAogICAgICAgICAgICB9CiAgICAgICAgICBdCiAgICAgICAgfQogICAgICBdCiAgICB9LAogICAgewogICAgICAibGFiZWwiOiAiRXhhbXBsZSBMb2FkIEJhbGFuY2VyIiwKICAgICAgInNlcnZpY2VzIjogWwogICAgICAgIHsKICAgICAgICAgICJsYWJlbCI6ICJGbGV4aWJsZSBMb2FkIEJhbGFuY2VyIiwKICAgICAgICAgICJpdGVtcyI6IFsKICAgICAgICAgICAgeyAic2t1IjogIkIwMDAwMDIiLCAicXVhbnRpdHkiOiAxLCAidW5pdFByaWNlIjogNSwgIm1vbnRobHlDb3N0IjogNSB9CiAgICAgICAgICBdCiAgICAgICAgfQogICAgICBdCiAgICB9LAogICAgewogICAgICAibGFiZWwiOiAiRXhhbXBsZSBBREIiLAogICAgICAic2VydmljZXMiOiBbCiAgICAgICAgewogICAgICAgICAgImxhYmVsIjogIkRhdGFiYXNlIC0gQXV0b25vbW91cyBBSSBEYXRhYmFzZSIsCiAgICAgICAgICAiaXRlbXMiOiBbCiAgICAgICAgICAgIHsgInNrdSI6ICJCMDAwMDAzIiwgInF1YW50aXR5IjogMSwgInVuaXRQcmljZSI6IDQwLCAibW9udGhseUNvc3QiOiA0MCB9CiAgICAgICAgICBdCiAgICAgICAgfQogICAgICBdCiAgICB9LAogICAgewogICAgICAibGFiZWwiOiAiRXhhbXBsZSBPYmplY3QgU3RvcmFnZSIsCiAgICAgICJzZXJ2aWNlcyI6IFsKICAgICAgICB7CiAgICAgICAgICAibGFiZWwiOiAiU3RvcmFnZSAtIE9iamVjdCBTdG9yYWdlIiwKICAgICAgICAgICJpdGVtcyI6IFsKICAgICAgICAgICAgeyAic2t1IjogIkIwMDAwMDQiLCAicXVhbnRpdHkiOiAxLCAidW5pdFByaWNlIjogMTAsICJtb250aGx5Q29zdCI6IDEwIH0KICAgICAgICAgIF0KICAgICAgICB9CiAgICAgIF0KICAgIH0KICBdCn0K</script>
-  </main></div>
+  </main>
+    <div class="deck-editor-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="deck-editor-title">
+      <form>
+        <h2 id="deck-editor-title">Editar contenido</h2>
+        <textarea id="deck-editor-input" aria-label="Contenido editable" rows="6"></textarea>
+        <div><button type="button" class="cancel-deck-edit">Cancelar</button><button type="button" class="save-deck-edit">Guardar</button></div>
+      </form>
+    </div>
+    <div class="case-prompt-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="case-prompt-dialog-title">
+      <section>
+        <h2 id="case-prompt-dialog-title">Prompt para generar imagen en GPT</h2>
+        <div class="case-prompt-text-wrap"><textarea class="case-prompt-dialog-text" aria-label="Prompt de imagen" rows="9"></textarea><button type="button" class="case-prompt-copy" aria-label="Copiar prompt" title="Copiar prompt"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="7" width="11" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 16V5a2 2 0 0 1 2-2h8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
+        <div class="case-dialog-actions"><button type="button" class="case-prompt-close">Cerrar</button><button type="button" class="case-prompt-save">Guardar</button></div>
+      </section>
+    </div>
+    <div class="case-image-actions-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="case-image-actions-title">
+      <section>
+        <h2 id="case-image-actions-title">Imagen del caso de uso</h2>
+        <p>Puede descargar o eliminar la imagen cargada.</p>
+        <div class="case-dialog-actions"><button type="button" class="case-image-actions-close">Cerrar</button><button type="button" class="case-image-actions-download">Descargar</button><button type="button" class="case-image-actions-delete">Eliminar imagen</button></div>
+      </section>
+    </div>
+    <div class="deck-toast" role="status" aria-live="polite"></div>
+    </div>
   <script>
     (() => {
       const deck = document.querySelector(".deck");
@@ -333,7 +389,9 @@
       const zoomFit = canvas?.querySelector(".zoom-fit");
       const serviceCards = [...document.querySelectorAll(".service-card[data-node-id]")];
       const diagramNodes = [...document.querySelectorAll(".architecture-canvas g.node")];
-      const downloadBom = document.querySelector(".download-bom");
+      const diagramEdges = [...document.querySelectorAll(".architecture-canvas .edge[data-source]")];
+      const edgeLabels = [...document.querySelectorAll(".architecture-canvas .edge-label[data-source]")];
+      const downloadBom = document.querySelector(".download-bom-json");
       const bomDownloadData = document.querySelector("#bom-download-data");
       let zoom = 1;
       let isFit = false;
@@ -358,21 +416,41 @@
         initialized = true;
         fitDiagram();
       }
-      function highlightService(card) {
-        const targetId = "node-" + card.dataset.nodeId;
-        serviceCards.forEach((item) => item.classList.toggle("is-active", item === card));
+      function highlightService(nodeId) {
+        const downstream = new Set(diagramEdges.filter((edge) => edge.dataset.source === nodeId).map((edge) => edge.dataset.target));
+        const visibleNodes = new Set([nodeId, ...downstream]);
+        serviceCards.forEach((card) => {
+          const selected = card.dataset.nodeId === nodeId;
+          const target = downstream.has(card.dataset.nodeId);
+          card.classList.toggle("is-active", selected);
+          card.classList.toggle("is-flow-target", target);
+        });
         diagramNodes.forEach((node) => {
-          const selected = node.id === targetId;
-          node.classList.toggle("is-highlighted", selected);
-          node.classList.toggle("is-muted", !selected);
+          const currentId = node.id.replace(/^node-/, "");
+          node.classList.toggle("is-highlighted", currentId === nodeId);
+          node.classList.toggle("is-flow-target", downstream.has(currentId));
+          node.classList.toggle("is-muted", !visibleNodes.has(currentId));
+        });
+        diagramEdges.forEach((edge) => {
+          const selected = edge.dataset.source === nodeId;
+          edge.classList.toggle("is-highlighted", selected);
+          edge.classList.toggle("is-muted", !selected);
+        });
+        edgeLabels.forEach((label) => {
+          const selected = label.dataset.source === nodeId;
+          label.classList.toggle("is-highlighted", selected);
+          label.classList.toggle("is-muted", !selected);
         });
       }
       function clearServiceHighlight() {
-        serviceCards.forEach((item) => item.classList.remove("is-active"));
-        diagramNodes.forEach((node) => node.classList.remove("is-highlighted", "is-muted"));
+        serviceCards.forEach((item) => item.classList.remove("is-active", "is-flow-target"));
+        diagramNodes.forEach((node) => node.classList.remove("is-highlighted", "is-flow-target", "is-muted"));
+        diagramEdges.forEach((edge) => edge.classList.remove("is-highlighted", "is-muted"));
+        edgeLabels.forEach((label) => label.classList.remove("is-highlighted", "is-muted"));
       }
       function selectTab(name, updateUrl) {
         const selected = allowed.has(name) ? name : "case";
+        activeTab = selected;
         tabs.forEach((tab) => tab.setAttribute("aria-selected", String(tab.dataset.tab === selected)));
         panels.forEach((panel) => panel.classList.toggle("is-active", panel.id === "slide-" + selected));
         headerTitle.textContent = headers[selected][0];
@@ -419,8 +497,30 @@
         }
         context.restore();
       }
-      async function paintSlideElement(context, element, deckRect, scale, styleText) {
+      function serializableSvgClone(element, styleText) {
+        const svgClone = element.cloneNode(true);
+        svgClone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        svgClone.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+        svgClone.classList.add("architecture-canvas");
+        [...svgClone.querySelectorAll("*")].forEach((node) => {
+          if (node.nodeName.includes(":")) { node.remove(); return; }
+          [...node.attributes].forEach((attribute) => {
+            if (attribute.name.includes(":") && attribute.name !== "xlink:href") node.removeAttribute(attribute.name);
+          });
+        });
+        const rootStyle = getComputedStyle(element);
+        ["--ink", "--muted", "--teal", "--oci", "--line", "--soft"].forEach((property) => {
+          const value = rootStyle.getPropertyValue(property);
+          if (value) svgClone.style.setProperty(property, value);
+        });
+        const styleNode = document.createElementNS("http://www.w3.org/2000/svg", "style");
+        styleNode.textContent = styleText;
+        svgClone.insertBefore(styleNode, svgClone.firstChild);
+        return svgClone;
+      }
+      async function paintSlideElement(context, element, deckRect, scale, styleText, includeFloating = false) {
         if (element.hasAttribute?.("data-capture-exclude")) return;
+        if (element.classList?.contains("deck-brand") && !includeFloating) return;
         const style = getComputedStyle(element);
         const rect = element.getBoundingClientRect();
         if (style.display === "none" || style.visibility === "hidden" || !rect.width || !rect.height) return;
@@ -441,17 +541,18 @@
           return;
         }
         if (element.namespaceURI === "http://www.w3.org/2000/svg" && element.tagName.toLowerCase() === "svg") {
-          const svgClone = element.cloneNode(true);
-          svgClone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-          const svgStyle = document.createElementNS("http://www.w3.org/2000/svg", "style");
-          svgStyle.textContent = styleText;
-          svgClone.insertBefore(svgStyle, svgClone.firstChild);
+          const svgClone = serializableSvgClone(element, styleText);
           const objectUrl = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(svgClone)], { type:"image/svg+xml;charset=utf-8" }));
-          const image = new Image();
-          image.src = objectUrl;
-          await image.decode();
-          context.drawImage(image, box.x, box.y, box.width, box.height);
-          URL.revokeObjectURL(objectUrl);
+          try {
+            const image = new Image();
+            image.src = objectUrl;
+            await image.decode();
+            context.drawImage(image, box.x, box.y, box.width, box.height);
+          } catch (_error) {
+            // ponytail: omit only an SVG asset the browser canvas cannot decode; use a full SVG renderer if diagrams need pixel-perfect export.
+          } finally {
+            URL.revokeObjectURL(objectUrl);
+          }
           return;
         }
         for (const child of element.childNodes) {
@@ -459,28 +560,34 @@
           else if (child.nodeType === Node.ELEMENT_NODE) await paintSlideElement(context, child, deckRect, scale, styleText);
         }
       }
-      async function copySlide() {
-        if (!navigator.clipboard?.write || typeof ClipboardItem === "undefined") {
-          if (captureStatus) captureStatus.textContent = "La copia de imagen no está disponible en este navegador.";
-          return;
-        }
+      async function renderActiveSlidePng() {
+        const canvas = document.createElement("canvas");
+        canvas.width = 1920;
+        canvas.height = 1080;
+        const context = canvas.getContext("2d");
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, 1920, 1080);
+        const deckRect = deck.getBoundingClientRect();
+        const scale = deckRect.width / 1920;
+        const styleText = [...document.querySelectorAll("style")].map((style) => style.textContent).join("\n");
+        await paintSlideElement(context, deck, deckRect, scale, styleText);
+        const brand = deck.querySelector(".deck-brand");
+        if (brand) await paintSlideElement(context, brand, deckRect, scale, styleText, true);
+        return new Promise((resolve, reject) => canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("PNG capture failed")), "image/png"));
+      }
+      async function renderAllSlidesPngs() {
+        const originalTab = activeTab;
+        const rendered = [];
         try {
-          const canvas = document.createElement("canvas");
-          canvas.width = 1920;
-          canvas.height = 1080;
-          const context = canvas.getContext("2d");
-          context.fillStyle = "#ffffff";
-          context.fillRect(0, 0, 1920, 1080);
-          const deckRect = deck.getBoundingClientRect();
-          const scale = deckRect.width / 1920;
-          const styleText = [...document.querySelectorAll("style")].map((style) => style.textContent).join("\n");
-          await paintSlideElement(context, deck, deckRect, scale, styleText);
-          const png = await new Promise((resolve, reject) => canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("PNG capture failed")), "image/png"));
-          await navigator.clipboard.write([new ClipboardItem({ "image/png":png })]);
-          if (captureStatus) captureStatus.textContent = "Página 16:9 copiada al portapapeles.";
-        } catch (error) {
-          if (captureStatus) captureStatus.textContent = "No fue posible copiar la página 16:9.";
-          console.error(error);
+          for (const tabName of ["case", "architecture", "bom"]) {
+            selectTab(tabName, false);
+            clearServiceHighlight();
+            await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+            rendered.push({ id:tabName, title:headers[tabName][0], blob:await renderActiveSlidePng() });
+          }
+          return rendered;
+        } finally {
+          selectTab(originalTab, false);
         }
       }
       zoomOut?.addEventListener("click", () => renderDiagram(zoom - 0.1));
@@ -500,16 +607,20 @@
       viewport?.addEventListener("pointerup", () => { pan = null; viewport.classList.remove("is-panning"); });
       viewport?.addEventListener("pointercancel", () => { pan = null; viewport.classList.remove("is-panning"); });
       serviceCards.forEach((card) => {
-        card.addEventListener("mouseenter", () => highlightService(card));
+        card.addEventListener("mouseenter", () => highlightService(card.dataset.nodeId));
         card.addEventListener("mouseleave", () => { if (document.activeElement !== card) clearServiceHighlight(); });
-        card.addEventListener("focus", () => highlightService(card));
+        card.addEventListener("focus", () => highlightService(card.dataset.nodeId));
         card.addEventListener("blur", clearServiceHighlight);
       });
-      tabs.forEach((tab) => tab.addEventListener("click", () => selectTab(tab.dataset.tab, true)));
-      window.ociCopyActiveSlide = copySlide;
-      window.addEventListener("message", (event) => {
-        if (event.origin === window.location.origin && event.data?.type === "oci-copy-active-slide") copySlide();
+      diagramNodes.forEach((node) => {
+        const nodeId = node.id.replace(/^node-/, "");
+        node.addEventListener("mouseenter", () => highlightService(nodeId));
+        node.addEventListener("mouseleave", () => { if (!node.contains(document.activeElement)) clearServiceHighlight(); });
+        node.addEventListener("focusin", () => highlightService(nodeId));
+        node.addEventListener("focusout", () => { if (!node.contains(document.activeElement)) clearServiceHighlight(); });
       });
+      tabs.forEach((tab) => tab.addEventListener("click", () => selectTab(tab.dataset.tab, true)));
+      window.ociRenderAllSlides = renderAllSlidesPngs;
       downloadBom?.addEventListener("click", () => {
         const encoded = bomDownloadData?.textContent.trim();
         if (!encoded) return;
@@ -524,6 +635,196 @@
         link.remove();
         window.setTimeout(() => URL.revokeObjectURL(url), 0);
       });
+
+      const defaultCaseImagePrompt = "Create a polished corporate image for an Oracle Cloud use case. Client and project context: OCI Web Case Architecture. Use-case context: El caso presenta una aplicación web resiliente cuyo ingreso público, ejecución privada y persistencia administrada se despliegan en OCI con trazabilidad hacia su BoM. Show the people and business context appropriate to this use case using an intelligent, secure conversational assistant that accesses approved information and supports authorised work. Blend the client context with a clean Oracle Cloud environment, subtle OCI red accents, professional blue and grey technical tones, and a modern enterprise style. Do not include text, UI screenshots, watermarks, or third-party logos unless they are supplied separately.";
+      const caseVisual = document.querySelector(".case-visual");
+      if (caseVisual) {
+        const slot = document.createElement("div");
+        slot.className = "case-image-slot";
+        slot.dataset.caseImageSlot = "";
+        const image = document.createElement("img");
+        image.className = "case-uploaded-image";
+        image.alt = "";
+        image.setAttribute("aria-hidden", "true");
+        image.hidden = true;
+        const upload = document.createElement("button");
+        upload.type = "button";
+        upload.className = "case-image-upload";
+        upload.setAttribute("aria-label", "Subir imagen para el caso de uso");
+        upload.title = "Subir imagen";
+        upload.innerHTML = '<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="7" y="10" width="50" height="43" rx="6" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="24" cy="26" r="5" fill="none" stroke="currentColor" stroke-width="3"/><path d="m12 47 14-14 9 9 7-7 10 12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="case-image-dimensions"></span>';
+        const promptToggle = document.createElement("button");
+        promptToggle.type = "button";
+        promptToggle.className = "case-image-prompt-toggle";
+        promptToggle.dataset.captureExclude = "";
+        promptToggle.setAttribute("aria-label", "Ver y copiar el prompt para generar la imagen");
+        promptToggle.title = "Ver prompt";
+        promptToggle.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v12H9l-4 4V4Zm4 4h6m-6 4h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        const file = document.createElement("input");
+        file.className = "case-image-file";
+        file.type = "file";
+        file.accept = "image/png,image/jpeg,image/webp";
+        file.hidden = true;
+        slot.append(image, upload, promptToggle, file);
+        caseVisual.replaceChildren(slot);
+      }
+      const editStorageKey = "oci-case-deck-edits:" + window.location.pathname;
+      const editorDialog = document.querySelector(".deck-editor-dialog");
+      const editorTitle = document.querySelector("#deck-editor-title");
+      const editorInput = document.querySelector("#deck-editor-input");
+      const caseDescriptionElement = document.querySelector(".case-content p");
+      const caseImageSlot = document.querySelector("[data-case-image-slot]");
+      const caseImage = document.querySelector(".case-uploaded-image");
+      const caseImageUpload = document.querySelector(".case-image-upload");
+      const caseImageFile = document.querySelector(".case-image-file");
+      const casePromptToggle = document.querySelector(".case-image-prompt-toggle");
+      const casePromptDialog = document.querySelector(".case-prompt-dialog");
+      const casePromptDialogText = document.querySelector(".case-prompt-dialog-text");
+      const casePromptClose = document.querySelector(".case-prompt-close");
+      const casePromptCopy = document.querySelector(".case-prompt-copy");
+      const casePromptSave = document.querySelector(".case-prompt-save");
+      const caseImageActions = document.querySelector(".case-image-actions-dialog");
+      const caseImageActionsClose = document.querySelector(".case-image-actions-close");
+      const caseImageActionsDownload = document.querySelector(".case-image-actions-download");
+      const caseImageActionsDelete = document.querySelector(".case-image-actions-delete");
+      const deckToast = document.querySelector(".deck-toast");
+      const nodeDefaults = new Map();
+      let activeTab = "case";
+      let toastTimer = 0;
+      const projectId = new URLSearchParams(window.location.search).get("project") || "";
+      const persistedCaseImageUrl = new URLSearchParams(window.location.search).get("caseImage") || "";
+      let deckEdits = { headers: {}, nodes: {}, image: "", imagePrompt: "" };
+      try {
+        const stored = JSON.parse(localStorage.getItem(editStorageKey) || "{}");
+        if (stored && typeof stored === "object") deckEdits = { ...deckEdits, ...stored, headers: stored.headers || {}, nodes: stored.nodes || {} };
+      } catch (_error) {}
+      function saveDeckEdits(message) {
+        try { localStorage.setItem(editStorageKey, JSON.stringify(deckEdits)); if (captureStatus) captureStatus.textContent = message; showToast(message); }
+        catch (_error) { const fallback = "El cambio se mantiene en esta sesión, pero el navegador no pudo guardarlo localmente."; if (captureStatus) captureStatus.textContent = fallback; showToast(fallback, "error"); }
+      }
+      function notifyCaseImage(imageUrl) {
+        window.parent?.postMessage({ type: "oci-case-image-updated", projectId, caseImageUrl: imageUrl || "" }, window.location.origin);
+      }
+      function showToast(message, kind = "success") {
+        if (!deckToast) return;
+        deckToast.textContent = message;
+        deckToast.classList.toggle("is-error", kind === "error");
+        deckToast.classList.add("is-visible");
+        window.clearTimeout(toastTimer);
+        toastTimer = window.setTimeout(() => deckToast.classList.remove("is-visible"), 2600);
+      }
+      const editorCancel = document.querySelector(".cancel-deck-edit");
+      const editorSave = document.querySelector(".save-deck-edit");
+      let editorSaveHandler = null;
+      function closeEditor(save) {
+        if (save && editorInput?.value.trim() && editorSaveHandler) editorSaveHandler(editorInput.value.trim());
+        editorSaveHandler = null;
+        if (editorDialog) editorDialog.hidden = true;
+      }
+      function openEditor(label, value, onSave) {
+        if (!editorDialog || !editorInput) return;
+        editorTitle.textContent = label;
+        editorInput.value = value;
+        editorSaveHandler = onSave;
+        editorDialog.hidden = false;
+        editorInput.focus();
+        editorInput.select();
+      }
+      editorCancel?.addEventListener("click", () => closeEditor(false));
+      editorSave?.addEventListener("click", () => closeEditor(true));
+      editorInput?.addEventListener("keydown", (event) => { if (event.key === "Escape") closeEditor(false); if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) { event.preventDefault(); closeEditor(true); } });
+      function bindEditable(element, label, getValue, onSave) {
+        if (!element) return;
+        element.classList.add("deck-editable");
+        element.tabIndex = 0;
+        element.setAttribute("role", "button");
+        element.setAttribute("aria-label", label);
+        const edit = (event) => { event?.preventDefault(); event?.stopPropagation(); openEditor(label, getValue(), onSave); };
+        element.addEventListener("pointerdown", (event) => event.stopPropagation());
+        element.addEventListener("click", edit);
+        element.addEventListener("keydown", (event) => { if (event.key === "Enter" || event.key === " ") edit(event); });
+      }
+      Object.entries(deckEdits.headers).forEach(([tab, value]) => { if (headers[tab] && typeof value === "string") headers[tab][1] = value; });
+      if (typeof deckEdits.caseDescription === "string" && caseDescriptionElement) caseDescriptionElement.textContent = deckEdits.caseDescription;
+      bindEditable(headerDescription, "Editar la descripción de la página", () => headers[activeTab][1], (value) => { headers[activeTab][1] = value; headerDescription.textContent = value; deckEdits.headers[activeTab] = value; saveDeckEdits("Descripción de página guardada localmente."); });
+      bindEditable(caseDescriptionElement, "Editar la descripción del caso de uso", () => caseDescriptionElement.textContent, (value) => { caseDescriptionElement.textContent = value; deckEdits.caseDescription = value; saveDeckEdits("Descripción del caso guardada localmente."); });
+      function setNodeLabel(text, value) {
+        const words = value.trim().split(/\s+/); const lines = []; let current = "";
+        words.forEach((word) => { const candidate = (current + " " + word).trim(); if (candidate.length > 22 && current) { lines.push(current); current = word; } else current = candidate; });
+        if (current) lines.push(current); const visibleLines = lines.length > 2 ? [lines.slice(0, Math.ceil(lines.length / 2)).join(" "), lines.slice(Math.ceil(lines.length / 2)).join(" ")] : lines;
+        const x = text.getAttribute("x") || "92"; text.textContent = ""; text.setAttribute("y", visibleLines.length > 1 ? "82" : "89");
+        visibleLines.forEach((line, index) => { const span = document.createElementNS("http://www.w3.org/2000/svg", "tspan"); span.setAttribute("x", x); if (index) span.setAttribute("dy", "1.12em"); span.textContent = line; text.append(span); });
+      }
+      document.querySelectorAll(".architecture-canvas .node-service-name").forEach((text) => {
+        const nodeId = text.closest("g.node")?.id; if (!nodeId) return; const original = text.textContent.trim(); nodeDefaults.set(nodeId, original);
+        const stored = deckEdits.nodes[nodeId]; if (typeof stored === "string") setNodeLabel(text, stored);
+        bindEditable(text, "Editar el nombre del servicio", () => deckEdits.nodes[nodeId] || nodeDefaults.get(nodeId), (value) => { setNodeLabel(text, value); deckEdits.nodes[nodeId] = value; const card = document.querySelector('.service-card[data-node-id="' + nodeId.replace(/^node-/, "") + '"] strong'); if (card) card.textContent = value; saveDeckEdits("Nombre del servicio guardado localmente."); });
+      });
+      function imageFormat() {
+        const width = Math.max(1, Math.round(caseImageSlot?.clientWidth || 885));
+        const height = Math.max(1, Math.round(caseImageSlot?.clientHeight || 856));
+        const targetHeight = 1536;
+        const targetWidth = Math.max(2, 2 * Math.round((targetHeight * width / height) / 2));
+        return { width, height, targetWidth, targetHeight, ratio: (width / height).toFixed(3) };
+      }
+      function normalizedPromptBase() {
+        const base = defaultCaseImagePrompt.replace(/^(?:Crear una ilustración corporativa|Create a polished) 16:9 [(]1920 × 1080[)] /i, "").trim();
+        return /^para /i.test(base) ? "Contexto del cliente y proyecto: " + base.slice(5) : base;
+      }
+      function generatedImagePrompt() {
+        const format = imageFormat();
+        return "Crear una imagen corporativa para Oracle Cloud de " + format.targetWidth + " × " + format.targetHeight + " px (proporción " + format.ratio + ":1, igual al área de imagen de esta página). Debe cubrir por completo el encuadre, sin bordes, franjas ni texto. " + normalizedPromptBase();
+      }
+      function currentImagePrompt() { return typeof deckEdits.imagePrompt === "string" && deckEdits.imagePrompt.trim() ? deckEdits.imagePrompt.trim() : generatedImagePrompt(); }
+      function refreshImageFormat() {
+        const format = imageFormat();
+        const dimensions = document.querySelector(".case-image-dimensions");
+        if (dimensions) dimensions.textContent = format.width + " × " + format.height + " px";
+        if (!deckEdits.imagePrompt && casePromptDialogText) casePromptDialogText.value = generatedImagePrompt();
+      }
+      function isSupportedImage(value) { return typeof value === "string" && (/^data:image[/](?:png|jpeg|webp);base64,/i.test(value) || /^[.][.][/]assets[/]project-images[/][A-Za-z0-9._-]+[/]case-image[.](?:png|jpg|webp)$/i.test(value)); }
+      function applyCaseImage(value) {
+        if (!caseImage || !caseImageUpload) return;
+        const hasImage = isSupportedImage(value); caseImage.hidden = !hasImage; caseImageUpload.hidden = hasImage; caseImageSlot?.classList.toggle("has-image", hasImage);
+        if (hasImage) { caseImage.src = value; caseImage.tabIndex = 0; caseImage.setAttribute("role", "button"); caseImage.setAttribute("aria-label", "Administrar la imagen cargada del caso de uso"); caseImage.title = "Descargar o eliminar imagen"; }
+        else { caseImage.removeAttribute("src"); caseImage.removeAttribute("role"); caseImage.removeAttribute("aria-label"); caseImage.removeAttribute("title"); }
+      }
+      async function migrateLegacyCaseImage() {
+        if (!projectId || persistedCaseImageUrl || window.location.protocol === "file:" || !/^data:image[/](?:png|jpeg|webp);base64,/i.test(deckEdits.image)) return;
+        try {
+          const blob = await (await fetch(deckEdits.image)).blob();
+          if (!blob.size || blob.size > 3 * 1024 * 1024) return;
+          const response = await fetch("/api/projects/" + encodeURIComponent(projectId) + "/case-image", { method: "PUT", headers: { "Content-Type": blob.type }, body: blob });
+          const saved = await response.json();
+          if (!response.ok || !isSupportedImage(saved.caseImageUrl)) throw new Error(saved.error || "No fue posible migrar la imagen.");
+          deckEdits.image = saved.caseImageUrl;
+          applyCaseImage(deckEdits.image);
+          notifyCaseImage(deckEdits.image);
+          if (captureStatus) captureStatus.textContent = "Imagen guardada en el proyecto.";
+          showToast("Imagen guardada en el proyecto.");
+        } catch (_error) {
+          // ponytail: keep the existing local data URL as the portable offline fallback.
+        }
+      }
+      if (isSupportedImage(persistedCaseImageUrl)) deckEdits.image = persistedCaseImageUrl;
+      applyCaseImage(deckEdits.image);
+      window.requestAnimationFrame(refreshImageFormat);
+      window.requestAnimationFrame(migrateLegacyCaseImage);
+      window.addEventListener("resize", refreshImageFormat);
+      caseImageUpload?.addEventListener("click", () => caseImageFile?.click());
+      caseImageFile?.addEventListener("change", async () => { const file = caseImageFile.files?.[0]; if (!file) return; if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size > 3 * 1024 * 1024) { const message = "Use una imagen PNG, JPEG o WebP de hasta 3 MB."; if (captureStatus) captureStatus.textContent = message; showToast(message, "error"); return; } if (!projectId || window.location.protocol === "file:") { const reader = new FileReader(); reader.addEventListener("load", () => { const imageValue = String(reader.result || ""); if (!isSupportedImage(imageValue)) { const message = "No fue posible leer la imagen seleccionada."; if (captureStatus) captureStatus.textContent = message; showToast(message, "error"); return; } deckEdits.image = imageValue; applyCaseImage(deckEdits.image); saveDeckEdits("Imagen guardada localmente."); }); reader.addEventListener("error", () => { const message = "No fue posible leer la imagen seleccionada."; if (captureStatus) captureStatus.textContent = message; showToast(message, "error"); }); reader.readAsDataURL(file); return; } try { const response = await fetch("/api/projects/" + encodeURIComponent(projectId) + "/case-image", { method: "PUT", headers: { "Content-Type": file.type }, body: file }); const saved = await response.json(); if (!response.ok || !isSupportedImage(saved.caseImageUrl)) throw new Error(saved.error || "No fue posible guardar la imagen."); deckEdits.image = saved.caseImageUrl; applyCaseImage(deckEdits.image); notifyCaseImage(deckEdits.image); if (captureStatus) captureStatus.textContent = "Imagen guardada en el proyecto."; showToast("Imagen guardada en el proyecto."); } catch (error) { const message = error instanceof Error ? error.message : "No fue posible guardar la imagen."; if (captureStatus) captureStatus.textContent = message; showToast(message, "error"); } finally { caseImageFile.value = ""; } });
+      casePromptDialogText && (casePromptDialogText.value = currentImagePrompt());
+      casePromptToggle?.addEventListener("click", () => { if (!casePromptDialog || !casePromptDialogText) return; casePromptDialogText.value = currentImagePrompt(); casePromptDialog.hidden = false; casePromptDialogText.focus(); });
+      casePromptClose?.addEventListener("click", () => { if (casePromptDialog) casePromptDialog.hidden = true; });
+      casePromptSave?.addEventListener("click", () => { const prompt = casePromptDialogText?.value.trim(); if (!prompt) return; deckEdits.imagePrompt = prompt; saveDeckEdits("Prompt guardado localmente."); });
+      casePromptCopy?.addEventListener("click", async () => { const prompt = casePromptDialogText?.value.trim() || currentImagePrompt(); try { await navigator.clipboard.writeText(prompt); if (captureStatus) captureStatus.textContent = "Prompt copiado al portapapeles."; showToast("Prompt copiado."); } catch (_error) { casePromptDialogText?.focus(); casePromptDialogText?.select(); const copied = document.execCommand("copy"); if (captureStatus) captureStatus.textContent = copied ? "Prompt copiado al portapapeles." : "No fue posible copiar el prompt."; showToast(copied ? "Prompt copiado." : "No fue posible copiar el prompt."); } });
+      function openImageActions() { if (isSupportedImage(deckEdits.image) && caseImageActions) caseImageActions.hidden = false; }
+      caseImage?.addEventListener("click", openImageActions);
+      caseImage?.addEventListener("keydown", (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openImageActions(); } });
+      caseImageActionsClose?.addEventListener("click", () => { if (caseImageActions) caseImageActions.hidden = true; });
+      caseImageActionsDownload?.addEventListener("click", () => { if (!isSupportedImage(deckEdits.image)) return; const extension = (deckEdits.image.match(/^data:image[/]([a-z]+)/i)?.[1] || deckEdits.image.split(".").pop() || "png").replace("jpeg", "jpg"); const link = document.createElement("a"); link.href = deckEdits.image; link.download = "case-image." + extension; link.click(); if (captureStatus) captureStatus.textContent = "Descarga de imagen iniciada."; });
+      caseImageActionsDelete?.addEventListener("click", async () => { const isPersisted = /^[.][.][/]assets[/]project-images[/]/.test(deckEdits.image); try { if (isPersisted && projectId && window.location.protocol !== "file:") { const response = await fetch("/api/projects/" + encodeURIComponent(projectId) + "/case-image", { method: "DELETE" }); if (!response.ok) throw new Error("No fue posible eliminar la imagen del proyecto."); notifyCaseImage(""); } deckEdits.image = ""; caseImageFile && (caseImageFile.value = ""); applyCaseImage(""); if (caseImageActions) caseImageActions.hidden = true; if (isPersisted) { if (captureStatus) captureStatus.textContent = "Imagen eliminada del proyecto."; showToast("Imagen eliminada del proyecto."); } else saveDeckEdits("Imagen eliminada localmente."); } catch (error) { const message = error instanceof Error ? error.message : "No fue posible eliminar la imagen."; if (captureStatus) captureStatus.textContent = message; showToast(message, "error"); } });
+
       window.addEventListener("resize", () => { fitDeck(); if (isFit) fitDiagram(); });
       selectTab(new URLSearchParams(window.location.search).get("tab"), false);
       fitDeck();

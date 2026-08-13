@@ -70,10 +70,33 @@ price. Show an SKU column from the exact priced lines in the supplied Cost
 Estimator JSON. Place a `Descargar JSON` button to the right of those totals.
 The portable deck must embed and download the exact bytes of the supplied Oracle
 Cost Estimator JSON; do not generate a custom spreadsheet and present it as a
-Cost Estimator export. Alongside the button, explain that the user should open
-Oracle Cloud Cost Estimator, choose the three-dot menu, select `Import`, upload
-the JSON, and then use the Cost Estimator's own Export action to obtain the
-official Excel file; include the official Cost Estimator link.
+Cost Estimator export. Include an `XLS` action beside the JSON, styled as the
+same download control, that
+opens Oracle Cloud Cost Estimator, where the user chooses the three-dot menu,
+selects `Import`, uploads the JSON, and uses Cost Estimator's own `Export`
+action to obtain the official Excel file.
+
+## Browser validation and official Excel
+
+Use the Browser plugin to perform this official UI workflow for each final BoM:
+
+1. Open a clean Cost Estimator tab and select **Main actions > Import**.
+2. Upload the exact `--bom` JSON delivered with the deck and select **Import**.
+3. Validate success only if the import dialog closes, the expected
+   configurations render, and the official **Export** action is enabled.
+4. Set `bom.validation` to `browser_validated` only after that visible success
+   condition. Keep `locally_validated` if Browser cannot reach or accept the
+   JSON, and report the visible failure.
+   If Oracle recalculates a different monthly total, retain the accepted import
+   result but leave price freshness as `unverified` and regenerate the BoM only
+   from the official export.
+5. If the user requests the official Excel, select **Export** in that validated
+   Cost Estimator tab and preserve the downloaded file alongside the exact
+   JSON. Do not substitute a plugin-produced XLSX, CSV, or HTML table.
+
+The `XLS` deck link is a handoff to Cost Estimator only. The static
+deck cannot itself upload files or automate a third-party website; the Browser
+plugin performs that task during a Codex run.
 
 The portfolio header must expose a download icon for a PowerPoint file. It must
 render the Use Case, Architecture and BoM tabs as full 1920×1080 PNGs and package

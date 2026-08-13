@@ -77,6 +77,13 @@ rendered. Use
 $oci-architecture-case-deck for the integrated discovery, architecture,
 sizing, validation and case-memory workflow.
 
+For final Cost Estimator validation, the plugin workflow uses the Codex Browser:
+it imports the exact delivered JSON in Oracle Cloud Cost Estimator, verifies
+that Oracle renders the expected configurations and enables **Export**, and
+then uses that same UI to obtain the official XLS file when requested. The
+portable HTML only downloads the exact JSON and links to Cost Estimator; it does
+not claim to generate Oracle's official Excel itself.
+
 ## Local Browser Flow
 
 Use this flow when testing the plugin inside Codex:

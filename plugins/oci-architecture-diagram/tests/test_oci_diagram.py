@@ -340,6 +340,7 @@ class RendererTests(unittest.TestCase):
         self.assertIn("Bill of Materials (BoM)", output)
         self.assertIn('aria-label="Descargar JSON de Oracle Cost Estimator"', output)
         self.assertIn('aria-label="Abrir Oracle Cloud Cost Estimator"', output)
+        self.assertIn('aria-label="Exportar XLS oficial desde Oracle Cost Estimator"', output)
         self.assertIn('<th>SKU</th>', output)
         self.assertIn('class="bom-sku"', output)
         self.assertIn('Exportación homologada:', output)
@@ -348,6 +349,9 @@ class RendererTests(unittest.TestCase):
         self.assertNotIn('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', output)
         self.assertIn('<span>JSON</span>', output)
         self.assertIn('<span>Cost Estimator</span>', output)
+        self.assertIn('class="download-bom download-bom-xls"', output)
+        self.assertIn('class="download-bom download-bom-json"', output)
+        self.assertIn('<span>XLS</span>', output)
         self.assertIn('class="action-icon"', output)
         self.assertNotIn(">Abrir Cost Estimator<", output)
         self.assertIn('class="deck-brand"', output)
@@ -964,7 +968,7 @@ class SkillPackagingTests(unittest.TestCase):
         plugin_entry = marketplace["plugins"][0]
 
         self.assertEqual("oci-architecture-diagram", manifest["name"])
-        self.assertEqual("0.4.7", manifest["version"])
+        self.assertEqual("0.4.8", manifest["version"])
         self.assertEqual("Joel Gangini", manifest["author"]["name"])
         self.assertEqual("Joel Gangini", manifest["interface"]["developerName"])
         self.assertEqual("oci-architecture", marketplace["name"])
@@ -989,6 +993,7 @@ class SkillPackagingTests(unittest.TestCase):
                 "oci-icon-catalog",
                 "oci-diagram-renderer",
                 "oci-diagram-visual-qa",
+                "Cost Estimator Browser Validation",
                 "Final Delivery Contract",
             ],
             "oci-spec-normalizer": ["Schema v1", "Common Service Synonyms"],
@@ -1001,10 +1006,10 @@ class SkillPackagingTests(unittest.TestCase):
                 "?diagram=<diagram-id>",
             ],
             "oci-diagram-visual-qa": ["Browser Checks", "diagram-toolbar", "Browser plugin", "Browser Delivery"],
-            "oci-architecture-case-deck": ["Start gate", "Workflow", "Delivery"],
+            "oci-architecture-case-deck": ["Start gate", "Workflow", "Browser validation and official Excel", "Delivery"],
             "oci-architecture-commercial-discovery": ["facts", "assumptions"],
             "oci-architecture-solution": ["service map", "sizing driver"],
-            "oci-architecture-sizing": ["Oracle Cost Estimator JSON", "pricing"],
+            "oci-architecture-sizing": ["Oracle Cost Estimator JSON", "pricing", "Browser plugin"],
             "oci-architecture-curation": ["Audit", "customer evidence"],
         }
 

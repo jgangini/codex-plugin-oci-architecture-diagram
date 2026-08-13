@@ -48,6 +48,33 @@ Use the Browser plugin for local visual QA. Do not import the standalone
 Playwright package or open `file://` pages unless the user explicitly requests
 that fallback.
 
+## Cost Estimator Browser Validation
+
+When the case includes an Oracle Cost Estimator JSON, use the Browser plugin
+to validate the exact delivered file in the official Cost Estimator UI; do not
+replace this step with an API call or a locally generated spreadsheet.
+
+1. Open a clean `https://www.oracle.com/cloud/costestimator.html` tab.
+2. Select **Main actions > Import** and upload the exact delivered JSON through
+   the Browser file chooser.
+3. Select **Import** only after Cost Estimator enables it.
+4. Treat the BoM as `browser_validated` only when the import dialog closes,
+   the expected configurations are rendered, and **Main actions > Export** is
+   enabled. Record the validation timestamp and Cost Estimator build shown by
+   the page when available.
+   If Cost Estimator recalculates a different monthly total, retain the
+   `browser_validated` import result but keep price freshness as `unverified`;
+   report the difference and regenerate the delivered BoM only from an official
+   Cost Estimator export.
+5. When the user requests the official spreadsheet, select **Export** in the
+   same validated session and retain the downloaded Oracle-generated file next
+   to the unchanged JSON. Never call a plugin-generated `.xlsx` the official
+   Cost Estimator export.
+
+Browser automation is a Codex plugin workflow, not a capability of the static
+portable HTML deck. The deck may link to Cost Estimator, but it must not claim
+that its link independently imports, validates, or exports a file.
+
 ## Final Delivery Contract
 
 - Always serve the plugin root over localhost before final delivery. Prefer
