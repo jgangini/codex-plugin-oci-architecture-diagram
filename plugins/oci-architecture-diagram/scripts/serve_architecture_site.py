@@ -19,7 +19,15 @@ DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8765
 DEFAULT_PATH = "/src/index.html"
 MAX_DATABASE_BYTES = 2 * 1024 * 1024
+MAX_CASE_IMAGE_BYTES = 3 * 1024 * 1024
 PROJECT_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
+CASE_IMAGE_URL = re.compile(r"^\.\./assets/project-images/([A-Za-z0-9][A-Za-z0-9._-]{0,127})/case-image\.(png|jpg|webp)$")
+CASE_IMAGE_ROUTE = re.compile(r"^/api/projects/([A-Za-z0-9][A-Za-z0-9._-]{0,127})/case-image$")
+CASE_IMAGE_TYPES = {
+    "image/png": ("png", b"\x89PNG\r\n\x1a\n"),
+    "image/jpeg": ("jpg", b"\xff\xd8\xff"),
+    "image/webp": ("webp", b"RIFF"),
+}
 DATABASE_LOCK = threading.Lock()
 
 
@@ -52,6 +60,16 @@ def validate_project_database(value: object) -> dict:
         family_id = project.get("familyId", project_id)
         if not isinstance(family_id, str) or not PROJECT_ID.fullmatch(family_id):
             raise ValueError(f"projects[{index}].familyId is invalid.")
+        source_project_id = project.get("sourceProjectId")
+        if source_project_id is not None and (
+            not isinstance(source_project_id, str) or not PROJECT_ID.fullmatch(source_project_id)
+        ):
+            raise ValueError(f"projects[{index}].sourceProjectId is invalid.")
+        case_image_url = project.get("caseImageUrl")
+        if case_image_url is not None:
+            match = CASE_IMAGE_URL.fullmatch(case_image_url) if isinstance(case_image_url, str) else None
+            if match is None or match.group(1) != project_id:
+                raise ValueError(f"projects[{index}].caseImageUrl is invalid.")
     if value.get("updatedAt") is not None and not isinstance(value.get("updatedAt"), str):
         raise ValueError("updatedAt must be a string.")
     return value
@@ -70,9 +88,76 @@ def resolve_project_html(root: Path, path: str) -> Path:
     return resolved
 
 
+def case_image_path(root: Path, project_id: str, extension: str) -> Path:
+    image_root = (root / "assets" / "project-images").resolve()
+    target = (image_root / project_id / f"case-image.{extension}").resolve()
+    if target.parent.parent != image_root:
+        raise ValueError("Case image path must stay within assets/project-images.")
+    return target
+
+
+def validate_case_image(content_type: str, payload: bytes) -> tuple[str, str]:
+    media_type = content_type.split(";", 1)[0].strip().lower()
+    metadata = CASE_IMAGE_TYPES.get(media_type)
+    if metadata is None or not payload or len(payload) > MAX_CASE_IMAGE_BYTES:
+        raise ValueError("Use a PNG, JPEG or WebP image up to 3 MB.")
+    extension, signature = metadata
+    if not payload.startswith(signature) or (media_type == "image/webp" and payload[8:12] != b"WEBP"):
+        raise ValueError("The uploaded image does not match its declared format.")
+    return media_type, extension
+
+
+def save_case_image(root: Path, project_id: str, content_type: str, payload: bytes) -> str:
+    _media_type, extension = validate_case_image(content_type, payload)
+    with DATABASE_LOCK:
+        database_path = root / "src" / "projects.json"
+        database = validate_project_database(json.loads(database_path.read_text(encoding="utf-8")))
+        project = next((item for item in database["projects"] if item["id"] == project_id), None)
+        if project is None:
+            raise ValueError("Unknown project id.")
+        target = case_image_path(root, project_id, extension)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        temporary_image = target.with_suffix(target.suffix + ".tmp")
+        temporary_database = database_path.with_suffix(".json.tmp")
+        try:
+            temporary_image.write_bytes(payload)
+            project["caseImageUrl"] = f"../assets/project-images/{project_id}/case-image.{extension}"
+            serialized = json.dumps(database, ensure_ascii=False, indent=2) + "\n"
+            temporary_database.write_text(serialized, encoding="utf-8")
+            temporary_image.replace(target)
+            temporary_database.replace(database_path)
+            for candidate_extension in {"png", "jpg", "webp"} - {extension}:
+                case_image_path(root, project_id, candidate_extension).unlink(missing_ok=True)
+        except OSError:
+            temporary_image.unlink(missing_ok=True)
+            temporary_database.unlink(missing_ok=True)
+            raise
+    return project["caseImageUrl"]
+
+
+def delete_case_image(root: Path, project_id: str) -> None:
+    with DATABASE_LOCK:
+        database_path = root / "src" / "projects.json"
+        database = validate_project_database(json.loads(database_path.read_text(encoding="utf-8")))
+        project = next((item for item in database["projects"] if item["id"] == project_id), None)
+        if project is None:
+            raise ValueError("Unknown project id.")
+        temporary_database = database_path.with_suffix(".json.tmp")
+        project.pop("caseImageUrl", None)
+        try:
+            temporary_database.write_text(json.dumps(database, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            temporary_database.replace(database_path)
+            for extension in ("png", "jpg", "webp"):
+                case_image_path(root, project_id, extension).unlink(missing_ok=True)
+        except OSError:
+            temporary_database.unlink(missing_ok=True)
+            raise
+
+
 def materialize_project_versions(root: Path, current: dict, updated: dict) -> list[Path]:
     current_by_id = {project["id"]: project for project in current["projects"]}
     created: list[Path] = []
+    created_images: list[Path] = []
     try:
         for project in updated["projects"]:
             if project["id"] in current_by_id:
@@ -85,7 +170,16 @@ def materialize_project_versions(root: Path, current: dict, updated: dict) -> li
             ]
             if not candidates:
                 raise ValueError(f"No source project found for version {project['id']}.")
-            source_project = max(candidates, key=lambda candidate: candidate["version"])
+            # A browser sends the complete project database. Its new version must
+            # originate from the project that was duplicated, not merely from the
+            # highest version in the same family.
+            source_id = project.get("sourceProjectId")
+            if source_id is not None:
+                source_project = next((candidate for candidate in candidates if candidate["id"] == source_id), None)
+                if source_project is None:
+                    raise ValueError(f"Source project {source_id} is not in family {family_id}.")
+            else:
+                source_project = max(candidates, key=lambda candidate: candidate["version"])
             source = resolve_project_html(root, source_project["path"])
             target = resolve_project_html(root, project["path"])
             if target.exists():
@@ -94,8 +188,23 @@ def materialize_project_versions(root: Path, current: dict, updated: dict) -> li
                 raise ValueError(f"Source HTML is missing for {source_project['id']}.")
             target.write_bytes(source.read_bytes())
             created.append(target)
+            source_image_url = source_project.get("caseImageUrl")
+            if source_image_url:
+                image_match = CASE_IMAGE_URL.fullmatch(source_image_url)
+                if image_match is None:
+                    raise ValueError(f"Source project {source_project['id']} has an invalid case image.")
+                source_image = case_image_path(root, source_project["id"], image_match.group(2))
+                if not source_image.is_file():
+                    raise ValueError(f"Source project {source_project['id']} case image is missing.")
+                target_image = case_image_path(root, project["id"], image_match.group(2))
+                target_image.parent.mkdir(parents=True, exist_ok=True)
+                target_image.write_bytes(source_image.read_bytes())
+                created_images.append(target_image)
+                project["caseImageUrl"] = f"../assets/project-images/{project['id']}/case-image.{image_match.group(2)}"
     except (OSError, ValueError):
         for path in created:
+            path.unlink(missing_ok=True)
+        for path in created_images:
             path.unlink(missing_ok=True)
         raise
     return created
@@ -117,6 +226,15 @@ def build_project_export(root: Path, project_ids: list[str]) -> bytes:
         file_name = safe_export_name(project["id"]) + ".html"
         portable_projects.append({**project, "path": "../examples/" + file_name})
         export_files.append(("examples/" + file_name, source.read_bytes()))
+        case_image_url = project.get("caseImageUrl")
+        if case_image_url:
+            match = CASE_IMAGE_URL.fullmatch(case_image_url)
+            if match is None:
+                raise ValueError(f"Invalid case image for project {project['id']}.")
+            image = case_image_path(root, project["id"], match.group(2))
+            if not image.is_file():
+                raise ValueError(f"Missing case image for project {project['id']}.")
+            export_files.append((case_image_url.removeprefix("../"), image.read_bytes()))
     portable_database = {
         "version": 1,
         "updatedAt": database.get("updatedAt", ""),
@@ -189,7 +307,33 @@ def make_handler(root: Path) -> type[SimpleHTTPRequestHandler]:
             self.wfile.write(payload)
 
         def do_PUT(self) -> None:
-            if self.path.split("?", 1)[0] != "/api/projects":
+            route = self.path.split("?", 1)[0]
+            image_match = CASE_IMAGE_ROUTE.fullmatch(route)
+            if image_match is not None:
+                if self.client_address[0] not in {"127.0.0.1", "::1"}:
+                    self.send_error(403, "Project editing is local-only.")
+                    return
+                try:
+                    length = int(self.headers.get("Content-Length", "0"))
+                    if length <= 0 or length > MAX_CASE_IMAGE_BYTES:
+                        raise ValueError("Use a PNG, JPEG or WebP image up to 3 MB.")
+                    image_url = save_case_image(root, image_match.group(1), self.headers.get("Content-Type", ""), self.rfile.read(length))
+                except (OSError, ValueError) as exc:
+                    body = json.dumps({"ok": False, "error": str(exc)}).encode("utf-8")
+                    self.send_response(400)
+                    self.send_header("Content-Type", "application/json; charset=utf-8")
+                    self.send_header("Content-Length", str(len(body)))
+                    self.end_headers()
+                    self.wfile.write(body)
+                    return
+                body = json.dumps({"ok": True, "caseImageUrl": image_url}).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
+            if route != "/api/projects":
                 self.send_error(404)
                 return
             if self.client_address[0] not in {"127.0.0.1", "::1"}:
@@ -226,6 +370,27 @@ def make_handler(root: Path) -> type[SimpleHTTPRequestHandler]:
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
+
+        def do_DELETE(self) -> None:
+            image_match = CASE_IMAGE_ROUTE.fullmatch(self.path.split("?", 1)[0])
+            if image_match is None:
+                self.send_error(404)
+                return
+            if self.client_address[0] not in {"127.0.0.1", "::1"}:
+                self.send_error(403, "Project editing is local-only.")
+                return
+            try:
+                delete_case_image(root, image_match.group(1))
+            except (OSError, ValueError) as exc:
+                body = json.dumps({"ok": False, "error": str(exc)}).encode("utf-8")
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
+            self.send_response(204)
+            self.end_headers()
 
     return GalleryRequestHandler
 

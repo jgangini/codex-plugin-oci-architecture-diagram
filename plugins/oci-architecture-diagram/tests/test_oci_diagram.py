@@ -727,6 +727,7 @@ class LocalArchitectureSiteTests(unittest.TestCase):
         self.assertIn('fetch(DATABASE_URL', app)
         self.assertIn('method: "PUT"', app)
         self.assertIn('const SAVE_URL = "/api/projects"', app)
+        self.assertIn("STORAGE_FALLBACK_KEY", app)
         self.assertIn("embeddedPath", app)
         self.assertIn("resizeFrameToContent", app)
         self.assertIn("const maxFrameHeight = Math.max(1, window.innerHeight - headerHeight);", app)
@@ -805,6 +806,34 @@ class LocalArchitectureSiteTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "must reference"):
             site_server.validate_project_database(invalid)
 
+        invalid_image = json.loads(json.dumps(database))
+        invalid_image["projects"][0]["caseImageUrl"] = "../assets/project-images/other/case-image.png"
+        with self.assertRaisesRegex(ValueError, "caseImageUrl"):
+            site_server.validate_project_database(invalid_image)
+
+    def test_case_image_is_persisted_with_a_project_relative_url(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "src").mkdir()
+            (root / "assets").mkdir()
+            database = {
+                "version": 1,
+                "updatedAt": "",
+                "projects": [{"id": "2026-08-12-10-11-12-123", "familyId": "case", "version": 1, "title": "Case", "description": "Case description", "category": "Case Deck", "format": "deck", "path": "../examples/case.html"}],
+            }
+            (root / "src" / "projects.json").write_text(json.dumps(database), encoding="utf-8")
+
+            image_url = site_server.save_case_image(root, "2026-08-12-10-11-12-123", "image/png", b"\x89PNG\r\n\x1a\nimage")
+            stored = json.loads((root / "src" / "projects.json").read_text(encoding="utf-8"))
+
+            self.assertEqual("../assets/project-images/2026-08-12-10-11-12-123/case-image.png", image_url)
+            self.assertEqual(image_url, stored["projects"][0]["caseImageUrl"])
+            self.assertEqual(b"\x89PNG\r\n\x1a\nimage", (root / image_url.removeprefix("../")).read_bytes())
+
+            site_server.delete_case_image(root, "2026-08-12-10-11-12-123")
+            self.assertNotIn("caseImageUrl", json.loads((root / "src" / "projects.json").read_text(encoding="utf-8"))["projects"][0])
+            self.assertFalse((root / "assets" / "project-images" / "2026-08-12-10-11-12-123" / "case-image.png").exists())
+
     def test_project_export_contains_only_selected_portable_html(self) -> None:
         payload = site_server.build_project_export(PLUGIN_ROOT, ["case-deck-web"])
 
@@ -850,6 +879,7 @@ class LocalArchitectureSiteTests(unittest.TestCase):
                 {
                     **current["projects"][0],
                     "id": "case-v2",
+                    "sourceProjectId": "case",
                     "version": 2,
                     "title": "Case — v2",
                     "path": "../examples/case-v2.html",
@@ -861,6 +891,71 @@ class LocalArchitectureSiteTests(unittest.TestCase):
             self.assertEqual([root / "examples" / "case-v2.html"], created)
             self.assertEqual(source.read_bytes(), created[0].read_bytes())
 
+    def test_project_version_materializes_the_selected_source_within_a_family(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "src").mkdir()
+            (root / "examples").mkdir()
+            first = root / "examples" / "case.html"
+            second = root / "examples" / "case-v2.html"
+            first.write_text("<html>first</html>", encoding="utf-8")
+            second.write_text("<html>second</html>", encoding="utf-8")
+            current = {
+                "version": 1,
+                "updatedAt": "",
+                "projects": [
+                    {"id": "case", "familyId": "case", "version": 1, "title": "Case", "description": "Case description", "category": "Case Deck", "format": "deck", "path": "../examples/case.html"},
+                    {"id": "case-v2", "familyId": "case", "version": 2, "title": "Case v2", "description": "Case description", "category": "Case Deck", "format": "deck", "path": "../examples/case-v2.html"},
+                ],
+            }
+            updated = json.loads(json.dumps(current))
+            updated["projects"].append(
+                {**current["projects"][0], "id": "case-v3", "version": 3, "sourceProjectId": "case", "path": "../examples/case-v3.html"}
+            )
+
+            created = site_server.materialize_project_versions(root, current, updated)
+
+            self.assertEqual("<html>first</html>", created[0].read_text(encoding="utf-8"))
+
+    def test_project_version_copies_the_selected_case_image(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "src").mkdir()
+            (root / "examples").mkdir()
+            (root / "assets" / "project-images" / "case").mkdir(parents=True)
+            (root / "examples" / "case.html").write_text("<html>case</html>", encoding="utf-8")
+            (root / "assets" / "project-images" / "case" / "case-image.png").write_bytes(b"image")
+            current = {
+                "version": 1,
+                "updatedAt": "",
+                "projects": [{"id": "case", "familyId": "case", "version": 1, "title": "Case", "description": "Case description", "category": "Case Deck", "format": "deck", "path": "../examples/case.html", "caseImageUrl": "../assets/project-images/case/case-image.png"}],
+            }
+            updated = json.loads(json.dumps(current))
+            updated["projects"].append({**current["projects"][0], "id": "case-v2", "sourceProjectId": "case", "version": 2, "path": "../examples/case-v2.html", "caseImageUrl": "../assets/project-images/case-v2/case-image.png"})
+
+            site_server.materialize_project_versions(root, current, updated)
+
+            self.assertEqual(b"image", (root / "assets" / "project-images" / "case-v2" / "case-image.png").read_bytes())
+
+    def test_portfolio_duplicates_use_timestamp_ids(self) -> None:
+        app = (PLUGIN_ROOT / "src" / "app.js").read_text(encoding="utf-8")
+
+        self.assertIn("function timestampProjectId", app)
+        self.assertIn("nextTimestampProjectId()", app)
+        self.assertIn("const id = nextTimestampProjectId();", app)
+        self.assertIn("selectProject(selectedId);", app)
+
+    def test_case_image_prompt_uses_the_actual_case_context(self) -> None:
+        prompt = renderer.build_case_image_prompt(
+            "Agente de Cobranza",
+            {"description": "Consulta información de cobranza por usuarios autorizados."},
+        )
+
+        self.assertIn("Agente de Cobranza", prompt)
+        self.assertIn("información de cobranza", prompt)
+        self.assertNotIn("field-service technicians", prompt)
+        self.assertNotIn("autorizados..", prompt)
+
 
 class SkillPackagingTests(unittest.TestCase):
     def test_plugin_is_published_as_repo_marketplace(self) -> None:
@@ -869,7 +964,7 @@ class SkillPackagingTests(unittest.TestCase):
         plugin_entry = marketplace["plugins"][0]
 
         self.assertEqual("oci-architecture-diagram", manifest["name"])
-        self.assertEqual("0.4.6", manifest["version"])
+        self.assertEqual("0.4.7", manifest["version"])
         self.assertEqual("Joel Gangini", manifest["author"]["name"])
         self.assertEqual("Joel Gangini", manifest["interface"]["developerName"])
         self.assertEqual("oci-architecture", marketplace["name"])

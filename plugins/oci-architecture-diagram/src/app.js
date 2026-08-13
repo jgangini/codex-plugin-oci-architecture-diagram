@@ -2,7 +2,8 @@
   const DATABASE_URL = "./projects.json";
   const SAVE_URL = "/api/projects";
   const STORAGE_KEY = "oci-architecture-projects:" + window.location.pathname;
-  const PORTFOLIO_VERSION = "portfolio-v30";
+  const STORAGE_FALLBACK_KEY = STORAGE_KEY + ":fallback";
+const PORTFOLIO_VERSION = "portfolio-v34";
   const list = document.querySelector("#architecture-list");
   const search = document.querySelector("#architecture-search");
   const frame = document.querySelector("#diagram-frame");
@@ -82,6 +83,8 @@
       projects: inputProjects.map((project, index) => ({
         id: String(project.id || "project-" + (index + 1)),
         familyId: String(project.familyId || project.id || "project-" + (index + 1)),
+        sourceProjectId: typeof project.sourceProjectId === "string" ? project.sourceProjectId : undefined,
+        caseImageUrl: typeof project.caseImageUrl === "string" ? project.caseImageUrl : undefined,
         version: projectVersion(project),
         title: String(project.title || "Proyecto OCI"),
         description: String(project.description || project.summary || ""),
@@ -91,11 +94,6 @@
         updatedAt: typeof project.updatedAt === "string" ? project.updatedAt : ""
       }))
     };
-  }
-
-  function databaseTimestamp(value) {
-    const timestamp = Date.parse(value?.updatedAt || "");
-    return Number.isFinite(timestamp) ? timestamp : 0;
   }
 
   async function loadDatabase() {
@@ -117,11 +115,16 @@
         loaded = normalizeDatabase({ projects: legacy });
       }
     }
-    try {
-      const stored = normalizeDatabase(JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"));
-      if (stored.projects.length && databaseTimestamp(stored) > databaseTimestamp(loaded)) loaded = stored;
-    } catch (_error) {
-      // Invalid local state must never prevent the JSON database from loading.
+    // The JSON catalogue is the shared source of truth whenever it is available.
+    // Local storage is only a portable/offline fallback, never a replacement for
+    // edits that were persisted by the localhost server.
+    if (!loaded.projects.length || localStorage.getItem(STORAGE_FALLBACK_KEY) === "1") {
+      try {
+        const stored = normalizeDatabase(JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"));
+        if (stored.projects.length) loaded = stored;
+      } catch (_error) {
+        // Invalid local state must never prevent the JSON database from loading.
+      }
     }
     return loaded;
   }
@@ -136,18 +139,24 @@
         body: JSON.stringify(database, null, 2)
       });
       if (!response.ok) throw new Error("JSON persistence unavailable");
+      localStorage.removeItem(STORAGE_FALLBACK_KEY);
       setStatus(message + " Guardado en projects.json.");
       return true;
     } catch (_error) {
       setStatus(message + " Guardado localmente; se incluirá en el ZIP.");
+      localStorage.setItem(STORAGE_FALLBACK_KEY, "1");
       return false;
     }
   }
 
-  function embeddedPath(path) {
+  function embeddedPath(path, project) {
     const url = new URL(path, window.location.href);
     url.searchParams.set("embed", "1");
     url.searchParams.set("v", PORTFOLIO_VERSION);
+    if (project?.id) {
+      url.searchParams.set("project", project.id);
+      if (typeof project.caseImageUrl === "string") url.searchParams.set("caseImage", project.caseImageUrl);
+    }
     const tab = new URLSearchParams(window.location.search).get("tab");
     if (tab) url.searchParams.set("tab", tab);
     return url.pathname + url.search;
@@ -222,7 +231,7 @@
     resizeFrameToContent();
     pptxButton.hidden = true;
     pptxButton.disabled = true;
-    frame.src = embeddedPath(selected.path);
+    frame.src = embeddedPath(selected.path, selected);
     if (pushState) {
       const url = new URL(window.location.href);
       url.searchParams.set("diagram", selected.id);
@@ -361,18 +370,38 @@
     element.addEventListener("blur", () => finish(true), { once: true });
   }
 
+  function timestampProjectId(date = new Date()) {
+    const part = (value, width = 2) => String(value).padStart(width, "0");
+    return [
+      part(date.getFullYear(), 4),
+      part(date.getMonth() + 1),
+      part(date.getDate()),
+      part(date.getHours()),
+      part(date.getMinutes()),
+      part(date.getSeconds()),
+      part(date.getMilliseconds(), 3)
+    ].join("-");
+  }
+
+  function nextTimestampProjectId() {
+    let offset = 0;
+    let id = timestampProjectId();
+    while (projects.some((project) => project.id === id)) id = timestampProjectId(new Date(Date.now() + ++offset));
+    return id;
+  }
+
   async function duplicateProject(source = currentProject()) {
     if (!source) return;
     const familyId = source.familyId || source.id;
     const nextVersion = Math.max(...projects.filter((project) => (project.familyId || project.id) === familyId).map(projectVersion), 0) + 1;
     const baseTitle = source.baseTitle || source.title.replace(/\s+[—-]\s+v\d+$/i, "");
-    let id = familyId + "-v" + nextVersion;
-    let suffix = 2;
-    while (projects.some((project) => project.id === id)) id = familyId + "-v" + nextVersion + "-" + suffix++;
+    const id = nextTimestampProjectId();
     const duplicate = {
       ...source,
       id,
       familyId,
+      sourceProjectId: source.id,
+      caseImageUrl: typeof source.caseImageUrl === "string" ? source.caseImageUrl.replace("/" + source.id + "/", "/" + id + "/") : undefined,
       baseTitle,
       version: nextVersion,
       title: baseTitle + " — v" + nextVersion,
@@ -672,8 +701,17 @@
   });
   window.addEventListener("popstate", () => {
     selectedId = new URLSearchParams(window.location.search).get("diagram") || selectedId;
-    selectProject(selectedId, false);
+    selectProject(selectedId);
     renderList(search.value);
+  });
+  window.addEventListener("message", (event) => {
+    if (event.origin !== window.location.origin || event.source !== frame.contentWindow) return;
+    const update = event.data;
+    if (!update || update.type !== "oci-case-image-updated" || typeof update.projectId !== "string") return;
+    const project = projects.find((item) => item.id === update.projectId);
+    if (!project) return;
+    if (typeof update.caseImageUrl === "string") project.caseImageUrl = update.caseImageUrl;
+    else delete project.caseImageUrl;
   });
 
   (async () => {

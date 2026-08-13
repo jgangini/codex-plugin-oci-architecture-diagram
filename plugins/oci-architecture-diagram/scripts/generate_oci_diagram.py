@@ -1583,13 +1583,13 @@ def render_deck_bom_rows(components: list[dict[str, Any]], currency: str) -> str
 
 def build_case_image_prompt(title: str, case: dict[str, Any]) -> str:
     project_context = re.sub(r"\s+", " ", title).strip()
-    solution_context = re.sub(r"\s+", " ", str(case.get("description") or case["objective"])).strip()
+    solution_context = re.sub(r"\s+", " ", str(case.get("description") or case["objective"])).strip().rstrip(".!?")
     return (
         "Create a polished corporate image for an Oracle Cloud use case. "
         f"Client and project context: {project_context}. "
         f"Use-case context: {solution_context}. "
-        "Show field-service technicians using an intelligent, secure conversational assistant that accesses approved "
-        "knowledge and coordinates authorised operational work. Blend the client context with a clean Oracle Cloud "
+        "Show the people and business context appropriate to this use case using an intelligent, secure conversational "
+        "assistant that accesses approved information and supports authorised work. Blend the client context with a clean Oracle Cloud "
         "environment, subtle OCI red accents, professional blue and grey technical tones, and a modern enterprise style. "
         "Do not include text, UI screenshots, watermarks, or third-party logos unless they are supplied separately."
     )
@@ -1708,6 +1708,8 @@ def render_case_deck_interaction_script(image_prompt: str) -> str:
       const nodeDefaults = new Map();
       let activeTab = "case";
       let toastTimer = 0;
+      const projectId = new URLSearchParams(window.location.search).get("project") || "";
+      const persistedCaseImageUrl = new URLSearchParams(window.location.search).get("caseImage") || "";
       let deckEdits = { headers: {}, nodes: {}, image: "", imagePrompt: "" };
       try {
         const stored = JSON.parse(localStorage.getItem(editStorageKey) || "{}");
@@ -1716,6 +1718,9 @@ def render_case_deck_interaction_script(image_prompt: str) -> str:
       function saveDeckEdits(message) {
         try { localStorage.setItem(editStorageKey, JSON.stringify(deckEdits)); if (captureStatus) captureStatus.textContent = message; showToast(message); }
         catch (_error) { const fallback = "El cambio se mantiene en esta sesión, pero el navegador no pudo guardarlo localmente."; if (captureStatus) captureStatus.textContent = fallback; showToast(fallback, "error"); }
+      }
+      function notifyCaseImage(imageUrl) {
+        window.parent?.postMessage({ type: "oci-case-image-updated", projectId, caseImageUrl: imageUrl || "" }, window.location.origin);
       }
       function showToast(message, kind = "success") {
         if (!deckToast) return;
@@ -1794,18 +1799,37 @@ def render_case_deck_interaction_script(image_prompt: str) -> str:
         if (dimensions) dimensions.textContent = format.width + " × " + format.height + " px";
         if (!deckEdits.imagePrompt && casePromptDialogText) casePromptDialogText.value = generatedImagePrompt();
       }
-      function isSupportedImage(value) { return typeof value === "string" && /^data:image[/](?:png|jpeg|webp);base64,/i.test(value); }
+      function isSupportedImage(value) { return typeof value === "string" && (/^data:image[/](?:png|jpeg|webp);base64,/i.test(value) || /^[.][.][/]assets[/]project-images[/][A-Za-z0-9._-]+[/]case-image[.](?:png|jpg|webp)$/i.test(value)); }
       function applyCaseImage(value) {
         if (!caseImage || !caseImageUpload) return;
         const hasImage = isSupportedImage(value); caseImage.hidden = !hasImage; caseImageUpload.hidden = hasImage; caseImageSlot?.classList.toggle("has-image", hasImage);
         if (hasImage) { caseImage.src = value; caseImage.tabIndex = 0; caseImage.setAttribute("role", "button"); caseImage.setAttribute("aria-label", "Administrar la imagen cargada del caso de uso"); caseImage.title = "Descargar o eliminar imagen"; }
         else { caseImage.removeAttribute("src"); caseImage.removeAttribute("role"); caseImage.removeAttribute("aria-label"); caseImage.removeAttribute("title"); }
       }
+      async function migrateLegacyCaseImage() {
+        if (!projectId || persistedCaseImageUrl || window.location.protocol === "file:" || !/^data:image[/](?:png|jpeg|webp);base64,/i.test(deckEdits.image)) return;
+        try {
+          const blob = await (await fetch(deckEdits.image)).blob();
+          if (!blob.size || blob.size > 3 * 1024 * 1024) return;
+          const response = await fetch("/api/projects/" + encodeURIComponent(projectId) + "/case-image", { method: "PUT", headers: { "Content-Type": blob.type }, body: blob });
+          const saved = await response.json();
+          if (!response.ok || !isSupportedImage(saved.caseImageUrl)) throw new Error(saved.error || "No fue posible migrar la imagen.");
+          deckEdits.image = saved.caseImageUrl;
+          applyCaseImage(deckEdits.image);
+          notifyCaseImage(deckEdits.image);
+          if (captureStatus) captureStatus.textContent = "Imagen guardada en el proyecto.";
+          showToast("Imagen guardada en el proyecto.");
+        } catch (_error) {
+          // ponytail: keep the existing local data URL as the portable offline fallback.
+        }
+      }
+      if (isSupportedImage(persistedCaseImageUrl)) deckEdits.image = persistedCaseImageUrl;
       applyCaseImage(deckEdits.image);
       window.requestAnimationFrame(refreshImageFormat);
+      window.requestAnimationFrame(migrateLegacyCaseImage);
       window.addEventListener("resize", refreshImageFormat);
       caseImageUpload?.addEventListener("click", () => caseImageFile?.click());
-      caseImageFile?.addEventListener("change", () => { const file = caseImageFile.files?.[0]; if (!file) return; if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size > 3 * 1024 * 1024) { const message = "Use una imagen PNG, JPEG o WebP de hasta 3 MB."; if (captureStatus) captureStatus.textContent = message; showToast(message, "error"); return; } const reader = new FileReader(); reader.addEventListener("load", () => { const imageValue = String(reader.result || ""); if (!isSupportedImage(imageValue)) { const message = "No fue posible leer la imagen seleccionada."; if (captureStatus) captureStatus.textContent = message; showToast(message, "error"); return; } deckEdits.image = imageValue; applyCaseImage(deckEdits.image); saveDeckEdits("Imagen guardada localmente."); }); reader.addEventListener("error", () => { const message = "No fue posible leer la imagen seleccionada."; if (captureStatus) captureStatus.textContent = message; showToast(message, "error"); }); reader.readAsDataURL(file); });
+      caseImageFile?.addEventListener("change", async () => { const file = caseImageFile.files?.[0]; if (!file) return; if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size > 3 * 1024 * 1024) { const message = "Use una imagen PNG, JPEG o WebP de hasta 3 MB."; if (captureStatus) captureStatus.textContent = message; showToast(message, "error"); return; } if (!projectId || window.location.protocol === "file:") { const reader = new FileReader(); reader.addEventListener("load", () => { const imageValue = String(reader.result || ""); if (!isSupportedImage(imageValue)) { const message = "No fue posible leer la imagen seleccionada."; if (captureStatus) captureStatus.textContent = message; showToast(message, "error"); return; } deckEdits.image = imageValue; applyCaseImage(deckEdits.image); saveDeckEdits("Imagen guardada localmente."); }); reader.addEventListener("error", () => { const message = "No fue posible leer la imagen seleccionada."; if (captureStatus) captureStatus.textContent = message; showToast(message, "error"); }); reader.readAsDataURL(file); return; } try { const response = await fetch("/api/projects/" + encodeURIComponent(projectId) + "/case-image", { method: "PUT", headers: { "Content-Type": file.type }, body: file }); const saved = await response.json(); if (!response.ok || !isSupportedImage(saved.caseImageUrl)) throw new Error(saved.error || "No fue posible guardar la imagen."); deckEdits.image = saved.caseImageUrl; applyCaseImage(deckEdits.image); notifyCaseImage(deckEdits.image); if (captureStatus) captureStatus.textContent = "Imagen guardada en el proyecto."; showToast("Imagen guardada en el proyecto."); } catch (error) { const message = error instanceof Error ? error.message : "No fue posible guardar la imagen."; if (captureStatus) captureStatus.textContent = message; showToast(message, "error"); } finally { caseImageFile.value = ""; } });
       casePromptDialogText && (casePromptDialogText.value = currentImagePrompt());
       casePromptToggle?.addEventListener("click", () => { if (!casePromptDialog || !casePromptDialogText) return; casePromptDialogText.value = currentImagePrompt(); casePromptDialog.hidden = false; casePromptDialogText.focus(); });
       casePromptClose?.addEventListener("click", () => { if (casePromptDialog) casePromptDialog.hidden = true; });
@@ -1815,8 +1839,8 @@ def render_case_deck_interaction_script(image_prompt: str) -> str:
       caseImage?.addEventListener("click", openImageActions);
       caseImage?.addEventListener("keydown", (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openImageActions(); } });
       caseImageActionsClose?.addEventListener("click", () => { if (caseImageActions) caseImageActions.hidden = true; });
-      caseImageActionsDownload?.addEventListener("click", () => { if (!isSupportedImage(deckEdits.image)) return; const extension = (deckEdits.image.match(/^data:image[/]([a-z]+)/i)?.[1] || "png").replace("jpeg", "jpg"); const link = document.createElement("a"); link.href = deckEdits.image; link.download = "case-image." + extension; link.click(); if (captureStatus) captureStatus.textContent = "Descarga de imagen iniciada."; });
-      caseImageActionsDelete?.addEventListener("click", () => { deckEdits.image = ""; caseImageFile && (caseImageFile.value = ""); applyCaseImage(""); if (caseImageActions) caseImageActions.hidden = true; saveDeckEdits("Imagen eliminada localmente."); });
+      caseImageActionsDownload?.addEventListener("click", () => { if (!isSupportedImage(deckEdits.image)) return; const extension = (deckEdits.image.match(/^data:image[/]([a-z]+)/i)?.[1] || deckEdits.image.split(".").pop() || "png").replace("jpeg", "jpg"); const link = document.createElement("a"); link.href = deckEdits.image; link.download = "case-image." + extension; link.click(); if (captureStatus) captureStatus.textContent = "Descarga de imagen iniciada."; });
+      caseImageActionsDelete?.addEventListener("click", async () => { const isPersisted = /^[.][.][/]assets[/]project-images[/]/.test(deckEdits.image); try { if (isPersisted && projectId && window.location.protocol !== "file:") { const response = await fetch("/api/projects/" + encodeURIComponent(projectId) + "/case-image", { method: "DELETE" }); if (!response.ok) throw new Error("No fue posible eliminar la imagen del proyecto."); notifyCaseImage(""); } deckEdits.image = ""; caseImageFile && (caseImageFile.value = ""); applyCaseImage(""); if (caseImageActions) caseImageActions.hidden = true; if (isPersisted) { if (captureStatus) captureStatus.textContent = "Imagen eliminada del proyecto."; showToast("Imagen eliminada del proyecto."); } else saveDeckEdits("Imagen eliminada localmente."); } catch (error) { const message = error instanceof Error ? error.message : "No fue posible eliminar la imagen."; if (captureStatus) captureStatus.textContent = message; showToast(message, "error"); } });
     """.replace("__CASE_IMAGE_PROMPT__", json.dumps(image_prompt, ensure_ascii=False))
 
 

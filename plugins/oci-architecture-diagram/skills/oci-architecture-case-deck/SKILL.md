@@ -37,11 +37,14 @@ not a fixed 16:9 size. Generate a GPT image prompt using the same calculated
 aspect ratio and dimensions so the generated asset fills the area without crop
 or bars. In the editable prompt dialog, place a copy icon inside the textarea's
 lower-right corner and show a toast after copying; do not use a separate text
-copy button. Persist an uploaded image, its editable prompt and direct text
-edits locally in the portable deck; clicking the uploaded image must open
-download and delete actions, while the prompt text icon remains in the image
-corner. Accept PNG, JPEG and WebP uploads up to 3 MB; show a visible error
-toast when the selected file is rejected or cannot be read.
+copy button. When served from the local portfolio, persist an uploaded image
+in the project's `assets/project-images/<project-id>/` folder and store its
+relative URL in `projects.json`; browser storage is only the offline fallback.
+Persist its editable prompt and direct text edits locally in the portable deck;
+clicking the uploaded image must open download and delete actions, while the
+prompt text icon remains in the image corner. Accept PNG, JPEG and WebP
+uploads up to 3 MB; show a visible error toast when the selected file is
+rejected or cannot be read.
 Make the page subtitle, case description and architecture service labels editable
 on click through an explicit Save action. Use a portable, accessible visual
 illustration on the left and the case-specific objective on the right. Embed the
@@ -97,8 +100,15 @@ Register generated cases and diagrams in `src/projects.json`; this JSON file is
 the portable project database. Keep the project menu available for diagrams and
 case decks. The menu must support search, multi-selection for sharing, inline
 name and description editing on double click, and duplication with an explicit
-version number. Persist edits atomically through the localhost server; retain a
+version number. Every new project identifier must use the timestamp format
+`yyyy-mm-dd-hh-mm-ss-ms`; use that identifier in the `diagram` URL query
+parameter. Persist edits atomically through the localhost server; retain a
 browser-local fallback when a shared package is opened without that server.
+When a project is served locally, persist an uploaded Use Case image as a
+validated PNG, JPEG or WebP file under `assets/project-images/<project-id>/`
+and store its relative URL in that project's `caseImageUrl` field in
+`projects.json`. Include the file in a selected-project ZIP export; browser
+storage is only an offline fallback.
 
 Export selected projects as a dependency-free ZIP containing their portable
 HTML files, `projects.json`, the gallery shell and its OCI icon. A recipient must

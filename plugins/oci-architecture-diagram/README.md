@@ -103,6 +103,12 @@ confirm whether to save. The server writes valid updates atomically to
 `src/projects.json`; an extracted ZIP keeps a local browser fallback and
 includes only the projects selected for sharing.
 
+When the gallery is served locally, Use Case image uploads are validated and
+written under `assets/project-images/<project-id>/`; the corresponding
+project-relative `caseImageUrl` is stored atomically in `src/projects.json`.
+The image remains available after a refresh, duplication, or selected-project
+ZIP export.
+
 Avoid standalone Playwright package imports for visual QA. The Browser plugin
 is the intended surface for loading, inspecting, and refreshing local pages in
 Codex.

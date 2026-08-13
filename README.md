@@ -104,6 +104,12 @@ source files.
 - `oci-architecture-case-deck`: coordinates discovery, cost-aligned OCI
   architecture, Oracle Cost Estimator JSON and portable 16:9 Case/Architecture/BoM decks.
 
+## Release 0.4.7
+
+Use Case image uploads now persist as validated project assets and their
+relative paths are stored in the portable project database. Images are copied
+when a project is duplicated and included in selected-project ZIP exports.
+
 ## Release 0.4.1
 
 Fixes the 16:9 architecture canvas so it fills the available viewport without
