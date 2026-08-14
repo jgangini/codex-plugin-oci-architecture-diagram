@@ -70,6 +70,9 @@ def validate_project_database(value: object) -> dict:
             match = CASE_IMAGE_URL.fullmatch(case_image_url) if isinstance(case_image_url, str) else None
             if match is None or match.group(1) != project_id:
                 raise ValueError(f"projects[{index}].caseImageUrl is invalid.")
+        bom_validation = project.get("bomValidation")
+        if bom_validation is not None and bom_validation not in {"browser_validated", "locally_validated", "blocked"}:
+            raise ValueError(f"projects[{index}].bomValidation is invalid.")
     if value.get("updatedAt") is not None and not isinstance(value.get("updatedAt"), str):
         raise ValueError("updatedAt must be a string.")
     return value
@@ -399,10 +402,10 @@ def make_server(host: str, port: int, root: Path) -> ThreadingHTTPServer:
     return ThreadingHTTPServer((host, port), make_handler(root))
 
 
-def local_gallery_url(host: str, port: int, diagram: str = "") -> str:
+def local_gallery_url(host: str, port: int, project: str = "") -> str:
     url = f"http://{host}:{port}{DEFAULT_PATH}"
-    if diagram:
-        url = f"{url}?{urlencode({'diagram': diagram})}"
+    if project:
+        url = f"{url}?{urlencode({'project': project})}"
     return url
 
 
@@ -411,7 +414,7 @@ def main() -> int:
     parser.add_argument("--host", default=DEFAULT_HOST)
     parser.add_argument("--port", type=int, default=DEFAULT_PORT)
     parser.add_argument("--root", default=str(PLUGIN_ROOT))
-    parser.add_argument("--diagram", default="", help="Optional architecture id to include in the local gallery URL.")
+    parser.add_argument("--project", "--diagram", dest="project", default="", help="Optional project id to include in the local gallery URL.")
     args = parser.parse_args()
 
     root = Path(args.root).resolve()
@@ -419,7 +422,7 @@ def main() -> int:
         raise SystemExit(f"Missing site entrypoint: {root / 'src' / 'index.html'}")
 
     server = make_server(args.host, args.port, root)
-    url = local_gallery_url(args.host, args.port, args.diagram)
+    url = local_gallery_url(args.host, args.port, args.project)
     print(f"Serving OCI Architecture Diagram site from {root}")
     print(f"Open {url}")
     try:

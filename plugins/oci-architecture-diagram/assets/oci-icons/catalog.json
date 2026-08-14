@@ -1,7 +1,7 @@
 {
   "generatedBy": "extract_oci_icons.py",
-  "source": "D:\\dev\\codex-plugin-oci-architecture\\oci",
-  "serviceCount": 241,
+  "source": "oci",
+  "serviceCount": 243,
   "services": {
     "analytics": {
       "name": "Analytics",
@@ -88,6 +88,22 @@
       "iconSource": "local-svg",
       "localIconFile": "Streaming.svg",
       "matchedLocalIconSlug": "streaming"
+    },
+    "oci-streaming-with-apache-kafka": {
+      "name": "OCI Streaming with Apache Kafka",
+      "category": "Analytics AI",
+      "file": "oci-streaming-with-apache-kafka.svg",
+      "sourceFile": "oci-streaming-with-apache-kafka.svg",
+      "keywords": [
+        "Analytics",
+        "AI",
+        "Kafka",
+        "Streaming"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "oci-streaming-with-apache-kafka.svg",
+      "matchedLocalIconSlug": "oci-streaming-with-apache-kafka"
     },
     "service-connector-hub": {
       "name": "Service Connector Hub",
@@ -241,8 +257,23 @@
       "keywords": [],
       "warnings": [],
       "iconSource": "local-svg",
-      "localIconFile": "Generative AI.svg",
-      "matchedLocalIconSlug": "generative-ai"
+      "localIconFile": "oci-generative-ai.svg",
+      "matchedLocalIconSlug": "oci-generative-ai"
+    },
+    "oci-ai-data-platform-workbench": {
+      "name": "OCI AI Data Platform Workbench",
+      "category": "Analytics AI",
+      "file": "oci-ai-data-platform-workbench.svg",
+      "sourceFile": "oci-ai-data-platform-workbench.svg",
+      "keywords": [
+        "AI",
+        "Data Platform",
+        "Workbench"
+      ],
+      "warnings": [],
+      "iconSource": "local-svg",
+      "localIconFile": "oci-ai-data-platform-workbench.svg",
+      "matchedLocalIconSlug": "oci-ai-data-platform-workbench"
     },
     "oci-language": {
       "name": "OCI Language",
@@ -3346,6 +3377,7 @@
     "fusion": "fusion",
     "gateway": "drg",
     "generative-ai": "oci-generative-ai",
+    "ai-data-platform-workbench": "oci-ai-data-platform-workbench",
     "generic": "generic",
     "goldengate": "goldengate",
     "goldengate-application-adapter": "goldengate-application-adapter",
@@ -3441,7 +3473,9 @@
     "oci-console": "oci-console",
     "oci-container-registry": "oci-container-registry",
     "oci-database-with-postgresql": "oci-database-with-postgresql",
+    "oci-ai-data-platform-workbench": "oci-ai-data-platform-workbench",
     "oci-generative-ai": "oci-generative-ai",
+    "oci-streaming-with-apache-kafka": "oci-streaming-with-apache-kafka",
     "oci-language": "oci-language",
     "oci-migrate-autonomous-database": "oci-migrate-autonomous-database",
     "oci-multicloud": "oci-multicloud",
@@ -3515,6 +3549,7 @@
     "storage": "object-storage",
     "storage-gateway": "storage-gateway",
     "streaming": "streaming",
+    "streaming-with-apache-kafka": "oci-streaming-with-apache-kafka",
     "studio": "goldengate-studio",
     "supply-chain-planning": "supply-chain-planning",
     "tagging": "tagging",
@@ -3559,8 +3594,8 @@
     "VPN or FastConnect: no convertible vector geometry found",
     "Local Peering: no convertible vector geometry found"
   ],
-  "localSvgIconSource": "D:\\Desktop\\Oracle\\4.tools\\_OCI icons",
-  "localSvgAvailableCount": 245,
-  "localSvgImportedCount": 170,
+  "localSvgIconSource": "assets/oci-icons",
+  "localSvgAvailableCount": 244,
+  "localSvgImportedCount": 172,
   "localSvgUnmatchedCatalogCount": 71
 }

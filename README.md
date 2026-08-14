@@ -66,13 +66,13 @@ From `plugins/oci-architecture-diagram`:
 
 ```powershell
 python scripts/generate_oci_diagram.py --spec examples/web-architecture.json --out examples/web-architecture.html
-python scripts/serve_architecture_site.py --port 8765 --diagram web-architecture
+python scripts/serve_architecture_site.py --port 8765 --project web-architecture
 ```
 
 Then open:
 
 ```text
-http://127.0.0.1:8765/src/index.html?diagram=web-architecture
+http://127.0.0.1:8765/src/index.html?project=web-architecture
 ```
 
 Run tests from the repository root:
@@ -109,6 +109,12 @@ source files.
 Use Case image uploads now persist as validated project assets and their
 relative paths are stored in the portable project database. Images are copied
 when a project is duplicated and included in selected-project ZIP exports.
+
+## Release 0.4.10
+
+Adds OCI AI Data Platform Workbench, OCI Generative AI and OCI Streaming with
+Apache Kafka icons, standardizes gallery URLs on `project`, and removes the
+obsolete generated 100-case prompt suite in favor of `src/projects.json`.
 
 ## Release 0.4.1
 

@@ -94,14 +94,16 @@ Use the Browser plugin to perform this official UI workflow for each final BoM:
    Cost Estimator tab and preserve the downloaded file alongside the exact
    JSON. Do not substitute a plugin-produced XLSX, CSV, or HTML table.
 
-The `XLS` deck link is a handoff to Cost Estimator only. The static
-deck cannot itself upload files or automate a third-party website; the Browser
-plugin performs that task during a Codex run.
+Invoke `oci-cost-estimator-browser-export` for the official JSON/XLS pair. The
+static deck cannot upload files to or automate a third-party website; the
+Browser plugin performs that work during a Codex run. Embed the exact validated
+JSON and XLS so their deck actions are real downloads, not handoff links.
 
 The portable project menu must expose the same two actions for every
-BoM-enabled deck: `JSON` downloads the exact embedded Cost Estimator payload
-and `XLS` opens the official Cost Estimator handoff. Disable both actions for a
-diagram-only project rather than exposing an invented BoM export.
+BoM-enabled, browser-validated deck: `JSON` and `XLS` download the exact
+official artifacts exported from the same Cost Estimator session. Disable both
+actions for an unvalidated or diagram-only project rather than exposing an
+invented BoM export.
 
 The portfolio header must expose a download icon for a PowerPoint file. It must
 render the Use Case, Architecture and BoM tabs as full 1920×1080 PNGs and package

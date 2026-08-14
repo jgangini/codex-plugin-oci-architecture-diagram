@@ -13,10 +13,10 @@ user reports visual issues in the in-app Browser.
 Serve the plugin root first:
 
 ```powershell
-python scripts/serve_architecture_site.py --port 8765 --diagram <diagram-id>
+python scripts/serve_architecture_site.py --port 8765 --project <project-id>
 ```
 
-Open the printed `http://127.0.0.1:8765/src/index.html?diagram=<diagram-id>`
+Open the printed `http://127.0.0.1:8765/src/index.html?project=<project-id>`
 URL with the Browser plugin, then verify:
 
 - Official icons render inside node cards and are not generic blocks.

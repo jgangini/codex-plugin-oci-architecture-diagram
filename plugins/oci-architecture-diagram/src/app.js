@@ -3,12 +3,13 @@
   const SAVE_URL = "/api/projects";
   const STORAGE_KEY = "oci-architecture-projects:" + window.location.pathname;
   const STORAGE_FALLBACK_KEY = STORAGE_KEY + ":fallback";
-  const PORTFOLIO_VERSION = "portfolio-v35";
+  const PORTFOLIO_VERSION = "portfolio-v36";
   const list = document.querySelector("#architecture-list");
   const search = document.querySelector("#architecture-search");
   const frame = document.querySelector("#diagram-frame");
   const title = document.querySelector("#architecture-title");
   const pptxButton = document.querySelector("#download-pptx");
+  const agentPromptButton = document.querySelector("#copy-agent-prompt");
   const menuToggle = document.querySelector("#menu-toggle");
   const menuBackdrop = document.querySelector("#menu-backdrop");
   const exportButton = document.querySelector("#export-projects");
@@ -21,7 +22,8 @@
   const selectedForExport = new Set();
   let database = { version: 1, updatedAt: "", projects: [] };
   let projects = [];
-  let selectedId = new URLSearchParams(window.location.search).get("diagram") || "";
+  const initialQuery = new URLSearchParams(window.location.search);
+  let selectedId = initialQuery.get("project") || initialQuery.get("diagram") || "";
 
   function normalize(value) {
     return String(value || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -79,6 +81,10 @@
     return project.format === "deck" || project.path.endsWith("-case-deck.html");
   }
 
+  function projectHasOfficialBom(project) {
+    return projectHasBom(project) && project.bomValidation === "browser_validated";
+  }
+
   function normalizeDatabase(value) {
     const inputProjects = Array.isArray(value?.projects) ? value.projects : [];
     return {
@@ -89,6 +95,9 @@
         familyId: String(project.familyId || project.id || "project-" + (index + 1)),
         sourceProjectId: typeof project.sourceProjectId === "string" ? project.sourceProjectId : undefined,
         caseImageUrl: typeof project.caseImageUrl === "string" ? project.caseImageUrl : undefined,
+        bomValidation: ["browser_validated", "locally_validated", "blocked"].includes(project.bomValidation)
+          ? project.bomValidation
+          : undefined,
         version: projectVersion(project),
         title: String(project.title || "Proyecto OCI"),
         description: String(project.description || project.summary || ""),
@@ -198,6 +207,9 @@
     const supportsPptx = frame.classList.contains("is-deck") && typeof frame.contentWindow?.ociRenderAllSlides === "function";
     pptxButton.hidden = !supportsPptx;
     pptxButton.disabled = !supportsPptx;
+    const supportsAgentPrompt = Boolean(currentProject());
+    agentPromptButton.hidden = !supportsAgentPrompt;
+    agentPromptButton.disabled = !supportsAgentPrompt;
   }
 
   function prepareFrame() {
@@ -235,10 +247,13 @@
     resizeFrameToContent();
     pptxButton.hidden = true;
     pptxButton.disabled = true;
+    agentPromptButton.hidden = false;
+    agentPromptButton.disabled = false;
     frame.src = embeddedPath(selected.path, selected);
     if (pushState) {
       const url = new URL(window.location.href);
-      url.searchParams.set("diagram", selected.id);
+      url.searchParams.set("project", selected.id);
+      url.searchParams.delete("diagram");
       window.history.replaceState({}, "", url);
     }
   }
@@ -296,23 +311,23 @@
       const xls = document.createElement("button");
       xls.type = "button";
       xls.className = "project-download project-download-xls";
-      xls.title = projectHasBom(project) ? "Exportar XLS oficial para " + project.title : "Este proyecto no contiene un BoM de Cost Estimator";
+      xls.title = projectHasOfficialBom(project) ? "Descargar XLS oficial para " + project.title : "El par oficial JSON/XLS todavía no superó la validación en Cost Estimator";
       xls.setAttribute("aria-label", xls.title);
-      xls.disabled = !projectHasBom(project);
+      xls.disabled = !projectHasOfficialBom(project);
       xls.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 15v4h14v-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg><span>XLS</span>';
       xls.addEventListener("click", async (event) => {
         event.stopPropagation();
         if (xls.disabled) return;
-        if (await confirmAction("Exportar XLS oficial", "Se abrirá Oracle Cloud Cost Estimator para importar el JSON de \"" + project.title + "\" y descargar el XLS oficial. ¿Deseas continuar?", "Abrir")) {
-          openProjectCostEstimator(project);
+        if (await confirmAction("Descargar XLS oficial", "¿Deseas descargar el XLS validado de Oracle Cloud Cost Estimator de \"" + project.title + "\"?", "Descargar")) {
+          await downloadProjectBomXls(project);
         }
       });
       const json = document.createElement("button");
       json.type = "button";
       json.className = "project-download project-download-json";
-      json.title = projectHasBom(project) ? "Descargar JSON de Cost Estimator para " + project.title : "Este proyecto no contiene un BoM de Cost Estimator";
+      json.title = projectHasOfficialBom(project) ? "Descargar JSON de Cost Estimator para " + project.title : "El par oficial JSON/XLS todavía no superó la validación en Cost Estimator";
       json.setAttribute("aria-label", json.title);
-      json.disabled = !projectHasBom(project);
+      json.disabled = !projectHasOfficialBom(project);
       json.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 15v4h14v-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg><span>JSON</span>';
       json.addEventListener("click", async (event) => {
         event.stopPropagation();
@@ -610,6 +625,44 @@
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
+  function agentPromptForCurrentProject() {
+    const project = currentProject();
+    if (!project) return "";
+    return [
+      "Usa [@oci-architecture-diagram](plugin://oci-architecture-diagram@local) para aplicar el siguiente cambio únicamente al proyecto actual.",
+      "",
+      "Proyecto: " + project.title,
+      "project=" + project.id,
+      "",
+      "Actualiza solamente la arquitectura, el Use Case, el BoM y los artefactos generados asociados a este project. No modifiques otros proyectos.",
+      "",
+      "Cambio solicitado:"
+    ].join("\\n");
+  }
+
+  async function copyAgentPrompt() {
+    const prompt = agentPromptForCurrentProject();
+    if (!prompt) return;
+    try {
+      let copied = false;
+      if (navigator.clipboard?.writeText) copied = await navigator.clipboard.writeText(prompt).then(() => true, () => false);
+      if (!copied) {
+        const input = document.createElement("textarea");
+        input.value = prompt;
+        input.style.position = "fixed";
+        input.style.opacity = "0";
+        document.body.append(input);
+        input.select();
+        copied = document.execCommand("copy");
+        input.remove();
+      }
+      if (!copied) throw new Error("copy failed");
+      showViewerToast("Prompt del agente copiado.");
+    } catch (_error) {
+      showViewerToast("No fue posible copiar el prompt del agente.", true);
+    }
+  }
+
   async function downloadPptx() {
     const renderSlides = frame.contentWindow?.ociRenderAllSlides;
     if (typeof renderSlides !== "function") {
@@ -636,14 +689,18 @@
     return normalize(value).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "project";
   }
 
-  async function projectBomBytes(project) {
+  async function projectArtifactBytes(project, selector, missingMessage) {
     const response = await fetch(project.path, { cache: "no-store" });
     if (!response.ok) throw new Error("No se pudo obtener el BoM del proyecto.");
     const documentSource = new DOMParser().parseFromString(await response.text(), "text/html");
-    const encoded = documentSource.querySelector("#bom-download-data")?.textContent.replace(/\s+/g, "");
-    if (!encoded) throw new Error("Este proyecto no contiene un JSON de Cost Estimator.");
+    const encoded = documentSource.querySelector(selector)?.textContent.replace(/\s+/g, "");
+    if (!encoded) throw new Error(missingMessage);
     const binary = atob(encoded);
     return Uint8Array.from(binary, (character) => character.charCodeAt(0));
+  }
+
+  function projectBomBytes(project) {
+    return projectArtifactBytes(project, "#bom-download-data", "Este proyecto no contiene un JSON de Cost Estimator.");
   }
 
   async function downloadProjectBomJson(project) {
@@ -657,16 +714,15 @@
     }
   }
 
-  function openProjectCostEstimator(project) {
-    const costEstimator = document.createElement("a");
-    costEstimator.href = "https://www.oracle.com/cloud/costestimator.html";
-    costEstimator.target = "_blank";
-    costEstimator.rel = "noopener noreferrer";
-    costEstimator.hidden = true;
-    document.body.append(costEstimator);
-    costEstimator.click();
-    costEstimator.remove();
-    showViewerToast("Cost Estimator abierto para exportar el XLS oficial de " + projectListTitle(project) + ".");
+  async function downloadProjectBomXls(project) {
+    try {
+      const bytes = await projectArtifactBytes(project, "#xls-download-data", "Este proyecto no contiene un XLS oficial validado.");
+      triggerDownload(new Blob([bytes], { type: "application/vnd.ms-excel" }), safeFileName(project.title) + "-oracle-cost-estimator.xls");
+      showViewerToast("XLS oficial de Cost Estimator descargado.");
+    } catch (error) {
+      console.error(error);
+      showViewerToast(error.message || "No fue posible descargar el XLS.", true);
+    }
   }
 
   async function fetchBytes(path) {
@@ -759,13 +815,15 @@
   pptxButton.addEventListener("click", async () => {
     if (await confirmAction("Descargar PowerPoint", "¿Deseas descargar un PPTX con Use Case, Architecture y BoM?", "Descargar")) downloadPptx();
   });
+  agentPromptButton.addEventListener("click", copyAgentPrompt);
   exportButton.addEventListener("click", requestExport);
   title.addEventListener("dblclick", () => beginInlineEdit(title, "title"));
   window.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && !document.querySelector("[contenteditable=true]")) setMenuOpen(false);
   });
   window.addEventListener("popstate", () => {
-    selectedId = new URLSearchParams(window.location.search).get("diagram") || selectedId;
+    const query = new URLSearchParams(window.location.search);
+    selectedId = query.get("project") || query.get("diagram") || selectedId;
     selectProject(selectedId);
     renderList(search.value);
   });

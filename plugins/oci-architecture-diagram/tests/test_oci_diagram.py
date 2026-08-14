@@ -35,8 +35,6 @@ def load_module(name: str, path: Path):
 renderer = load_module("generate_oci_diagram", SCRIPTS / "generate_oci_diagram.py")
 extractor = load_module("extract_oci_icons", SCRIPTS / "extract_oci_icons.py")
 svg_importer = load_module("import_oci_svg_icons", SCRIPTS / "import_oci_svg_icons.py")
-cases_module = load_module("architecture_prompt_cases", SCRIPTS / "architecture_prompt_cases.py")
-suite_renderer = load_module("render_architecture_prompt_suite", SCRIPTS / "render_architecture_prompt_suite.py")
 site_server = load_module("serve_architecture_site", SCRIPTS / "serve_architecture_site.py")
 
 
@@ -192,6 +190,36 @@ class ExtractorTests(unittest.TestCase):
             self.assertEqual("local-svg", catalog["services"]["dns"]["iconSource"])
             self.assertEqual([], catalog["services"]["dns"]["warnings"])
 
+    def test_importer_removes_visio_extensions(self) -> None:
+        icon = svg_importer.sanitize_svg(
+            '<svg xmlns="http://www.w3.org/2000/svg" xmlns:v="urn:visio" viewBox="0 0 10 10">'
+            '<v:documentProperties v:langID="1033"/><g v:mID="1"><path d="M0 0h10v10z"/></g></svg>',
+            "visio-test",
+        )
+
+        ET.fromstring(icon)
+        self.assertNotIn("v:", icon)
+
+    def test_catalog_contains_new_ai_and_kafka_icons(self) -> None:
+        catalog = renderer.read_json(CATALOG)
+        self.assertEqual("oci", catalog["source"])
+        self.assertEqual("assets/oci-icons", catalog["localSvgIconSource"])
+        expected = {
+            "oci-ai-data-platform-workbench": "oci-ai-data-platform-workbench.svg",
+            "oci-generative-ai": "oci-generative-ai.svg",
+            "oci-streaming-with-apache-kafka": "oci-streaming-with-apache-kafka.svg",
+        }
+
+        for service, file_name in expected.items():
+            with self.subTest(service=service):
+                self.assertEqual(file_name, catalog["services"][service]["localIconFile"])
+                icon = PLUGIN_ROOT / "assets" / "oci-icons" / file_name
+                self.assertTrue(icon.is_file())
+                ET.fromstring(icon.read_text(encoding="utf-8"))
+                viewbox, body = renderer.icon_for_service(service, catalog["services"][service], CATALOG)
+                self.assertEqual("0 0 720 720", viewbox)
+                self.assertIn(f"oci-{service}", body)
+
 
 class RendererTests(unittest.TestCase):
     @classmethod
@@ -340,10 +368,13 @@ class RendererTests(unittest.TestCase):
         self.assertIn("Bill of Materials (BoM)", output)
         self.assertIn('aria-label="Descargar JSON de Oracle Cost Estimator"', output)
         self.assertIn('aria-label="Abrir Oracle Cloud Cost Estimator"', output)
-        self.assertIn('aria-label="Exportar XLS oficial desde Oracle Cost Estimator"', output)
+        self.assertIn('aria-label="Descargar XLS oficial de Oracle Cost Estimator"', output)
         self.assertIn('<th>SKU</th>', output)
         self.assertIn('class="bom-sku"', output)
-        self.assertIn('Exportación homologada:', output)
+        self.assertIn('Validación oficial pendiente:', output)
+        self.assertIn('oci-cost-estimator-browser-export', output)
+        self.assertRegex(output, r'class="download-bom download-bom-xls"[^>]+ disabled>')
+        self.assertRegex(output, r'class="download-bom download-bom-json"[^>]+ disabled>')
         self.assertNotIn('aria-label="Descargar Excel"', output)
         self.assertNotIn('downloadBomExcel?.addEventListener("click"', output)
         self.assertNotIn('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', output)
@@ -364,7 +395,7 @@ class RendererTests(unittest.TestCase):
         self.assertIn('.diagram-toolbar .zoom-fit { min-width:46px; font-size:11px; }', output)
         self.assertIn('context.drawImage(element, box.x, box.y, box.width, box.height)', output)
         self.assertIn("https://www.oracle.com/cloud/costestimator.html", output)
-        self.assertIn("Exportación homologada:", output)
+        self.assertIn("Validación oficial pendiente:", output)
         embedded_bom = re.search(r'<script type="application/octet-stream" id="bom-download-data">([^<]+)</script>', output)
         self.assertIsNotNone(embedded_bom)
         self.assertEqual(base64.b64decode(embedded_bom.group(1)), bom_path.read_bytes())
@@ -396,6 +427,33 @@ class RendererTests(unittest.TestCase):
         self.assertNotIn("Validación local; importación pendiente", output)
         self.assertNotIn("Frescura de precio no verificada", output)
         self.assertNotIn("No valorizado", output)
+
+    def test_case_deck_embeds_only_a_browser_validated_official_pair(self) -> None:
+        architecture = renderer.read_json(PLUGIN_ROOT / "examples" / "case-deck-web-architecture.json")
+        deck = renderer.read_json(PLUGIN_ROOT / "examples" / "case-deck-web.json")
+        deck["bom"]["validation"] = "browser_validated"
+        bom_path = PLUGIN_ROOT / "examples" / "case-deck-web-bom.json"
+        bom_detail = renderer.read_bom_detail(bom_path)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            xls_path = Path(temporary) / "cost-estimator.xls"
+            xls_path.write_bytes(b"official-xls")
+            output = renderer.render_case_deck_html(
+                architecture, deck, bom_detail, self.catalog, CATALOG, bom_path, xls_path
+            )
+
+        self.assertIn("Exportación oficial validada:", output)
+        self.assertNotRegex(output, r'class="download-bom download-bom-(?:xls|json)"[^>]+ disabled>')
+        embedded_xls = re.search(r'<script type="application/octet-stream" id="xls-download-data">([^<]+)</script>', output)
+        self.assertIsNotNone(embedded_xls)
+        self.assertEqual(base64.b64decode(embedded_xls.group(1)), b"official-xls")
+
+    def test_case_deck_rejects_an_incomplete_official_export_pair(self) -> None:
+        deck = renderer.read_json(PLUGIN_ROOT / "examples" / "case-deck-web.json")
+        deck["bom"]["validation"] = "browser_validated"
+
+        with self.assertRaisesRegex(renderer.DiagramError, "requires --xls"):
+            renderer.validate_official_export_pair(deck, None)
 
     def test_case_deck_cards_follow_diagram_visual_reading_order(self) -> None:
         architecture = renderer.read_json(PLUGIN_ROOT / "examples" / "case-deck-web-architecture.json")
@@ -561,21 +619,9 @@ class RendererTests(unittest.TestCase):
         self.assertIn('viewBox="0 0 44.45 42"', node_html)
         self.assertIn("oci-dns-st1", node_html)
 
-    def test_suite_subnets_keep_horizontal_room_for_edge_labels(self) -> None:
-        case = next(item for item in cases_module.architecture_prompt_cases() if item["id"] == "web-oke-adb-08")
-        html = renderer.render_html(case["spec"], self.catalog, CATALOG)
-        group_boxes = group_boxes_from_html(html)
-
-        public_subnet = group_boxes["public-subnet"]
-        app_subnet = group_boxes["private-subnet"]
-        data_subnet = group_boxes["data-subnet"]
-
-        self.assertGreaterEqual(app_subnet[0] - public_subnet[2], 70)
-        self.assertGreaterEqual(data_subnet[0] - app_subnet[2], 70)
-
     def test_service_inventory_replaces_footer_legend_chips(self) -> None:
-        case = next(item for item in cases_module.architecture_prompt_cases() if item["id"] == "web-oke-adb-08")
-        html = renderer.render_html(case["spec"], self.catalog, CATALOG)
+        spec = renderer.read_json(PLUGIN_ROOT / "examples" / "live-query-ecommerce.json")
+        html = renderer.render_html(spec, self.catalog, CATALOG)
 
         self.assertNotIn("<footer class=\"legend\"", html)
         self.assertNotIn('class="legend-item"', html)
@@ -587,7 +633,7 @@ class RendererTests(unittest.TestCase):
         self.assertNotIn('class="service-inventory-scroll"', html)
         self.assertIn("Container Engine for Kubernetes", html)
         self.assertIn("Ejecuta los microservicios", html)
-        self.assertIn("Email Delivery", html)
+        self.assertIn("Streaming", html)
 
     def test_diagram_toolbar_is_fixed_overlay_scoped_to_diagram_shell(self) -> None:
         spec = renderer.read_json(PLUGIN_ROOT / "examples" / "web-architecture.json")
@@ -627,73 +673,6 @@ class RendererTests(unittest.TestCase):
         self.assertNotIn("border-bottom: 1px solid var(--line);", toolbar_css)
 
 
-class PromptSuiteTests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls) -> None:
-        cls.catalog = renderer.load_catalog(CATALOG)
-        cls.cases = cases_module.architecture_prompt_cases()
-
-    def test_suite_has_100_compound_architecture_questions(self) -> None:
-        self.assertEqual(100, len(self.cases))
-        prompts = [case["prompt"] for case in self.cases]
-        self.assertEqual(len(prompts), len(set(prompts)))
-        for prompt in prompts:
-            self.assertGreaterEqual(prompt.count(";"), 2)
-            self.assertIn("arquitectura OCI", prompt)
-            self.assertIn("conexiones criticas", prompt)
-
-    def test_all_100_architecture_specs_validate_and_render_coherently(self) -> None:
-        patterns = {case["sourcePattern"] for case in self.cases}
-        self.assertGreaterEqual(len(patterns), 10)
-
-        for case in self.cases:
-            with self.subTest(case=case["id"]):
-                nodes, edges, groups, warnings = renderer.validate_spec(case["spec"])
-                self.assertGreaterEqual(len(nodes), 6)
-                self.assertGreaterEqual(len(edges), 5)
-                self.assertGreaterEqual(len(groups), 3)
-                self.assertEqual([], warnings)
-                html = renderer.render_html(case["spec"], self.catalog, CATALOG)
-                self.assertIn(case["spec"]["title"], html)
-                self.assertIn("<svg class=\"diagram\"", html)
-                self.assertNotIn("Unknown OCI service", html)
-                self.assertLess(html.count("<g class=\"node\""), 20)
-                node_boxes = node_boxes_from_html(html)
-                for index, first in enumerate(node_boxes):
-                    for second in node_boxes[index + 1 :]:
-                        self.assertFalse(overlaps(first, second), f"node cards overlap: {first} {second}")
-                label_boxes = edge_label_boxes_from_html(html)
-                for label in label_boxes:
-                    for node in node_boxes:
-                        self.assertFalse(overlaps(label, node), f"edge label overlaps node card: label={label} node={node}")
-                group_boxes = group_boxes_from_html(html)
-                for first_id, second_id in sibling_group_pairs(case["spec"]):
-                    first = group_boxes.get(first_id)
-                    second = group_boxes.get(second_id)
-                    if not first or not second:
-                        continue
-                    self.assertFalse(
-                        overlaps(first, second),
-                        f"sibling groups overlap: {first_id}={first} {second_id}={second}",
-                    )
-
-    def test_render_suite_writes_root_gallery_with_100_visible_diagram_links(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            out_dir = Path(tmp) / "generated-suite"
-            diagram_count = suite_renderer.render_suite(out_dir, CATALOG)
-            root_index = out_dir.parent / "index.html"
-            suite_index = out_dir / "index.html"
-
-            self.assertEqual(100, diagram_count)
-            self.assertTrue(root_index.exists())
-            self.assertTrue(suite_index.exists())
-            root_html = root_index.read_text(encoding="utf-8")
-            self.assertIn("OCI Architecture Diagram Gallery", root_html)
-            self.assertNotIn('class="count"', root_html)
-            self.assertNotIn("100 diagramas", root_html)
-            self.assertEqual(100, root_html.count('<li><a href="generated-suite/'))
-
-
 class LocalArchitectureSiteTests(unittest.TestCase):
     def test_src_gallery_uses_portable_json_project_database(self) -> None:
         src = PLUGIN_ROOT / "src"
@@ -708,6 +687,7 @@ class LocalArchitectureSiteTests(unittest.TestCase):
         self.assertIn("viewer-logo", index)
         self.assertIn("menu-toggle", index)
         self.assertIn("download-pptx", index)
+        self.assertIn("copy-agent-prompt", index)
         self.assertIn("export-projects", index)
         self.assertIn("project-footer", index)
         self.assertIn('id="action-confirmation"', index)
@@ -751,14 +731,21 @@ class LocalArchitectureSiteTests(unittest.TestCase):
         self.assertIn("pptxThemeXml", app)
         self.assertIn('ppt/theme/theme1.xml', app)
         self.assertIn("supportsPptx", app)
+        self.assertIn("agentPromptForCurrentProject", app)
+        self.assertIn('url.searchParams.set("project", selected.id)', app)
+        self.assertIn('url.searchParams.delete("diagram")', app)
+        self.assertIn("Prompt del agente copiado.", app)
         self.assertIn("requestExport", app)
         self.assertIn('duplicate.className = "duplicate-project"', app)
         self.assertIn('remove.className = "delete-project"', app)
         self.assertIn('xls.className = "project-download project-download-xls"', app)
         self.assertIn('json.className = "project-download project-download-json"', app)
+        self.assertIn("projectHasOfficialBom", app)
+        self.assertIn('project.bomValidation === "browser_validated"', app)
         self.assertIn("downloadProjectBomJson", app)
-        self.assertIn("openProjectCostEstimator", app)
+        self.assertIn("downloadProjectBomXls", app)
         self.assertIn("#bom-download-data", app)
+        self.assertIn("#xls-download-data", app)
         self.assertNotIn("<span>Duplicar</span>", app)
         self.assertIn('selectionLabel.className = "project-selection"', app)
         self.assertIn("updateExportControl", app)
@@ -777,6 +764,7 @@ class LocalArchitectureSiteTests(unittest.TestCase):
         self.assertIn(".viewer-logo", styles)
         self.assertIn(".diagram-frame.is-deck", styles)
         self.assertIn(".download-pptx", styles)
+        self.assertIn(".copy-agent-prompt", styles)
         self.assertIn(".viewer-toast", styles)
         self.assertIn("border: 1px solid #b8c5cf;", styles)
         self.assertIn(".project-footer", styles)
@@ -803,7 +791,7 @@ class LocalArchitectureSiteTests(unittest.TestCase):
             site_server.local_gallery_url("127.0.0.1", 8765),
         )
         self.assertEqual(
-            "http://127.0.0.1:8765/src/index.html?diagram=web-architecture",
+            "http://127.0.0.1:8765/src/index.html?project=web-architecture",
             site_server.local_gallery_url("127.0.0.1", 8765, "web-architecture"),
         )
 
@@ -820,6 +808,13 @@ class LocalArchitectureSiteTests(unittest.TestCase):
         invalid_image["projects"][0]["caseImageUrl"] = "../assets/project-images/other/case-image.png"
         with self.assertRaisesRegex(ValueError, "caseImageUrl"):
             site_server.validate_project_database(invalid_image)
+
+        valid_bom = json.loads(json.dumps(database))
+        valid_bom["projects"][0]["bomValidation"] = "browser_validated"
+        self.assertIs(valid_bom, site_server.validate_project_database(valid_bom))
+        valid_bom["projects"][0]["bomValidation"] = "trusted_by_assumption"
+        with self.assertRaisesRegex(ValueError, "bomValidation"):
+            site_server.validate_project_database(valid_bom)
 
     def test_case_image_is_persisted_with_a_project_relative_url(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -974,7 +969,7 @@ class SkillPackagingTests(unittest.TestCase):
         plugin_entry = marketplace["plugins"][0]
 
         self.assertEqual("oci-architecture-diagram", manifest["name"])
-        self.assertEqual("0.4.9", manifest["version"])
+        self.assertEqual("0.4.10", manifest["version"])
         self.assertEqual("Joel Gangini", manifest["author"]["name"])
         self.assertEqual("Joel Gangini", manifest["interface"]["developerName"])
         self.assertEqual("oci-architecture", marketplace["name"])
@@ -1007,19 +1002,19 @@ class SkillPackagingTests(unittest.TestCase):
             "oci-icon-catalog": ["extract_oci_icons.py", "import_oci_svg_icons.py"],
             "oci-diagram-renderer": [
                 "generate_oci_diagram.py",
-                "render_architecture_prompt_suite.py",
                 "serve_architecture_site.py",
-                "?diagram=<diagram-id>",
+                "?project=<project-id>",
             ],
             "oci-diagram-visual-qa": ["Browser Checks", "diagram-toolbar", "Browser plugin", "Browser Delivery"],
             "oci-architecture-case-deck": ["Start gate", "Workflow", "Browser validation and official Excel", "Delivery"],
             "oci-architecture-commercial-discovery": ["facts", "assumptions"],
             "oci-architecture-solution": ["service map", "sizing driver"],
-            "oci-architecture-sizing": ["Oracle Cost Estimator JSON", "pricing", "Browser plugin"],
+            "oci-architecture-sizing": ["Oracle Cost Estimator JSON", "pricing", "Browser"],
+            "oci-cost-estimator-browser-export": ["Hard contract", "round trip", "Browser plugin", "USD 0.00"],
             "oci-architecture-curation": ["Audit", "customer evidence"],
         }
 
-        self.assertGreaterEqual(len(list(SKILLS.glob("*/SKILL.md"))), 11)
+        self.assertGreaterEqual(len(list(SKILLS.glob("*/SKILL.md"))), 12)
         for skill_name, required_phrases in expected.items():
             with self.subTest(skill=skill_name):
                 skill_path = SKILLS / skill_name / "SKILL.md"

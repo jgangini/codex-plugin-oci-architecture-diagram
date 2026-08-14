@@ -1,6 +1,6 @@
 ---
 name: oci-diagram-renderer
-description: Render validated OCI architecture JSON specs into portable static HTML/SVG diagrams, regenerate the 100-case example gallery, and report renderer warnings and output paths.
+description: Render validated OCI architecture JSON specs into portable static HTML/SVG diagrams, register them in the project catalog, and report renderer warnings and output paths.
 ---
 
 # OCI Diagram Renderer
@@ -24,25 +24,17 @@ entry in `src/architectures.js`.
 python scripts/generate_oci_diagram.py --spec examples/web-architecture.json --out examples/web-architecture.html --validate-only
 ```
 
-## Render Prompt Suite
-
-```powershell
-python scripts/render_architecture_prompt_suite.py --out-dir examples/generated-suite
-```
-
-This writes 100 generated diagrams plus gallery indexes.
-
 ## Serve Local Gallery
 
 ```powershell
-python scripts/serve_architecture_site.py --port 8765 --diagram web-architecture
+python scripts/serve_architecture_site.py --port 8765 --project web-architecture
 ```
 
 Open the printed URL with the Browser plugin. For a specific diagram, the URL
-must include `?diagram=<diagram-id>`, for example:
+must include `?project=<project-id>`, for example:
 
 ```text
-http://127.0.0.1:8765/src/index.html?diagram=web-architecture
+http://127.0.0.1:8765/src/index.html?project=web-architecture
 ```
 
 Prefer the HTTP gallery over `file://` links so navigation, iframe loading, and

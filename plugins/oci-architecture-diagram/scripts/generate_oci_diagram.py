@@ -188,6 +188,9 @@ SERVICE_ROLE_DESCRIPTIONS = {
     "oracle-cloud-infrastructure-vault": "Protege secretos, claves y material criptografico.",
     "service-gateway": "Conecta recursos privados con servicios OCI sin usar internet publico.",
     "streaming": "Transporta eventos en tiempo real entre productores y consumidores.",
+    "oci-streaming-with-apache-kafka": "Proporciona streaming compatible con Apache Kafka para productores y consumidores administrados.",
+    "oci-ai-data-platform-workbench": "Proporciona un entorno administrado para preparar, explorar y operar cargas de datos e inteligencia artificial.",
+    "oci-generative-ai": "Genera respuestas, embeddings y contenido mediante modelos generativos administrados.",
     "vault": "Protege secretos, claves y material criptografico.",
     "virtual-cloud-network": "Aisla la red de la arquitectura y contiene subredes, rutas y controles.",
     "virtual-machine": "Ejecuta cargas de trabajo o componentes de aplicacion sobre compute.",
@@ -1844,6 +1847,14 @@ def render_case_deck_interaction_script(image_prompt: str) -> str:
     """.replace("__CASE_IMAGE_PROMPT__", json.dumps(image_prompt, ensure_ascii=False))
 
 
+def validate_official_export_pair(deck: dict[str, Any], xls_path: Path | None) -> None:
+    browser_validated = deck["bom"].get("validation") == "browser_validated"
+    if xls_path is not None and not xls_path.is_file():
+        raise DiagramError(f"Official Cost Estimator XLS not found: {xls_path}")
+    if bool(xls_path) != browser_validated:
+        raise DiagramError("A browser_validated deck requires --xls, and --xls requires browser_validated.")
+
+
 def render_case_deck_html(
     architecture: dict[str, Any],
     deck: dict[str, Any],
@@ -1851,6 +1862,7 @@ def render_case_deck_html(
     catalog: dict[str, Any],
     catalog_path: Path,
     bom_path: Path,
+    xls_path: Path | None = None,
 ) -> str:
     components = validate_deck_spec(deck, architecture, bom_detail)
     architecture_components = order_deck_components_by_architecture(components, architecture)
@@ -1867,6 +1879,15 @@ def render_case_deck_html(
     case_description = str(case.get("description") or f'Este caso de uso presenta la necesidad funcional de la solución: {case["objective"]}')
     case_image_prompt = str(case.get("imagePrompt") or build_case_image_prompt(title, case))
     bom_download = base64.b64encode(bom_path.read_bytes()).decode("ascii")
+    browser_validated = bom.get("validation") == "browser_validated"
+    validate_official_export_pair(deck, xls_path)
+    xls_download = base64.b64encode(xls_path.read_bytes()).decode("ascii") if xls_path else ""
+    artifact_message = (
+        "<strong>Exportación oficial validada:</strong> JSON y XLS fueron exportados desde la misma estimación y el JSON superó la reimportación limpia."
+        if browser_validated
+        else "<strong>Validación oficial pendiente:</strong> genere y reimporte los archivos con el skill oci-cost-estimator-browser-export."
+    )
+    download_disabled = "" if browser_validated else " disabled"
     try:
         deck_brand = "data:image/svg+xml;base64," + base64.b64encode(DECK_BRAND_FILE.read_bytes()).decode("ascii")
     except OSError as exc:
@@ -1916,7 +1937,7 @@ def render_case_deck_html(
     .diagram-viewport {{ position:absolute; inset:0; overflow:auto; background:#eef2f5; cursor:grab; scrollbar-color:#8ea0aa transparent; scrollbar-width:thin; }} .diagram-viewport.is-panning {{ cursor:grabbing; user-select:none; }} .diagram-stage {{ width:100%; min-width:100%; height:100%; min-height:100%; padding:0; }} .diagram-viewport .diagram {{ display:block; max-width:none; }}
     .diagram-toolbar {{ position:absolute; right:16px; bottom:16px; z-index:4; display:flex; flex-direction:column; gap:5px; }} .diagram-toolbar button {{ min-width:36px; height:30px; border:1px solid #c9d1d9; border-radius:5px; color:var(--ink); background:#fff; box-shadow:0 2px 5px rgba(49,45,42,.14); font:700 13px Arial,Helvetica,sans-serif; cursor:pointer; }} .diagram-toolbar button:hover {{ border-color:var(--teal); color:var(--teal); }} .diagram-toolbar .zoom-fit {{ min-width:46px; font-size:11px; }}
     .bom-head {{ display:grid; grid-template-columns:minmax(0, 840px) minmax(0, 1fr); gap:14px; margin-bottom:22px; }} .bom-metrics {{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; }} .metric {{ padding:17px 20px; border:1px solid var(--line); background:var(--soft); }} .metric span {{ display:block; color:var(--muted); font-size:14px; font-weight:700; text-transform:uppercase; }} .metric strong {{ display:block; margin-top:6px; color:var(--teal); font-size:24px; line-height:1.12; }}
-    .bom-actions {{ display:flex; align-items:center; justify-content:space-between; gap:24px; padding:14px 18px; border:1px solid var(--line); background:#fff; }} .bom-actions p {{ margin:0; color:var(--muted); font-size:15px; line-height:1.35; }} .bom-actions strong {{ color:var(--ink); }} .bom-action-links {{ display:flex; flex:0 0 auto; align-items:center; gap:10px; }} .bom-action-links a,.download-bom {{ display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:42px; border-radius:5px; padding:0 16px; font:700 15px Arial,Helvetica,sans-serif; text-decoration:none; cursor:pointer; }} .bom-action-links a:not(.download-bom) {{ border:1px solid var(--teal); color:var(--teal); background:#fff; }} .bom-action-links .download-bom {{ border:1px solid var(--oci); color:#fff; background:var(--oci); }} .bom-action-links .action-icon {{ width:20px; height:20px; flex:0 0 auto; }} .bom-action-links a:hover,.bom-action-links a:focus-visible,.download-bom:hover,.download-bom:focus-visible {{ outline:3px solid rgba(199,70,52,.18); outline-offset:2px; }}
+    .bom-actions {{ display:flex; align-items:center; justify-content:space-between; gap:24px; padding:14px 18px; border:1px solid var(--line); background:#fff; }} .bom-actions p {{ margin:0; color:var(--muted); font-size:15px; line-height:1.35; }} .bom-actions strong {{ color:var(--ink); }} .bom-action-links {{ display:flex; flex:0 0 auto; align-items:center; gap:10px; }} .bom-action-links a,.download-bom {{ display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:42px; border-radius:5px; padding:0 16px; font:700 15px Arial,Helvetica,sans-serif; text-decoration:none; cursor:pointer; }} .bom-action-links a:not(.download-bom) {{ border:1px solid var(--teal); color:var(--teal); background:#fff; }} .bom-action-links .download-bom {{ border:1px solid var(--oci); color:#fff; background:var(--oci); }} .bom-action-links .download-bom:disabled {{ border-color:#aab5bc; color:#6c7880; background:#e8edef; cursor:not-allowed; opacity:.8; }} .bom-action-links .action-icon {{ width:20px; height:20px; flex:0 0 auto; }} .bom-action-links a:hover,.bom-action-links a:focus-visible,.download-bom:not(:disabled):hover,.download-bom:not(:disabled):focus-visible {{ outline:3px solid rgba(199,70,52,.18); outline-offset:2px; }}
     .bom-table {{ width:100%; border-collapse:collapse; table-layout:fixed; font-size:16px; }} .bom-table th {{ padding:12px 14px; color:#fff; background:var(--teal); text-align:left; font-size:14px; text-transform:uppercase; }} .bom-table td {{ padding:11px 14px; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.25; }} .bom-table tbody tr:nth-child(even) {{ background:#f7f9fa; }} .bom-table th:nth-child(1) {{ width:17%; }} .bom-table th:nth-child(2) {{ width:24%; }} .bom-table th:nth-child(3) {{ width:36%; }} .bom-table th:nth-child(4) {{ width:13%; }} .bom-table th:nth-child(5) {{ width:10%; text-align:right; }} .bom-table td:nth-child(5) {{ text-align:right; font-weight:700; }} .bom-table td span {{ display:block; margin-top:4px; color:var(--muted); font-size:14px; }} .bom-sku {{ color:var(--teal); font-family:Consolas,Monaco,monospace; font-size:13px; overflow-wrap:anywhere; }}
     .deck-warnings {{ position:absolute; right:20px; bottom:20px; max-width:440px; padding:12px 16px; border:1px solid #dfb6a9; background:#fff4f1; font-size:13px; }}
     .deck-brand {{ position:absolute; right:56px; bottom:0; z-index:6; width:80px; height:80px; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; pointer-events:none; }} .deck-brand img {{ display:block; width:100%; height:100%; object-fit:contain; }} #slide-architecture .diagram-toolbar {{ right:16px; bottom:54px; z-index:7; }}
@@ -1940,13 +1961,14 @@ def render_case_deck_html(
       <div class="architecture-layout"><section class="service-band" aria-label="Servicios y roles"><div class="service-grid">{render_deck_component_cards(architecture_components)}</div></section><div class="architecture-canvas"><div class="diagram-viewport"><div class="diagram-stage">{svg}</div></div><div class="diagram-toolbar" aria-label="Navegación del diagrama"><button type="button" class="zoom-out" aria-label="Alejar">−</button><button type="button" class="zoom-in" aria-label="Acercar">+</button><button type="button" class="zoom-fit" aria-label="Ajustar diagrama">100%</button></div></div></div>
     </section>
     <section id="slide-bom" role="tabpanel" aria-labelledby="tab-bom">
-      <div class="bom-head"><div class="bom-metrics"><article class="metric"><span>Costo anual estimado</span><strong>{html.escape(format_money(annual_cost, currency))}</strong></article><article class="metric"><span>Total mensual estimado</span><strong>{html.escape(format_money(monthly_cost, currency))}</strong></article></div><aside class="bom-actions" aria-label="Uso del JSON"><p><strong>Exportación homologada:</strong> descargue el JSON, impórtelo en Oracle Cloud Cost Estimator y use <em>Export</em> allí para obtener su archivo XLS oficial.</p><div class="bom-action-links"><a href="https://www.oracle.com/cloud/costestimator.html" target="_blank" rel="noopener noreferrer" aria-label="Abrir Oracle Cloud Cost Estimator" title="Abrir Oracle Cloud Cost Estimator"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h10a2.5 2.5 0 0 1 2.5 2.5v10A2.5 2.5 0 0 1 15 19.5H5A2.5 2.5 0 0 1 2.5 17V7A2.5 2.5 0 0 1 5 4.5Z M13 2.5h6.5V9 M11 13 19.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Cost Estimator</span></a><a class="download-bom download-bom-xls" href="https://www.oracle.com/cloud/costestimator.html" target="_blank" rel="noopener noreferrer" aria-label="Exportar XLS oficial desde Oracle Cost Estimator" title="Exportar XLS oficial en Oracle Cost Estimator"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11 M7.5 10.5 12 15l4.5-4.5 M4.5 18.5v1A2 2 0 0 0 6.5 21.5h11a2 2 0 0 0 2-2v-1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>XLS</span></a><button type="button" class="download-bom download-bom-json" aria-label="Descargar JSON de Oracle Cost Estimator" title="Descargar JSON de Oracle Cost Estimator"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11 M7.5 10.5 12 15l4.5-4.5 M4.5 18.5v1A2 2 0 0 0 6.5 21.5h11a2 2 0 0 0 2-2v-1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>JSON</span></button></div></aside></div>
+      <div class="bom-head"><div class="bom-metrics"><article class="metric"><span>Costo anual estimado</span><strong>{html.escape(format_money(annual_cost, currency))}</strong></article><article class="metric"><span>Total mensual estimado</span><strong>{html.escape(format_money(monthly_cost, currency))}</strong></article></div><aside class="bom-actions" aria-label="Uso del JSON"><p>{artifact_message}</p><div class="bom-action-links"><a href="https://www.oracle.com/cloud/costestimator.html" target="_blank" rel="noopener noreferrer" aria-label="Abrir Oracle Cloud Cost Estimator" title="Abrir Oracle Cloud Cost Estimator"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h10a2.5 2.5 0 0 1 2.5 2.5v10A2.5 2.5 0 0 1 15 19.5H5A2.5 2.5 0 0 1 2.5 17V7A2.5 2.5 0 0 1 5 4.5Z M13 2.5h6.5V9 M11 13 19.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Cost Estimator</span></a><button type="button" class="download-bom download-bom-xls" aria-label="Descargar XLS oficial de Oracle Cost Estimator" title="Descargar XLS oficial de Oracle Cost Estimator"{download_disabled}><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11 M7.5 10.5 12 15l4.5-4.5 M4.5 18.5v1A2 2 0 0 0 6.5 21.5h11a2 2 0 0 0 2-2v-1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>XLS</span></button><button type="button" class="download-bom download-bom-json" aria-label="Descargar JSON de Oracle Cost Estimator" title="Descargar JSON de Oracle Cost Estimator"{download_disabled}><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11 M7.5 10.5 12 15l4.5-4.5 M4.5 18.5v1A2 2 0 0 0 6.5 21.5h11a2 2 0 0 0 2-2v-1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>JSON</span></button></div></aside></div>
       <table class="bom-table"><thead><tr><th>Servicio</th><th>Componente y rol</th><th>Sizing</th><th>SKU</th><th>Mensual</th></tr></thead><tbody>{render_deck_bom_rows(components, currency)}</tbody></table>
     </section>
     {warnings_markup}
     <script type="application/json" id="architecture-spec">{html.escape(json.dumps(architecture, ensure_ascii=False))}</script>
     <script type="application/json" id="case-deck-spec">{html.escape(json.dumps(deck, ensure_ascii=False))}</script>
     <script type="application/octet-stream" id="bom-download-data">{bom_download}</script>
+    <script type="application/octet-stream" id="xls-download-data">{xls_download}</script>
   </main>{render_case_deck_editor_dialog()}</div>
   <script>
     (() => {{
@@ -1975,7 +1997,9 @@ def render_case_deck_html(
       const diagramEdges = [...document.querySelectorAll(".architecture-canvas .edge[data-source]")];
       const edgeLabels = [...document.querySelectorAll(".architecture-canvas .edge-label[data-source]")];
       const downloadBom = document.querySelector(".download-bom-json");
+      const downloadXls = document.querySelector(".download-bom-xls");
       const bomDownloadData = document.querySelector("#bom-download-data");
+      const xlsDownloadData = document.querySelector("#xls-download-data");
       let zoom = 1;
       let isFit = false;
       let initialized = false;
@@ -2218,6 +2242,20 @@ def render_case_deck_html(
         link.remove();
         window.setTimeout(() => URL.revokeObjectURL(url), 0);
       }});
+      downloadXls?.addEventListener("click", () => {{
+        const encoded = xlsDownloadData?.textContent.trim();
+        if (!encoded) return;
+        const binary = atob(encoded);
+        const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+        const url = URL.createObjectURL(new Blob([bytes], {{ type:"application/vnd.ms-excel" }}));
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = {json.dumps(xls_path.name if xls_path else "oracle-cost-estimator.xls", ensure_ascii=False)};
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 0);
+      }});
       {render_case_deck_interaction_script(case_image_prompt)}
       window.addEventListener("resize", () => {{ fitDeck(); if (isFit) fitDiagram(); }});
       selectTab(new URLSearchParams(window.location.search).get("tab"), false);
@@ -2243,6 +2281,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--catalog", default=str(DEFAULT_CATALOG), help="Path to OCI icon catalog.json.")
     parser.add_argument("--deck", help="Path to a version 1 case-deck JSON manifest.")
     parser.add_argument("--bom", help="Path to the exact Oracle Cost Estimator JSON used by the case deck.")
+    parser.add_argument("--xls", help="Path to the official Cost Estimator XLS exported with --bom.")
     parser.add_argument("--validate-only", action="store_true", help="Validate the spec and exit without writing HTML.")
     args = parser.parse_args(argv)
 
@@ -2255,18 +2294,22 @@ def main(argv: list[str] | None = None) -> int:
         validate_spec(spec)
         if bool(args.deck) != bool(args.bom):
             raise DiagramError("--deck and --bom must be provided together.")
+        if args.xls and not args.deck:
+            raise DiagramError("--xls requires --deck and --bom.")
         if args.validate_only:
             if args.deck and args.bom:
                 deck = read_json(resolve_path(args.deck))
                 bom_detail = read_bom_detail(resolve_path(args.bom))
                 validate_deck_spec(deck, spec, bom_detail)
+                validate_official_export_pair(deck, resolve_path(args.xls) if args.xls else None)
             print(f"Valid diagram spec: {spec_path}")
             return 0
         if args.deck and args.bom:
             deck = read_json(resolve_path(args.deck))
             bom_path = resolve_path(args.bom)
             bom_detail = read_bom_detail(bom_path)
-            html_output = render_case_deck_html(spec, deck, bom_detail, catalog, catalog_path, bom_path)
+            xls_path = resolve_path(args.xls) if args.xls else None
+            html_output = render_case_deck_html(spec, deck, bom_detail, catalog, catalog_path, bom_path, xls_path)
         else:
             html_output = render_html(spec, catalog, catalog_path)
         out_path.parent.mkdir(parents=True, exist_ok=True)

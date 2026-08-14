@@ -9,9 +9,9 @@ From `plugins/oci-architecture-diagram`:
 
 ```powershell
 python scripts/extract_oci_icons.py --source ../../oci --out assets/oci-icons
-python scripts/import_oci_svg_icons.py --source "D:\Desktop\Oracle\4.tools\_OCI icons" --out assets/oci-icons
+python scripts/import_oci_svg_icons.py --source "path/to/oracle-svg-icons" --out assets/oci-icons
 python scripts/generate_oci_diagram.py --spec examples/web-architecture.json --out examples/web-architecture.html
-python scripts/serve_architecture_site.py --port 8765 --diagram web-architecture
+python scripts/serve_architecture_site.py --port 8765 --project web-architecture
 ```
 
 If `python` is not on PATH, use the Python executable bundled with your Codex
@@ -20,7 +20,7 @@ workspace runtime.
 Then open the local gallery with the Codex in-app Browser:
 
 ```text
-http://127.0.0.1:8765/src/index.html?diagram=web-architecture
+http://127.0.0.1:8765/src/index.html?project=web-architecture
 ```
 
 ## Skills
@@ -97,13 +97,13 @@ Use this flow when testing the plugin inside Codex:
 3. Serve the plugin root:
 
 ```powershell
-python scripts/serve_architecture_site.py --port 8765 --diagram arquitectura-web-oke-adb
+python scripts/serve_architecture_site.py --port 8765 --project arquitectura-web-oke-adb
 ```
 
 4. Use `@Browser` to open a local HTTP URL such as:
 
 ```text
-http://127.0.0.1:8765/src/index.html?diagram=arquitectura-web-oke-adb
+http://127.0.0.1:8765/src/index.html?project=arquitectura-web-oke-adb
 ```
 
 Open the project menu to search, select, duplicate, delete or export projects.

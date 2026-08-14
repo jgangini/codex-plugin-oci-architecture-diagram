@@ -1,0 +1,4 @@
+interface:
+  display_name: "OCI Cost Estimator Browser Export"
+  short_description: "Create and validate official Oracle BoM exports"
+  default_prompt: "Use $oci-cost-estimator-browser-export to build, export, and re-import an official Oracle Cost Estimator JSON and XLS."

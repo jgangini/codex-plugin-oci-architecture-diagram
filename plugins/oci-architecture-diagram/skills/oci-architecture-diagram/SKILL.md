@@ -34,7 +34,7 @@ user-facing delivery must be the local HTTP gallery opened in the Codex Browser.
    should navigate to it from the local gallery.
 6. Serve the plugin root with `scripts/serve_architecture_site.py` and open the
    gallery through the Browser plugin at a local HTTP URL such as
-   `http://127.0.0.1:8765/src/index.html?diagram=<diagram-id>`.
+   `http://127.0.0.1:8765/src/index.html?project=<project-id>`.
 7. Iterate until icons, labels, arrows, groups, and navigation look solid.
 8. Return the generated HTML path, local gallery URL, warnings, and verification
    performed.
@@ -50,9 +50,9 @@ that fallback.
 
 ## Cost Estimator Browser Validation
 
-When the case includes an Oracle Cost Estimator JSON, use the Browser plugin
-to validate the exact delivered file in the official Cost Estimator UI; do not
-replace this step with an API call or a locally generated spreadsheet.
+When the case includes an Oracle Cost Estimator BoM, invoke
+`oci-cost-estimator-browser-export`; do not replace it with an API call or a
+locally generated JSON/spreadsheet.
 
 1. Open a clean `https://www.oracle.com/cloud/costestimator.html` tab.
 2. Select **Main actions > Import** and upload the exact delivered JSON through
@@ -81,7 +81,7 @@ that its link independently imports, validates, or exports a file.
   `127.0.0.1:8765`; choose another free port only when that port is occupied by
   an unrelated process.
 - Always open the navigable gallery URL with the Codex Browser plugin before
-  final response: `http://127.0.0.1:8765/src/index.html?diagram=<diagram-id>`.
+  final response: `http://127.0.0.1:8765/src/index.html?project=<project-id>`.
 - The final response must lead with the Browser-opened localhost URL. Include
   the HTML/JSON file paths and renderer warnings after that link.
 - If Browser cannot be used, state that explicitly and still provide the local
@@ -92,6 +92,5 @@ that its link independently imports, validates, or exports a file.
 
 ```powershell
 python scripts/generate_oci_diagram.py --spec examples/web-architecture.json --out examples/web-architecture.html
-python scripts/render_architecture_prompt_suite.py --out-dir examples/generated-suite
-python scripts/serve_architecture_site.py --port 8765 --diagram web-architecture
+python scripts/serve_architecture_site.py --port 8765 --project web-architecture
 ```

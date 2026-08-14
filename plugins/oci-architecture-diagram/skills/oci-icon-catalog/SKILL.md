@@ -40,6 +40,7 @@ services with `iconSource: local-svg`.
 - Inspect `catalog.json` for `localSvgImportedCount`.
 - Confirm key services use `iconSource: local-svg`: DNS, WAF, Load Balancer,
   Container Engine for Kubernetes, Autonomous Database, Object Storage, Bastion,
-  Vault, Logging, Monitoring, Service Gateway, Streaming, OCI Queue.
+  Vault, Logging, Monitoring, Service Gateway, Streaming, OCI Queue,
+  OCI AI Data Platform Workbench, OCI Generative AI and OCI Streaming with Apache Kafka.
 - Regenerate affected diagrams after icon import.
 - Use `oci-diagram-visual-qa` when a browser screenshot is available.

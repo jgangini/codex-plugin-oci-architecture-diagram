@@ -482,7 +482,8 @@ body::-webkit-scrollbar-thumb:hover,
 }
 
 .menu-toggle,
-.download-pptx {
+.download-pptx,
+.copy-agent-prompt {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -506,7 +507,13 @@ body::-webkit-scrollbar-thumb:hover,
   color: var(--oci);
 }
 
-.download-pptx svg {
+.copy-agent-prompt:hover {
+  border-color: var(--teal);
+  background: #f3f8fa;
+}
+
+.download-pptx svg,
+.copy-agent-prompt svg {
   width: 18px;
   height: 18px;
 }

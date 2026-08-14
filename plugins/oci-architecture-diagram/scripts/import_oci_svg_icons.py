@@ -194,6 +194,9 @@ def sanitize_svg(raw_svg: str, slug: str) -> str:
     body = re.sub(r"<metadata\b[^>]*>.*?</metadata>", "", body, flags=re.IGNORECASE | re.DOTALL)
     body = re.sub(r"<title\b[^>]*>.*?</title>", "", body, flags=re.IGNORECASE | re.DOTALL)
     body = re.sub(r"<desc\b[^>]*>.*?</desc>", "", body, flags=re.IGNORECASE | re.DOTALL)
+    body = re.sub(r"<v:[^>]+/>\s*", "", body, flags=re.IGNORECASE)
+    body = re.sub(r"<v:([\w-]+)\b[^>]*>.*?</v:\1>\s*", "", body, flags=re.IGNORECASE | re.DOTALL)
+    body = re.sub(r"\s+v:[\w-]+=(['\"]).*?\1", "", body, flags=re.IGNORECASE | re.DOTALL)
 
     prefix = f"oci-{slug}-"
 
@@ -204,7 +207,7 @@ def sanitize_svg(raw_svg: str, slug: str) -> str:
     body = prefix_class_attributes(body, prefix)
     body = inline_style_rules(body)
     body = prefix_ids(body, prefix)
-    body = body.strip()
+    body = "\n".join(line.rstrip() for line in body.strip().splitlines())
     return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{viewbox}">\n{body}\n</svg>\n'
 
 
