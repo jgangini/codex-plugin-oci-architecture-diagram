@@ -1,0 +1,41 @@
+{
+  "name": "oci-architecture-diagram",
+  "version": "0.4.10",
+  "description": "Generate, version, manage and share portable OCI diagrams and 16:9 Case/Architecture/BoM projects.",
+  "author": {
+    "name": "Joel Gangini",
+    "url": "https://github.com/jgangini"
+  },
+  "homepage": "https://github.com/jgangini/codex-plugin-oci-architecture-diagram",
+  "repository": "https://github.com/jgangini/codex-plugin-oci-architecture-diagram.git",
+  "license": "MIT",
+  "keywords": [
+    "oci",
+    "oracle-cloud",
+    "architecture",
+    "diagram",
+    "html"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "OCI Architecture Diagram",
+    "shortDescription": "Create OCI diagrams and open them in Codex Browser via localhost.",
+    "longDescription": "Turns natural-language Oracle Cloud architecture descriptions into normalized specs and portable HTML/SVG diagrams, coordinates 16:9 Case/Architecture/BoM decks, and manages editable, versioned projects through a portable JSON catalog with selective ZIP export.",
+    "developerName": "Joel Gangini",
+    "category": "OCI",
+    "capabilities": [
+      "Interactive",
+      "Write",
+      "Local files"
+    ],
+    "defaultPrompt": [
+      "Dibuja una arquitectura web en OCI con OKE y Autonomous Database.",
+      "Create an OCI architecture diagram for a public web app.",
+      "Generate an HTML OCI diagram from this architecture description.",
+      "Crea un deck 16:9 de caso, arquitectura y BoM desde .source."
+    ],
+    "brandColor": "#C74634",
+    "composerIcon": "./assets/icon.svg",
+    "logo": "./assets/logo.png"
+  }
+}

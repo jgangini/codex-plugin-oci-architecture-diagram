@@ -1,0 +1,20 @@
+{
+  "name": "oci-architecture",
+  "interface": {
+    "displayName": "OCI Architecture"
+  },
+  "plugins": [
+    {
+      "name": "oci-architecture-diagram",
+      "source": {
+        "source": "local",
+        "path": "./plugins/oci-architecture-diagram"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "OCI"
+    }
+  ]
+}

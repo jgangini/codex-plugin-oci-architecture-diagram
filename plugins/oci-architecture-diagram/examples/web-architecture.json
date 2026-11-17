@@ -1,0 +1,89 @@
+{
+  "title": "OCI Web Architecture",
+  "layout": "left-to-right",
+  "groups": [
+    {
+      "id": "region",
+      "label": "OCI Region",
+      "type": "region"
+    },
+    {
+      "id": "vcn",
+      "label": "Production VCN",
+      "type": "vcn",
+      "parent": "region"
+    },
+    {
+      "id": "public-subnet",
+      "label": "Public Subnet",
+      "type": "subnet",
+      "parent": "vcn"
+    },
+    {
+      "id": "private-subnet",
+      "label": "Private Subnet",
+      "type": "subnet",
+      "parent": "vcn"
+    },
+    {
+      "id": "data-subnet",
+      "label": "Data Subnet",
+      "type": "subnet",
+      "parent": "vcn"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "internet",
+      "label": "Internet Gateway",
+      "service": "Internet Gateway",
+      "group": "public-subnet"
+    },
+    {
+      "id": "lb",
+      "label": "Public Load Balancer",
+      "service": "Load Balancer",
+      "group": "public-subnet"
+    },
+    {
+      "id": "oke",
+      "label": "Application Pods",
+      "service": "OKE",
+      "group": "private-subnet"
+    },
+    {
+      "id": "adb",
+      "label": "Autonomous Database",
+      "service": "Autonomous Database",
+      "group": "data-subnet"
+    },
+    {
+      "id": "object-storage",
+      "label": "Static Assets Bucket",
+      "service": "Object Storage",
+      "group": "data-subnet"
+    }
+  ],
+  "edges": [
+    {
+      "from": "internet",
+      "to": "lb",
+      "label": "HTTPS"
+    },
+    {
+      "from": "lb",
+      "to": "oke",
+      "label": "HTTP"
+    },
+    {
+      "from": "oke",
+      "to": "adb",
+      "label": "SQL"
+    },
+    {
+      "from": "oke",
+      "to": "object-storage",
+      "label": "SDK"
+    }
+  ]
+}

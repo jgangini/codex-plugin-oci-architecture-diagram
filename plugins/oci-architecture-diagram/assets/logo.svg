@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 80" role="img" aria-label="OCI Architecture Diagram">
+  <rect x="4" y="8" width="72" height="64" rx="10" fill="#fff7f4" stroke="#c74634" stroke-width="5"/>
+  <circle cx="26" cy="32" r="7" fill="#c74634"/>
+  <circle cx="54" cy="32" r="7" fill="#2c5967"/>
+  <circle cx="40" cy="54" r="7" fill="#5c6f82"/>
+  <path d="M33 32h14M30 38l7 10M51 38l-7 10" fill="none" stroke="#312d2a" stroke-width="3" stroke-linecap="round"/>
+  <text x="92" y="36" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#312d2a">OCI Architecture</text>
+  <text x="92" y="58" font-family="Arial, sans-serif" font-size="18" fill="#5c6f82">Diagram</text>
+</svg>

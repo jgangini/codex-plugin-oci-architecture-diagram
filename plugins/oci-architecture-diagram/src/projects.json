@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "updatedAt": "2026-08-11T00:00:00Z",
+  "projects": [
+    {
+      "id": "case-deck-web",
+      "familyId": "case-deck-web",
+      "version": 1,
+      "title": "OCI Web Case",
+      "description": "Caso, arquitectura y BoM de una aplicación web OCI con ingreso público, OKE privado y datos administrados.",
+      "category": "Case Deck",
+      "format": "deck",
+      "path": "../examples/case-deck-web.html"
+    },
+    {
+      "id": "arquitectura-web-oke-adb-generative-ai",
+      "familyId": "arquitectura-web-oke-adb-generative-ai",
+      "version": 1,
+      "title": "Arquitectura Web OCI con OKE, Autonomous Database y Generative AI",
+      "description": "Arquitectura OCI de referencia con entrada pública, runtime privado, servicios de datos e inteligencia artificial.",
+      "category": "Arquitectura",
+      "format": "diagram",
+      "path": "../examples/arquitectura-web-oke-adb-generative-ai.html"
+    },
+    {
+      "id": "arquitectura-web-oke-adb",
+      "familyId": "arquitectura-web-oke-adb",
+      "version": 1,
+      "title": "Arquitectura Web OCI con OKE y Autonomous Database",
+      "description": "Arquitectura web OCI con balanceo, OKE privado, Autonomous Database y Object Storage.",
+      "category": "Arquitectura",
+      "format": "diagram",
+      "path": "../examples/arquitectura-web-oke-adb.html"
+    },
+    {
+      "id": "live-query-ecommerce",
+      "familyId": "live-query-ecommerce",
+      "version": 1,
+      "title": "E-commerce Platform",
+      "description": "Plataforma de comercio electrónico con entrada web, capa de aplicación, datos y servicios administrados.",
+      "category": "Arquitectura",
+      "format": "diagram",
+      "path": "../examples/live-query-ecommerce.html"
+    }
+  ]
+}

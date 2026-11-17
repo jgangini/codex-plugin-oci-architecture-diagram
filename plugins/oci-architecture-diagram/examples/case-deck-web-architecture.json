@@ -1,0 +1,16 @@
+{
+  "title": "OCI Web Case Architecture",
+  "layout": "left-to-right",
+  "groups": [],
+  "nodes": [
+    { "id": "lb", "label": "Public Load Balancer", "service": "Load Balancer", "group": "" },
+    { "id": "oke", "label": "Application Pods", "service": "OKE", "group": "" },
+    { "id": "adb", "label": "Autonomous Database", "service": "Autonomous Database", "group": "" },
+    { "id": "object-storage", "label": "Static Assets Bucket", "service": "Object Storage", "group": "" }
+  ],
+  "edges": [
+    { "from": "lb", "to": "oke", "label": "HTTPS" },
+    { "from": "oke", "to": "adb", "label": "SQL" },
+    { "from": "oke", "to": "object-storage", "label": "SDK" }
+  ]
+}

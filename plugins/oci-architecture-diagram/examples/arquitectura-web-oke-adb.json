@@ -1,0 +1,117 @@
+{
+  "title": "Arquitectura Web OCI con OKE y Autonomous Database",
+  "layout": "left-to-right",
+  "groups": [
+    {
+      "id": "region",
+      "label": "OCI Region",
+      "type": "region"
+    },
+    {
+      "id": "vcn",
+      "label": "VCN de Produccion",
+      "type": "vcn",
+      "parent": "region"
+    },
+    {
+      "id": "public-subnet",
+      "label": "Subred Publica",
+      "type": "subnet",
+      "parent": "vcn"
+    },
+    {
+      "id": "app-subnet",
+      "label": "Subred Privada App",
+      "type": "subnet",
+      "parent": "vcn"
+    },
+    {
+      "id": "data-subnet",
+      "label": "Subred Privada Datos",
+      "type": "subnet",
+      "parent": "vcn"
+    },
+    {
+      "id": "platform-services",
+      "label": "Servicios OCI",
+      "type": "group",
+      "parent": "region"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "public-dns",
+      "label": "DNS Publico",
+      "service": "DNS",
+      "group": "public-subnet"
+    },
+    {
+      "id": "edge-waf",
+      "label": "WAF",
+      "service": "WAF",
+      "group": "public-subnet"
+    },
+    {
+      "id": "public-lb",
+      "label": "Load Balancer",
+      "service": "Load Balancer",
+      "group": "public-subnet"
+    },
+    {
+      "id": "oke-cluster",
+      "label": "OKE Cluster",
+      "service": "Container Engine for Kubernetes",
+      "group": "app-subnet"
+    },
+    {
+      "id": "adb",
+      "label": "Autonomous DB",
+      "service": "Oracle Autonomous Database",
+      "group": "data-subnet"
+    },
+    {
+      "id": "service-gateway",
+      "label": "Service Gateway",
+      "service": "Service Gateway",
+      "group": "app-subnet"
+    },
+    {
+      "id": "object-storage",
+      "label": "Object Storage",
+      "service": "Object Storage",
+      "group": "platform-services"
+    }
+  ],
+  "edges": [
+    {
+      "from": "public-dns",
+      "to": "edge-waf",
+      "label": "DNS"
+    },
+    {
+      "from": "edge-waf",
+      "to": "public-lb",
+      "label": "HTTPS"
+    },
+    {
+      "from": "public-lb",
+      "to": "oke-cluster",
+      "label": "HTTPS"
+    },
+    {
+      "from": "oke-cluster",
+      "to": "adb",
+      "label": "SQL/TLS"
+    },
+    {
+      "from": "oke-cluster",
+      "to": "service-gateway",
+      "label": "privado"
+    },
+    {
+      "from": "service-gateway",
+      "to": "object-storage",
+      "label": "object API"
+    }
+  ]
+}
